@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>van Sambeek Performance</title>
+  <meta name="description" content="Mentale performance coaching en off-court begeleiding voor ambitieuze sporters." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0B2C4A;
+      --green: #6BCB2E;
+      --offwhite: #F7F9FB;
+      --text: #1F2933;
+      --line: #E6ECF2;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(107,203,46,.12), transparent 35%),
+        radial-gradient(circle at 88% 0%, rgba(11,44,74,.08), transparent 40%),
+        var(--offwhite);
+    }
+    .container { width: min(1100px, 92%); margin: 0 auto; }
+    .section { padding: 72px 0; border-top: 1px solid var(--line); }
+    .hero { border-top: 0; padding-top: 56px; }
+    h1, h2, h3 { font-family: Sora, sans-serif; color: var(--navy); margin: 0; }
+    p { line-height: 1.65; }
+    .pill {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0 0 6px;
+    }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247,249,251,.9);
+      backdrop-filter: blur(8px);
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--navy);
+      text-decoration: none;
+      font-family: Sora, sans-serif;
+      font-weight: 800;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      border-radius: 10px;
+      display: block;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .brand-logo.is-hidden {
+      display: none;
+    }
+    .nav-links { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lang-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--navy);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .nav a { color: var(--text); text-decoration: none; font-size: 14px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+    .btn-primary { background: var(--green); color: var(--navy); }
+    .btn-secondary { background: #fff; color: var(--navy); border: 1px solid rgba(11,44,74,.3); }
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 12px 28px rgba(11,44,74,.08);
+    }
+    .hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 26px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+    .trajectory-wrap { display: grid; grid-template-columns: 1.12fr .88fr; gap: 16px; }
+    #trajectoryArea {
+      position: relative;
+      min-height: 430px;
+      outline: none;
+      overflow: hidden;
+    }
+    #courtSvg {
+      width: 100%;
+      max-width: 540px;
+      display: block;
+      margin: 0 auto;
+    }
+    #nodesLayer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    #racketGroup {
+      transform: translate(92px,246px) rotate(-14deg);
+      transform-origin: 92px 246px;
+    }
+    #ballVisual {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .55s ease;
+    }
+    .step-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--navy);
+      cursor: pointer;
+      transition: .2s ease;
+      pointer-events: auto;
+    }
+    .step-node.active {
+      background: var(--green);
+      color: var(--navy);
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+    .controls { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+    .about-grid { display: grid; grid-template-columns: .95fr 1.05fr; gap: 14px; }
+    .two-col-list { columns: 2; column-gap: 20px; padding-left: 20px; margin: 8px 0 0; }
+    .two-col-list li { margin-bottom: 8px; break-inside: avoid; }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 11px 13px;
+      font: inherit;
+    }
+    .error { color: #b42318; font-size: 12px; margin-top: 6px; }
+    .ok {
+      margin-top: 10px;
+      color: var(--navy);
+      background: rgba(107,203,46,.2);
+      border: 1px solid rgba(107,203,46,.5);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .fade { opacity: 0; transform: translateY(18px); transition: .45s ease; }
+    .fade.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 960px) {
+      .hero-grid,
+      .grid-3,
+      .grid-4,
+      .about-grid,
+      .trajectory-wrap { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .two-col-list { columns: 1; }
+      .nav-links { display: none; }
+      #trajectoryArea { min-height: 390px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#top" class="brand" aria-label="van Sambeek Performance home">
+        <img id="brandLogo" class="brand-logo" src="./assets/logo.png" alt="van Sambeek Performance logo" />
+        <span>van Sambeek Performance</span>
+      </a>
+      <div class="nav-right">
+      <button id="langToggle" class="lang-btn" type="button" aria-label="Switch language">🌍</button>
+      <div class="nav-links">
+        <a id="navVoorWie" href="#voor-wie">Voor wie</a>
+        <a id="navWaarom" href="#mentale-coaching">Waarom mentaal</a>
+        <a id="navTrajecten" href="#traject">Trajecten</a>
+        <a id="navPrijzen" href="#prijzen">Prijzen</a>
+        <a id="navOverMij" href="#over-mij">Over Mij</a>
+        <a id="navContact" href="#contact" class="btn btn-primary">Plan kennismaking</a>
+      </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero section container">
+      <div class="hero-grid fade">
+        <div>
+          <p class="pill">High-performance coaching</p>
+          <h1 id="heroTitle" style="font-size:clamp(34px,6vw,62px);line-height:1.08;margin-top:8px;">Mentale performance voor sporters die willen groeien.</h1>
+          <p id="heroSub" style="max-width:700px;">Mentale coaching en begeleiding in topsport-leefstijl: focus, vertrouwen, druk, consistentie en off-court thema's zoals voeding, planning en routines.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
+            <a id="heroCta1" href="#contact" class="btn btn-primary">Plan kennismaking</a>
+            <a id="heroCta2" href="#traject" class="btn btn-secondary">Bekijk Starttraject</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3 id="trustTitle">Waarom sporters kiezen voor dit traject</h3>
+          <ul>
+            <li id="trust1">Topsportervaring</li>
+            <li id="trust2">Praktisch en direct toepasbaar</li>
+            <li id="trust3">Online sessies (45-60 min) of in person</li>
+            <li id="trust4">Videoanalyses van wedstrijden met Swing Vision</li>
+            <li id="trust5">Begeleiding in Nederlands en Engels, coaching on en off court</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="voor-wie" class="section container fade">
+      <p id="voorWiePill" class="pill">Voor wie</p>
+      <h2 id="voorWieTitle" style="font-size:clamp(28px,4vw,44px);">Are you willing to put in the work and grow?</h2>
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card">
+          <h3 id="doelgroepTitle">Doelgroep</h3>
+          <p id="doelgroepText">Voor sporters die plezier vooropzetten en tegelijk mentaal sterker willen worden. We kijken naar het hele plaatje: mindset, focus, zelfvertrouwen, druk, routines en de omgeving waarin je presteert.</p>
+        </div>
+        <div class="card">
+          <h3 id="resultatenTitle">Resultaten</h3>
+          <p id="resultatenText">Meer rust, betere focus, sterker zelfvertrouwen los van winnen of verliezen, betere emotieregulatie en meer structuur off-court.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="mentale-coaching" class="section container fade">
+      <p id="mentaalPill" class="pill">Waarom mentale coaching</p>
+      <h2 id="mentaalTitle" style="font-size:clamp(28px,4vw,44px);">Losing is not the enemy. Fear of losing is the enemy - Rafael Nadal.</h2>
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card">
+          <h3 id="mentaalCard1Title">Belang van mentale vaardigheden</h3>
+          <p id="mentaalCard1Text">Op cruciale momenten bepalen focus, zelfvertrouwen en emotieregulatie vaak het verschil. Techniek en fysiek zijn essentieel, maar zonder mentale stabiliteit komt je niveau niet volledig naar buiten.</p>
+        </div>
+        <div class="card">
+          <h3 id="mentaalCard2Title">Breed effect</h3>
+          <p id="mentaalCard2Text">Mentale coaching helpt niet alleen tijdens wedstrijden. Het versterkt ook dagelijkse keuzes: voorbereiding, herstel, communicatie en omgaan met verwachtingen uit je omgeving.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="werkwijze" class="section container fade">
+      <p id="werkwijzePill" class="pill">Werkwijze</p>
+      <h2 id="werkwijzeTitle" style="font-size:clamp(28px,4vw,44px);">Heldere aanpak in 3 stappen</h2>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card"><h3 id="step1Title">1. Intake en doelen</h3><p id="step1Text">Huidige situatie in kaart en concrete doelen bepalen.</p></div>
+        <div class="card"><h3 id="step2Title">2. Train de skills</h3><p id="step2Text">Tools en directe toepassing in training en wedstrijd.</p></div>
+        <div class="card"><h3 id="step3Title">3. Borging en groei</h3><p id="step3Text">Routines, evaluatie en vervolgplan voor duurzame progressie.</p></div>
+      </div>
+    </section>
+
+    <section id="traject" class="section container fade">
+      <p id="trajectPill" class="pill">Trajecten</p>
+      <h2 id="trajectTitle" style="font-size:clamp(28px,4vw,44px);">Starttraject: 10 sessies richting groei.</h2>
+      <p id="trajectIntro1" style="margin-top:8px;max-width:760px;">Voor we starten, plannen we eerst een kennismaking met ouder(s) en speler om de huidige situatie goed in kaart te brengen. Ik wil je echt leren kennen: waar liggen je valkuilen, waar wil je zelf in groeien en wat heb je nodig om met vertrouwen te presteren. Vanuit daar start het traject.</p>
+      <p id="trajectIntro2" style="margin-top:8px;max-width:760px;">De bal vertrekt vanaf het racket en gaat stap voor stap richting de horizon. Zo bouwen we sessie na sessie aan groei, met focus op vandaag en tegelijk een heldere blik op je toekomst.</p>
+      <div class="trajectory-wrap" style="margin-top:18px;">
+        <div class="card" id="trajectoryArea" tabindex="0" aria-label="Interactieve tennis route met stappen naar de horizon">
+          <svg id="courtSvg" viewBox="0 0 700 360" aria-hidden="true">
+            <defs>
+              <linearGradient id="courtGradient" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="100%" stop-color="#eef4fa" />
+              </linearGradient>
+            </defs>
+            <rect x="10" y="10" width="680" height="340" rx="20" fill="url(#courtGradient)" stroke="#E6ECF2" />
+            <path d="M70 250 C 230 200, 400 140, 620 70" fill="none" stroke="#9CB3C6" stroke-dasharray="5 7" stroke-width="2" />
+
+            <g id="racketGroup">
+              <ellipse cx="0" cy="0" rx="55" ry="34" fill="none" stroke="#0B2C4A" stroke-width="8" />
+              <line x1="40" y1="24" x2="94" y2="72" stroke="#0B2C4A" stroke-width="10" stroke-linecap="round" />
+              <line x1="95" y1="72" x2="112" y2="92" stroke="#0B2C4A" stroke-width="12" stroke-linecap="round" />
+              <line x1="-30" y1="-22" x2="30" y2="22" stroke="#b7c7d6" stroke-width="2" />
+              <line x1="-30" y1="22" x2="30" y2="-22" stroke="#b7c7d6" stroke-width="2" />
+            </g>
+
+            <circle id="ballVisual" cx="140" cy="240" r="11" fill="#6BCB2E" stroke="#0B2C4A" stroke-width="2" />
+            <circle id="impactRing" cx="140" cy="240" r="11" fill="none" stroke="#6BCB2E" stroke-width="3" opacity="0" />
+          </svg>
+          <div id="nodesLayer"></div>
+          <div class="controls">
+            <button class="btn btn-secondary" id="prevBtn" type="button">Vorige</button>
+            <button class="btn btn-primary" id="nextBtn" type="button">Volgende stap</button>
+          </div>
+        </div>
+
+        <div class="card" aria-live="polite">
+          <p class="pill" id="sessionNo">Sessie 1</p>
+          <h3 id="sessionTitle" style="margin-top:8px;font-size:28px;">Kennismaking en mentale basis</h3>
+          <p id="sessionDesc" style="margin-top:8px;">Inzicht in wie je bent als sporter en wat je wilt verbeteren.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="prijzen" class="section container fade">
+      <p id="prijzenPill" class="pill">Pakketten en prijzen</p>
+      <h2 id="prijzenTitle" style="font-size:clamp(28px,4vw,44px);">Doorgroeien na je starttraject</h2>
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card">
+          <h3 id="startCardTitle">Starttraject - 10 sessies</h3>
+          <p id="startCardText"><strong>EUR 500</strong><br>Duur: ongeveer 5 weken<br>Frequentie: 2 sessies per week<br>Vorm: Online (Zoom)<br>Duur per sessie: 45-60 minuten</p>
+        </div>
+        <div class="card" style="background:var(--navy);color:#fff;">
+          <h3 id="growthCardTitle" style="color:#fff;">Performance Growth Plan (3 maanden)</h3>
+          <p id="growthCardText"><strong>EUR 200 per maand</strong><br>Looptijd: 3 maanden<br>2 coaching sessies per maand als basis (uitbreidbaar op maat)<br>Continue app-contact voor snelle afstemming en begeleiding</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <h3 id="whyGrowthTitle">Waarom dit vervolgplan?</h3>
+        <p id="whyGrowthText">Het Performance Growth Plan is flexibel en aanpasbaar aan wat iemand zelf nodig heeft. Mentale ontwikkeling is een langetermijnproces: je blijft trainen, evalueren en verfijnen terwijl je als sporter verder groeit.</p>
+      </div>
+    </section>
+
+    <section class="section container fade">
+      <p id="offPill" class="pill">Meer dan mentale coaching</p>
+      <h2 id="offTitle" style="font-size:clamp(28px,4vw,44px);">Off-court begeleiding</h2>
+      <div class="grid-4" style="margin-top:16px;">
+        <div class="card"><h3 id="off1Title">Voeding</h3><p id="off1Text">Kijken naar wat jij nodig hebt: voeding op trainings- en wedstrijddagen, essentials, vitamines en herstel.</p></div>
+        <div class="card"><h3 id="off2Title">Planning en structuur</h3><p id="off2Text">Training, reizen, school en werk.</p></div>
+        <div class="card"><h3 id="off3Title">Herstel en routines</h3><p id="off3Text">Slaap, herstel en vaste gewoontes.</p></div>
+        <div class="card"><h3 id="off4Title">Communicatie en omgeving</h3><p id="off4Text">Afstemming met ouders, coaches en team.</p></div>
+      </div>
+    </section>
+
+    <section id="over-mij" class="section container fade">
+      <p id="overMijPill" class="pill">Over Mij</p>
+      <h2 id="overMijTitle" style="font-size:clamp(28px,4vw,44px);">Van college tennis tot de pro tour: coaching vanuit echte topsportervaring</h2>
+      <div class="about-grid" style="margin-top:16px;">
+        <div class="card" style="min-height:320px;padding:0;overflow:hidden;position:relative;">
+          <img
+            id="fonsPhoto"
+            src="./assets/fons.jpg"
+            alt="Fons van Sambeek op de tennisbaan"
+            style="width:100%;height:100%;object-fit:cover;display:block;"
+          />
+          <div id="fonsPhotoOverlay" style="position:absolute;inset:auto 0 0 0;padding:14px;background:linear-gradient(to top, rgba(11,44,74,.78), rgba(11,44,74,0));color:#fff;">
+            <p style="margin:0;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:12px;opacity:.95;">Fons van Sambeek</p>
+            <p id="photoOverlayText" style="margin:6px 0 0;font-size:14px;opacity:.95;">Professioneel tennisser | Achtergrond in psychologie | Coach in NL en EN</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <p id="aboutText1">Ik ben Fons van Sambeek, professioneel tennisser met een achtergrond in psychologie. Deze opleiding volgde ik in de Verenigde Staten tijdens mijn college tenniscarriere.</p>
+          <p id="aboutText2">Tijdens mijn eigen route - van college tennis tot het professionele circuit - heb ik ervaren hoe groot de invloed van mentale vaardigheden is op prestaties. Druk, twijfels, overdenken en verwachtingen spelen vaak een beslissende rol in wedstrijden.</p>
+          <p id="aboutText3">Mijn doel is om sporters te helpen hun mentale vaardigheden te versterken, zodat zij met vertrouwen en helderheid kunnen presteren op belangrijke momenten. Ik speel momenteel zelf op de pro tour en wil naast mijn eigen carrière jeugd en ambitieuze sporters begeleiden.</p>
+          <p id="aboutText4">Ik heb gespeeld voor NC State in Amerika en begeleid sporters in zowel het Nederlands als Engels.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <h3 id="prestatiesTitle">Prestaties</h3>
+        <ul class="two-col-list">
+          <li id="prest1">2025 ITA Doubles All-American</li>
+          <li id="prest2">4x All-ACC Academic Team (2022, 2023, 2024, 2025)</li>
+          <li id="prest3">Met dubbelpartner Braden Shick bereikte ik een carrière-high ranking van No. 5, goed voor All-America honors.</li>
+          <li id="prest4">5 Pro Titels</li>
+        </ul>
+        <a id="linkedinTop" class="btn btn-secondary" href="https://www.linkedin.com/in/fons-van-sambeek-674a73292/" target="_blank" rel="noopener noreferrer" style="margin-top:8px;">Bekijk LinkedIn</a>
+      </div>
+    </section>
+
+    <section class="section container fade">
+      <p id="testPill" class="pill">Testimonials</p>
+      <h2 id="testTitle" style="font-size:clamp(28px,4vw,44px);">Ervaringen van sporters</h2>
+      <div class="grid-3" style="margin-top:16px;">
+        <div id="test1" class="card">"Sinds het traject herstel ik sneller na fouten en blijf ik rustiger onder druk."</div>
+        <div id="test2" class="card">"Ik heb nu een vaste routine voor voorbereiding en speel met meer vertrouwen."</div>
+        <div id="test3" class="card">"De combinatie van mentale tools en off-court structuur helpt mij elke week."</div>
+      </div>
+    </section>
+
+    <section id="contact" class="section container fade">
+      <p id="contactPill" class="pill">Contact</p>
+      <h2 id="contactHeading" style="font-size:clamp(28px,4vw,44px);">Plan kennismaking</h2>
+      <div class="grid-2" style="margin-top:16px;">
+        <form class="card" id="contactForm" novalidate>
+          <label><span id="labelName">Naam</span><input name="name" /></label><div class="error" data-error="name"></div>
+          <label><span id="labelEmail">E-mail</span><input name="email" type="email" /></label><div class="error" data-error="email"></div>
+          <label><span id="labelSport">Sport</span><input name="sport" /></label><div class="error" data-error="sport"></div>
+          <label><span id="labelMessage">Bericht</span><textarea name="message" rows="5"></textarea></label><div class="error" data-error="message"></div>
+          <button id="submitBtn" class="btn btn-primary" style="margin-top:10px;width:100%;" type="submit">Plan kennismaking</button>
+          <div id="ok" class="ok" hidden>Bedankt. Je bericht is ontvangen.</div>
+        </form>
+        <div class="card">
+          <h3 id="contactTitle">Contactgegevens</h3>
+          <p id="contactEmail">E-mail: fonsvansambeek2002@gmail.com</p>
+          <p id="contactText">Iedereen start met het 10-sessies starttraject. Vanuit daar bouwen we verder aan jouw persoonlijke groei.</p>
+          <a id="linkedinBottom" class="btn btn-secondary" href="https://www.linkedin.com/in/fons-van-sambeek-674a73292/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const sessionsByLang = {
+      nl: [
+        ["Kennismaking en mentale basis", "We starten met jouw verhaal, doelen en context. Zo bouwen we een fundament dat past bij wie jij bent als sporter."],
+        ["Zelfvertrouwen begrijpen", "Je leert hoe zelfvertrouwen echt werkt, zodat het minder afhankelijk wordt van de uitslag en meer van je proces."],
+        ["Focus en aandacht", "Je traint om je aandacht te sturen naar wat nu belangrijk is, ook wanneer druk of afleiding toeneemt."],
+        ["Gedachten en twijfel managen", "We werken aan het herkennen van overdenken en het omzetten naar heldere, bruikbare acties."],
+        ["Wedstrijdvoorbereiding", "Je ontwikkelt een persoonlijke pre-match routine die rust en richting geeft op belangrijke momenten."],
+        ["Druk en verwachtingen", "Je leert omgaan met interne en externe druk, zonder dat het je spelplezier of beslissingen blokkeert."],
+        ["Emoties onder controle", "Je bouwt vaardigheden om spanning en frustratie op tijd te reguleren, zodat je mentaal stabiel blijft."],
+        ["Consistentie onder wisselende omstandigheden", "We versterken je vermogen om op verschillende dagen hetzelfde mentale niveau neer te zetten."],
+        ["Vertrouwen meenemen naar beslissende momenten", "Je traint om met overtuiging te blijven spelen wanneer de wedstrijd spannend wordt."],
+        ["Evaluatie en vervolgplan", "We kijken terug op je ontwikkeling en zetten een concreet plan uit voor de volgende fase van jouw groei."]
+      ],
+      en: [
+        ["Introduction and mental foundation", "We start with your story, goals, and context so we can build a foundation that truly fits you as an athlete."],
+        ["Understanding confidence", "You learn how confidence really works, so it depends less on results and more on your process."],
+        ["Focus and attention", "You train your attention to stay on what matters now, even when pressure and distractions increase."],
+        ["Managing thoughts and doubt", "We work on recognizing overthinking and turning it into clear, useful action."],
+        ["Match preparation", "You build a personal pre-match routine that creates calm, clarity, and direction."],
+        ["Pressure and expectations", "You learn to handle internal and external pressure without losing freedom and enjoyment in your game."],
+        ["Emotional control", "You build tools to regulate tension and frustration early, so you stay mentally stable."],
+        ["Consistency under changing conditions", "We strengthen your ability to bring the same mental level on different days and in different contexts."],
+        ["Bringing confidence into key moments", "You train to keep making brave, committed decisions when the match gets tight."],
+        ["Evaluation and next plan", "We review your progress and define a clear next-phase plan for long-term growth."]
+      ]
+    };
+
+    const uiByLang = {
+      nl: {
+        navVoorWie: 'Voor wie',
+        navWaarom: 'Waarom mentaal',
+        navTrajecten: 'Trajecten',
+        navPrijzen: 'Prijzen',
+        navOverMij: 'Over Mij',
+        navContact: 'Plan kennismaking',
+        heroTitle: 'Mentale performance voor sporters die willen groeien.',
+        heroSub: "Mentale coaching en begeleiding in topsport-leefstijl: focus, vertrouwen, druk, consistentie en off-court thema's zoals voeding, planning en routines.",
+        heroCta1: 'Plan kennismaking',
+        heroCta2: 'Bekijk Starttraject',
+        trustTitle: 'Waarom sporters kiezen voor dit traject',
+        trust1: 'Topsportervaring',
+        trust2: 'Praktisch en direct toepasbaar',
+        trust3: 'Online sessies (45-60 min) of in person',
+        trust4: 'Videoanalyses van wedstrijden met Swing Vision',
+        trust5: 'Begeleiding in Nederlands en Engels, coaching on en off court',
+        voorWiePill: 'Voor wie',
+        voorWieTitle: 'Are you willing to put in the work and grow?',
+        doelgroepTitle: 'Doelgroep',
+        doelgroepText: 'Voor sporters die plezier vooropzetten en tegelijk mentaal sterker willen worden. We kijken naar het hele plaatje: mindset, focus, zelfvertrouwen, druk, routines en de omgeving waarin je presteert.',
+        resultatenTitle: 'Resultaten',
+        resultatenText: 'Meer rust, betere focus, sterker zelfvertrouwen los van winnen of verliezen, betere emotieregulatie en meer structuur off-court.',
+        mentaalPill: 'Waarom mentale coaching',
+        mentaalTitle: 'Losing is not the enemy. Fear of losing is the enemy - Rafael Nadal.',
+        mentaalCard1Title: 'Belang van mentale vaardigheden',
+        mentaalCard1Text: 'Op cruciale momenten bepalen focus, zelfvertrouwen en emotieregulatie vaak het verschil. Techniek en fysiek zijn essentieel, maar zonder mentale stabiliteit komt je niveau niet volledig naar buiten.',
+        mentaalCard2Title: 'Breed effect',
+        mentaalCard2Text: 'Mentale coaching helpt niet alleen tijdens wedstrijden. Het versterkt ook dagelijkse keuzes: voorbereiding, herstel, communicatie en omgaan met verwachtingen uit je omgeving.',
+        werkwijzePill: 'Werkwijze',
+        werkwijzeTitle: 'Heldere aanpak in 3 stappen',
+        step1Title: '1. Intake en doelen',
+        step1Text: 'Huidige situatie in kaart en concrete doelen bepalen.',
+        step2Title: '2. Train de skills',
+        step2Text: 'Tools en directe toepassing in training en wedstrijd.',
+        step3Title: '3. Borging en groei',
+        step3Text: 'Routines, evaluatie en vervolgplan voor duurzame progressie.',
+        trajectPill: 'Trajecten',
+        trajectTitle: 'Starttraject: 10 sessies richting groei.',
+        trajectIntro1: 'Voor we starten, plannen we eerst een kennismaking met ouder(s) en speler om de huidige situatie goed in kaart te brengen. Ik wil je echt leren kennen: waar liggen je valkuilen, waar wil je zelf in groeien en wat heb je nodig om met vertrouwen te presteren. Vanuit daar start het traject.',
+        trajectIntro2: 'De bal vertrekt vanaf het racket en gaat stap voor stap richting de horizon. Zo bouwen we sessie na sessie aan groei, met focus op vandaag en tegelijk een heldere blik op je toekomst.',
+        prevBtn: 'Vorige',
+        nextBtn: 'Volgende stap',
+        overMijPill: 'Over Mij',
+        overMijTitle: 'Van college tennis tot de pro tour: coaching vanuit echte topsportervaring',
+        prestatiesTitle: 'Prestaties',
+        prest3: 'Met dubbelpartner Braden Shick bereikte ik een carrière-high ranking van No. 5, goed voor All-America honors.',
+        prest4: '5 Pro Titels',
+        linkedinTop: 'Bekijk LinkedIn',
+        prijzenPill: 'Pakketten en prijzen',
+        prijzenTitle: 'Doorgroeien na je starttraject',
+        startCardTitle: 'Starttraject - 10 sessies',
+        growthCardTitle: 'Performance Growth Plan (3 maanden)',
+        whyGrowthTitle: 'Waarom dit vervolgplan?',
+        offPill: 'Meer dan mentale coaching',
+        offTitle: 'Off-court begeleiding',
+        off1Title: 'Voeding',
+        off2Title: 'Planning en structuur',
+        off3Title: 'Herstel en routines',
+        off4Title: 'Communicatie en omgeving',
+        photoOverlayText: 'Professioneel tennisser | Achtergrond in psychologie | Coach in NL en EN',
+        testPill: 'Testimonials',
+        testTitle: 'Ervaringen van sporters',
+        contactPill: 'Contact',
+        contactHeading: 'Plan kennismaking',
+        labelName: 'Naam',
+        labelEmail: 'E-mail',
+        labelSport: 'Sport',
+        labelMessage: 'Bericht',
+        submitBtn: 'Plan kennismaking',
+        contactTitle: 'Contactgegevens',
+        contactEmail: 'E-mail: fonsvansambeek2002@gmail.com',
+        contactText: 'Iedereen start met het 10-sessies starttraject. Vanuit daar bouwen we verder aan jouw persoonlijke groei.',
+        linkedinBottom: 'LinkedIn',
+        aboutText1: 'Ik ben Fons van Sambeek, professioneel tennisser met een achtergrond in psychologie. Deze opleiding volgde ik in de Verenigde Staten tijdens mijn college tenniscarriere.',
+        aboutText2: 'Tijdens mijn eigen route - van college tennis tot het professionele circuit - heb ik ervaren hoe groot de invloed van mentale vaardigheden is op prestaties. Druk, twijfels, overdenken en verwachtingen spelen vaak een beslissende rol in wedstrijden.',
+        aboutText3: 'Mijn doel is om sporters te helpen hun mentale vaardigheden te versterken, zodat zij met vertrouwen en helderheid kunnen presteren op belangrijke momenten. Ik speel momenteel zelf op de pro tour en wil naast mijn eigen carrière jeugd en ambitieuze sporters begeleiden.',
+        aboutText4: 'Ik heb gespeeld voor NC State in Amerika en begeleid sporters in zowel het Nederlands als Engels.',
+        test1: '"Sinds het traject herstel ik sneller na fouten en blijf ik rustiger onder druk."',
+        test2: '"Ik heb nu een vaste routine voor voorbereiding en speel met meer vertrouwen."',
+        test3: '"De combinatie van mentale tools en off-court structuur helpt mij elke week."'
+      },
+      en: {
+        navVoorWie: 'For athletes',
+        navWaarom: 'Why mental coaching',
+        navTrajecten: 'Programs',
+        navPrijzen: 'Pricing',
+        navOverMij: 'About me',
+        navContact: 'Book introduction call',
+        heroTitle: 'Mental performance for athletes who want to grow.',
+        heroSub: 'Mental coaching and high-performance lifestyle guidance: focus, confidence, pressure, consistency, plus off-court structure in nutrition, planning, and routines.',
+        heroCta1: 'Book introduction call',
+        heroCta2: 'View Start Program',
+        trustTitle: 'Why athletes choose this program',
+        trust1: 'Top-level sports experience',
+        trust2: 'Practical and directly applicable',
+        trust3: 'Online sessions (45-60 min) or in person',
+        trust4: 'Match video analysis using Swing Vision',
+        trust5: 'Coaching in Dutch and English, on and off court',
+        voorWiePill: 'For athletes',
+        voorWieTitle: 'Are you willing to put in the work and grow?',
+        doelgroepTitle: 'Who this is for',
+        doelgroepText: 'For athletes who put joy first while building strong mental performance. We work on the full picture: mindset, focus, confidence, pressure, routines, and performance environment.',
+        resultatenTitle: 'Outcomes',
+        resultatenText: 'More calm, sharper focus, stronger confidence independent of results, better emotional regulation, and stronger off-court structure.',
+        mentaalPill: 'Why mental coaching',
+        mentaalTitle: 'Losing is not the enemy. Fear of losing is the enemy - Rafael Nadal.',
+        mentaalCard1Title: 'Why mental skills matter',
+        mentaalCard1Text: 'In key moments, focus, confidence, and emotional control often decide outcomes. Technique and physical level matter, but mental stability unlocks your full level.',
+        mentaalCard2Title: 'Broader impact',
+        mentaalCard2Text: 'Mental coaching goes beyond match day. It improves daily choices: preparation, recovery, communication, and handling expectations around you.',
+        werkwijzePill: 'Approach',
+        werkwijzeTitle: 'A clear 3-step method',
+        step1Title: '1. Intake and goals',
+        step1Text: 'Map the current situation and define concrete performance goals.',
+        step2Title: '2. Train the skills',
+        step2Text: 'Build practical tools and apply them directly in training and matches.',
+        step3Title: '3. Consolidation and growth',
+        step3Text: 'Anchor routines, evaluate progress, and set the next growth plan.',
+        trajectPill: 'Programs',
+        trajectTitle: 'Start Program: 10 sessions toward growth.',
+        trajectIntro1: 'Before we begin, we start with an introduction meeting with parent(s) and player to map the current situation clearly. I want to really know you: your patterns, challenges, and where you want to grow. From there, the program begins.',
+        trajectIntro2: 'The ball leaves the racket and moves step by step toward the horizon. Each session builds forward momentum: focused on today, connected to your long-term future.',
+        prevBtn: 'Previous',
+        nextBtn: 'Next step',
+        overMijPill: 'About me',
+        overMijTitle: 'From college tennis to the pro tour: coaching built on real high-performance experience',
+        prestatiesTitle: 'Performance highlights',
+        prest3: 'With doubles partner Braden Shick, I reached a career-high world ranking of No. 5, earning All-America honors.',
+        prest4: '5 Pro Titles',
+        linkedinTop: 'View LinkedIn',
+        prijzenPill: 'Pricing',
+        prijzenTitle: 'Keep growing after your Start Program',
+        startCardTitle: 'Start Program - 10 sessions',
+        growthCardTitle: 'Performance Growth Plan (3 months)',
+        whyGrowthTitle: 'Why this follow-up plan?',
+        offPill: 'More than mental coaching',
+        offTitle: 'Off-court guidance',
+        off1Title: 'Nutrition',
+        off2Title: 'Planning and structure',
+        off3Title: 'Recovery and routines',
+        off4Title: 'Communication and environment',
+        photoOverlayText: 'Professional tennis player | Psychology background | Coach in Dutch and English',
+        testPill: 'Testimonials',
+        testTitle: 'Athlete experiences',
+        contactPill: 'Contact',
+        contactHeading: 'Book introduction call',
+        labelName: 'Name',
+        labelEmail: 'Email',
+        labelSport: 'Sport',
+        labelMessage: 'Message',
+        submitBtn: 'Book introduction call',
+        contactTitle: 'Contact details',
+        contactEmail: 'Email: fonsvansambeek2002@gmail.com',
+        contactText: 'Everyone starts with the 10-session Start Program. From there we keep building your personal growth path.',
+        linkedinBottom: 'LinkedIn',
+        aboutText1: 'I am Fons van Sambeek, a professional tennis player with a background in psychology. I studied psychology in the United States during my college tennis career.',
+        aboutText2: 'During my own journey from college tennis to the professional circuit, I experienced how strongly mental skills influence performance. Pressure, doubt, overthinking, and expectations often decide matches.',
+        aboutText3: 'My goal is to help athletes strengthen their mental skills so they can perform with clarity and confidence in key moments. I am currently active on the pro tour and, alongside that, I coach youth and ambitious athletes.',
+        aboutText4: 'I played for NC State in the United States and I coach in both Dutch and English.',
+        test1: '"This program helped me stay calmer under pressure and recover mentally faster within matches."',
+        test2: '"I now have a clear preparation routine and I compete with more confidence."',
+        test3: '"The combination of mental tools and off-court structure helps me every single week."'
+      }
+    };
+
+    const uiHtmlByLang = {
+      nl: {
+        startCardText: '<strong>EUR 500</strong><br>Duur: ongeveer 5 weken<br>Frequentie: 2 sessies per week<br>Vorm: Online (Zoom)<br>Duur per sessie: 45-60 minuten',
+        growthCardText: '<strong>EUR 200 per maand</strong><br>Looptijd: 3 maanden<br>2 coaching sessies per maand als basis (uitbreidbaar op maat)<br>Continue app-contact voor snelle afstemming en begeleiding',
+        whyGrowthText: 'Het Performance Growth Plan is flexibel en aanpasbaar aan wat iemand zelf nodig heeft. Mentale ontwikkeling is een langetermijnproces: je blijft trainen, evalueren en verfijnen terwijl je als sporter verder groeit.',
+        off1Text: 'Kijken naar wat jij nodig hebt: voeding op trainings- en wedstrijddagen, essentials, vitamines en herstel.',
+        off2Text: 'Training, reizen, school en werk.',
+        off3Text: 'Slaap, herstel en vaste gewoontes.',
+        off4Text: 'Afstemming met ouders, coaches en team.'
+      },
+      en: {
+        startCardText: '<strong>EUR 500</strong><br>Duration: around 5 weeks<br>Frequency: 2 sessions per week<br>Format: Online (Zoom)<br>Session length: 45-60 minutes',
+        growthCardText: '<strong>EUR 200 per month</strong><br>Duration: 3 months<br>2 coaching sessions per month as baseline (expandable to your needs)<br>Continuous app contact for fast guidance',
+        whyGrowthText: 'The Performance Growth Plan is flexible and tailored to individual needs. Mental development is long-term: you keep training, evaluating, and refining while you continue to grow as an athlete.',
+        off1Text: 'Built around what you need: nutrition on training and match days, essentials, vitamins, and recovery.',
+        off2Text: 'Training, travel, school, and work.',
+        off3Text: 'Sleep, recovery, and stable routines.',
+        off4Text: 'Alignment with parents, coaches, and team.'
+      }
+    };
+    const formMessages = {
+      nl: {
+        nameRequired: 'Naam is verplicht.',
+        emailRequired: 'E-mail is verplicht.',
+        emailInvalid: 'Voer een geldig e-mailadres in.',
+        sportRequired: 'Sport is verplicht.',
+        messageRequired: 'Bericht is verplicht.',
+        success: 'Bedankt. Je bericht is ontvangen.'
+      },
+      en: {
+        nameRequired: 'Name is required.',
+        emailRequired: 'Email is required.',
+        emailInvalid: 'Please enter a valid email address.',
+        sportRequired: 'Sport is required.',
+        messageRequired: 'Message is required.',
+        success: 'Thanks. Your message has been received.'
+      }
+    };
+
+    const ballTrack = [
+      { x: 140, y: 240, scale: 1.0 },
+      { x: 190, y: 222, scale: 0.93 },
+      { x: 244, y: 200, scale: 0.86 },
+      { x: 300, y: 178, scale: 0.79 },
+      { x: 356, y: 155, scale: 0.72 },
+      { x: 410, y: 136, scale: 0.66 },
+      { x: 462, y: 118, scale: 0.60 },
+      { x: 514, y: 102, scale: 0.55 },
+      { x: 566, y: 86, scale: 0.50 },
+      { x: 620, y: 70, scale: 0.45 }
+    ];
+
+    let active = 0;
+    let currentLang = 'nl';
+    const area = document.getElementById('trajectoryArea');
+    const nodesLayer = document.getElementById('nodesLayer');
+    const ballVisual = document.getElementById('ballVisual');
+    const impactRing = document.getElementById('impactRing');
+    const racketGroup = document.getElementById('racketGroup');
+    const nodes = [];
+    const origin = ballTrack[0];
+    const langToggle = document.getElementById('langToggle');
+
+    function getSessions() {
+      return sessionsByLang[currentLang];
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      const ui = uiByLang[lang];
+      Object.entries(ui).forEach(([id, text]) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = text;
+      });
+      const uiHtml = uiHtmlByLang[lang];
+      Object.entries(uiHtml).forEach(([id, text]) => {
+        const node = document.getElementById(id);
+        if (node) node.innerHTML = text;
+      });
+
+      langToggle.setAttribute('title', lang === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands');
+      langToggle.setAttribute('aria-label', lang === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands');
+
+      nodes.forEach((btn, i) => {
+        btn.setAttribute('aria-label', `${lang === 'nl' ? 'Open sessie' : 'Open session'} ${i + 1}: ${getSessions()[i][0]}`);
+      });
+
+      setActive(active, true);
+    }
+
+    function getBallTransform(point) {
+      return `translate(${point.x - origin.x}px, ${point.y - origin.y}px) scale(${point.scale})`;
+    }
+
+    function animateRacketHit() {
+      racketGroup.animate([
+        { transform: 'translate(92px,246px) rotate(-14deg)' },
+        { transform: 'translate(92px,246px) rotate(10deg)' },
+        { transform: 'translate(92px,246px) rotate(-9deg)' },
+        { transform: 'translate(92px,246px) rotate(-14deg)' }
+      ], {
+        duration: 340,
+        easing: 'cubic-bezier(.2,.75,.2,1)'
+      });
+
+      impactRing.animate([
+        { opacity: 0.9, transform: 'translate(0px,0px) scale(0.9)' },
+        { opacity: 0.2, transform: 'translate(0px,0px) scale(1.7)' },
+        { opacity: 0, transform: 'translate(0px,0px) scale(2.15)' }
+      ], {
+        duration: 420,
+        easing: 'ease-out'
+      });
+    }
+
+    function createNodes() {
+      ballTrack.forEach((point, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'step-node';
+        btn.textContent = String(i + 1);
+        btn.style.left = ((point.x / 700) * 100) + '%';
+        btn.style.top = ((point.y / 360) * 100) + '%';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `Open sessie ${i + 1}: ${getSessions()[i][0]}`);
+        btn.addEventListener('click', () => setActive(i));
+        nodesLayer.appendChild(btn);
+        nodes.push(btn);
+      });
+    }
+
+    function setActive(i, skipHitAnimation) {
+      const sessions = getSessions();
+      const previousPoint = ballTrack[active];
+      active = (i + sessions.length) % sessions.length;
+      const point = ballTrack[active];
+      nodes.forEach((n, idx) => n.classList.toggle('active', idx === active));
+
+      if (!skipHitAnimation && previousPoint !== point) animateRacketHit();
+      ballVisual.style.transform = getBallTransform(point);
+      ballVisual.setAttribute('r', String(11 * point.scale));
+      ballVisual.style.opacity = String(Math.max(0.45, 1 - (active * 0.05)));
+
+      document.getElementById('sessionNo').textContent = `${currentLang === 'nl' ? 'Sessie' : 'Session'} ${active + 1}`;
+      document.getElementById('sessionTitle').textContent = sessions[active][0];
+      document.getElementById('sessionDesc').textContent = sessions[active][1];
+    }
+
+    createNodes();
+    ballVisual.style.transform = getBallTransform(ballTrack[0]);
+    applyLanguage('nl');
+    setActive(0, true);
+
+    langToggle.addEventListener('click', () => {
+      applyLanguage(currentLang === 'nl' ? 'en' : 'nl');
+    });
+
+    const brandLogo = document.getElementById('brandLogo');
+    brandLogo.addEventListener('error', () => {
+      if (brandLogo.src.includes('logo.png')) {
+        brandLogo.src = './assets/logo.jpg';
+        return;
+      }
+      if (brandLogo.src.includes('logo.jpg')) {
+        brandLogo.src = './assets/logo.webp';
+        return;
+      }
+      brandLogo.classList.add('is-hidden');
+    });
+
+    const fonsPhoto = document.getElementById('fonsPhoto');
+    fonsPhoto.addEventListener('error', () => {
+      if (fonsPhoto.src.includes('fons.jpg')) {
+        fonsPhoto.src = './assets/fons.jpeg';
+        return;
+      }
+      fonsPhoto.style.display = 'none';
+      const fallback = document.createElement('div');
+      fallback.style.cssText = 'position:absolute;inset:0;background:linear-gradient(135deg,#0B2C4A,#1f4b72 55%,#6BCB2E);';
+      fonsPhoto.parentElement.prepend(fallback);
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => setActive(active + 1));
+    document.getElementById('prevBtn').addEventListener('click', () => setActive(active - 1));
+
+    let startX = null;
+    area.addEventListener('touchstart', (event) => {
+      startX = event.changedTouches[0].clientX;
+    });
+    area.addEventListener('touchend', (event) => {
+      if (startX === null) return;
+      const deltaX = event.changedTouches[0].clientX - startX;
+      if (Math.abs(deltaX) > 35) {
+        if (deltaX < 0) setActive(active + 1);
+        if (deltaX > 0) setActive(active - 1);
+      }
+      startX = null;
+    });
+    area.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') setActive(active + 1);
+      if (event.key === 'ArrowLeft') setActive(active - 1);
+    });
+
+    const form = document.getElementById('contactForm');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const values = Object.fromEntries(data.entries());
+      const errs = {};
+
+      if (!String(values.name || '').trim()) errs.name = formMessages[currentLang].nameRequired;
+      if (!String(values.email || '').trim()) errs.email = formMessages[currentLang].emailRequired;
+      else if (!/^\S+@\S+\.\S+$/.test(String(values.email))) errs.email = formMessages[currentLang].emailInvalid;
+      if (!String(values.sport || '').trim()) errs.sport = formMessages[currentLang].sportRequired;
+      if (!String(values.message || '').trim()) errs.message = formMessages[currentLang].messageRequired;
+
+      ['name', 'email', 'sport', 'message'].forEach((key) => {
+        document.querySelector(`[data-error="${key}"]`).textContent = errs[key] || '';
+      });
+
+      if (Object.keys(errs).length === 0) {
+        document.getElementById('ok').textContent = formMessages[currentLang].success;
+        document.getElementById('ok').hidden = false;
+        form.reset();
+      }
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('show');
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>
