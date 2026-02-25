@@ -416,7 +416,16 @@
       <p id="contactPill" class="pill">Contact</p>
       <h2 id="contactHeading" style="font-size:clamp(28px,4vw,44px);">Plan kennismaking</h2>
       <div class="grid-2" style="margin-top:16px;">
-        <form class="card" id="contactForm" novalidate>
+        <form
+          class="card"
+          id="contactForm"
+          action="https://formsubmit.co/fonsvansambeek2002@gmail.com"
+          method="POST"
+          novalidate
+        >
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_subject" value="Nieuwe aanvraag via website">
+          <input type="hidden" name="_template" value="table">
           <label><span id="labelName">Naam</span><input name="name" /></label><div class="error" data-error="name"></div>
           <label><span id="labelEmail">E-mail</span><input name="email" type="email" /></label><div class="error" data-error="email"></div>
           <label><span id="labelSport">Sport</span><input name="sport" /></label><div class="error" data-error="sport"></div>
@@ -835,12 +844,11 @@
     });
 
     const form = document.getElementById('contactForm');
-    form.addEventListener('submit', async (event) => {
+    form.addEventListener('submit', (event) => {
       event.preventDefault();
       const data = new FormData(form);
       const values = Object.fromEntries(data.entries());
       const errs = {};
-      const okNode = document.getElementById('ok');
 
       if (!String(values.name || '').trim()) errs.name = formMessages[currentLang].nameRequired;
       if (!String(values.email || '').trim()) errs.email = formMessages[currentLang].emailRequired;
@@ -853,34 +861,7 @@
       });
 
       if (Object.keys(errs).length === 0) {
-        try {
-          const payload = new FormData();
-          payload.append('name', String(values.name || ''));
-          payload.append('email', String(values.email || ''));
-          payload.append('sport', String(values.sport || ''));
-          payload.append('message', String(values.message || ''));
-          payload.append('_subject', 'Nieuwe aanvraag via website');
-          payload.append('_captcha', 'false');
-
-          const response = await fetch('https://formsubmit.co/ajax/fonsvansambeek2002@gmail.com', {
-            method: 'POST',
-            headers: { Accept: 'application/json' },
-            body: payload
-          });
-
-          if (!response.ok) throw new Error('send failed');
-
-          okNode.style.borderColor = 'rgba(107,203,46,.5)';
-          okNode.style.background = 'rgba(107,203,46,.2)';
-          okNode.textContent = formMessages[currentLang].success;
-          okNode.hidden = false;
-          form.reset();
-        } catch {
-          okNode.style.borderColor = 'rgba(180,35,24,.35)';
-          okNode.style.background = 'rgba(180,35,24,.10)';
-          okNode.textContent = formMessages[currentLang].sendError;
-          okNode.hidden = false;
-        }
+        form.submit();
       }
     });
 
