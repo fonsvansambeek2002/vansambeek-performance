@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Portal · Van Sambeek Performance</title>
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/logo.png" />
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+
+  <div id="app" class="hidden">
+    <header class="app-topbar">
+      <div class="brand">
+        <img src="assets/logo.png" alt="" />
+        <span id="topbarTitle">Home</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a id="adminBtn" href="admin.html" class="btn btn-ghost hidden" style="padding: 8px 14px; font-size: 12px;">Beheer</a>
+        <button class="icon-btn" id="logoutBtn" title="Uitloggen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section class="screen active" id="screen-home">
+        <p class="greeting" id="homeGreeting">Hoi 👋</p>
+        <p class="subgreeting">Fijn dat je er bent. Hier is je overzicht.</p>
+
+        <div class="stats-row">
+          <div class="stat"><div class="num" id="statTotal">–</div><div class="label">Sessies totaal</div></div>
+          <div class="stat"><div class="num" id="statUpcoming">–</div><div class="label">Aankomend</div></div>
+          <div class="stat"><div class="num" id="statDone">–</div><div class="label">Afgerond</div></div>
+        </div>
+
+        <div class="card" id="nextSessionCard">
+          <h3>Volgende sessie</h3>
+          <p class="muted" id="nextSessionBody">Sessies laden…</p>
+        </div>
+
+        <div class="card" id="tipCard">
+          <h3>Tip van de dag</h3>
+          <p class="muted" id="tipBody">Tip laden…</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-sessions">
+        <div class="tabs" id="sessionTabs">
+          <button class="tab active" data-filter="upcoming">Aankomend</button>
+          <button class="tab" data-filter="past">Afgerond</button>
+        </div>
+        <div id="sessionsList"></div>
+      </section>
+
+      <section class="screen" id="screen-library">
+        <div class="tabs" id="categoryTabs">
+          <button class="tab active" data-category="mentaal">Mentaal</button>
+          <button class="tab" data-category="mindfulness">Mindfulness</button>
+          <button class="tab" data-category="voeding">Voeding</button>
+          <button class="tab" data-category="fysiek">Fysiek</button>
+        </div>
+        <div id="libraryList"></div>
+      </section>
+
+      <section class="screen" id="screen-wedstrijden">
+        <div class="card">
+          <h3>Wedstrijdreflectie</h3>
+          <form id="matchForm">
+            <div class="field">
+              <label>Datum</label>
+              <input type="date" id="matchDatum" required />
+            </div>
+            <div class="field">
+              <label>Tegenstander</label>
+              <input type="text" id="matchTegenstander" required placeholder="Naam tegenstander" />
+            </div>
+            <div class="field">
+              <label>Score</label>
+              <input type="text" id="matchScore" placeholder="bijv. 6-3 6-4" />
+            </div>
+            <div class="field">
+              <label>Wat heb ik vandaag goed gedaan?</label>
+              <textarea id="matchVraag1" required style="min-height: 80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>Wat zou ik de volgende keer beter willen doen?</label>
+              <textarea id="matchVraag2" required style="min-height: 80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>Hoe kan ik ervoor zorgen dat ik dit ga verbeteren?</label>
+              <textarea id="matchVraag3" required style="min-height: 80px;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-accent btn-block">Opslaan</button>
+            <p id="matchMessage" class="hidden"></p>
+          </form>
+        </div>
+
+        <h3 style="margin: 24px 0 12px;">Eerder ingevulde reflecties</h3>
+        <div id="matchList"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-screen="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Home
+      </button>
+      <button class="nav-btn" data-screen="sessions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
+        Sessies
+      </button>
+      <button class="nav-btn" data-screen="library">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M18 4v16"/></svg>
+        Bibliotheek
+      </button>
+      <button class="nav-btn" data-screen="wedstrijden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Wedstrijden
+      </button>
+    </nav>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script>
+    const titles = { home: 'Home', sessions: 'Sessies', library: 'Bibliotheek', wedstrijden: 'Wedstrijden' };
+
+    let currentUser = null;
+    let allSessions = [];
+    let libraryLoaded = false;
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await supabaseClient.auth.signOut();
+      location.href = 'login.html';
+    });
+
+    document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
+      btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
+    });
+
+    document.querySelectorAll('#sessionTabs .tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#sessionTabs .tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderSessions(tab.dataset.filter);
+      });
+    });
+
+    document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#categoryTabs .tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        loadLibrary(tab.dataset.category);
+      });
+    });
+
+    document.getElementById('matchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const messageEl = document.getElementById('matchMessage');
+      const payload = {
+        user_id: currentUser.id,
+        datum: document.getElementById('matchDatum').value,
+        tegenstander: document.getElementById('matchTegenstander').value.trim(),
+        score: document.getElementById('matchScore').value.trim() || null,
+        vraag1: document.getElementById('matchVraag1').value.trim(),
+        vraag2: document.getElementById('matchVraag2').value.trim(),
+        vraag3: document.getElementById('matchVraag3').value.trim(),
+      };
+
+      const { error } = await supabaseClient.from('match_reflections').insert(payload);
+      messageEl.classList.remove('hidden', 'error-msg', 'success-msg');
+
+      if (error) {
+        messageEl.classList.add('error-msg');
+        messageEl.textContent = 'Opslaan mislukt: ' + error.message;
+        return;
+      }
+
+      messageEl.classList.add('success-msg');
+      messageEl.textContent = 'Reflectie opgeslagen.';
+      document.getElementById('matchForm').reset();
+      loadMatchReflections();
+    });
+
+    function switchScreen(name) {
+      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+      document.getElementById('screen-' + name).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.screen === name));
+      document.getElementById('topbarTitle').textContent = titles[name];
+
+      if (name === 'sessions') {
+        const activeFilter = document.querySelector('#sessionTabs .tab.active').dataset.filter;
+        renderSessions(activeFilter);
+      }
+      if (name === 'library' && !libraryLoaded) {
+        const activeCategory = document.querySelector('#categoryTabs .tab.active').dataset.category;
+        loadLibrary(activeCategory);
+      }
+      if (name === 'wedstrijden') {
+        loadMatchReflections();
+      }
+    }
+
+    async function onAuthenticated() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      currentUser = user;
+      document.getElementById('app').classList.remove('hidden');
+
+      const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', user.id).single();
+      document.getElementById('adminBtn').classList.toggle('hidden', !(profile && profile.is_admin));
+
+      loadHome();
+    }
+
+    async function loadHome() {
+      const name = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'sporter';
+      document.getElementById('homeGreeting').textContent = `Hoi ${name} 👋`;
+
+      const { data: sessions } = await supabaseClient
+        .from('sessions')
+        .select('*')
+        .eq('athlete_id', currentUser.id)
+        .order('session_date', { ascending: true });
+
+      allSessions = sessions || [];
+
+      const now = new Date();
+      const upcoming = allSessions.filter((s) => new Date(s.session_date) >= now && s.status !== 'geannuleerd');
+      const done = allSessions.filter((s) => s.status === 'voltooid');
+
+      document.getElementById('statTotal').textContent = allSessions.length;
+      document.getElementById('statUpcoming').textContent = upcoming.length;
+      document.getElementById('statDone').textContent = done.length;
+
+      const next = upcoming[0];
+      document.getElementById('nextSessionBody').textContent = next
+        ? `${next.title} · ${formatDate(next.session_date)}`
+        : 'Je hebt nog geen geplande sessies.';
+
+      const { data: tips } = await supabaseClient
+        .from('content_items')
+        .select('title, description')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (tips && tips.length) {
+        const tip = tips[Math.floor(Math.random() * tips.length)];
+        document.getElementById('tipBody').textContent = `${tip.title} — ${tip.description || ''}`;
+      } else {
+        document.getElementById('tipBody').textContent = 'Nog geen content beschikbaar.';
+      }
+
+      renderSessions('upcoming');
+    }
+
+    function renderSessions(filter) {
+      const now = new Date();
+      const list = document.getElementById('sessionsList');
+      const items = allSessions.filter((s) =>
+        filter === 'upcoming' ? new Date(s.session_date) >= now : new Date(s.session_date) < now
+      );
+
+      if (!items.length) {
+        list.innerHTML = `<div class="empty-state">Geen ${filter === 'upcoming' ? 'aankomende' : 'afgeronde'} sessies.</div>`;
+        return;
+      }
+
+      list.innerHTML = items.map((s) => `
+        <div class="session-item">
+          <div class="row">
+            <strong>${escapeHtml(s.title)}</strong>
+            <span class="badge badge-${s.status}">${escapeHtml(s.status)}</span>
+          </div>
+          <p class="muted">${formatDate(s.session_date)}</p>
+          ${s.notes ? `<p class="muted" style="margin-top:8px;">${escapeHtml(s.notes)}</p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function loadLibrary(category) {
+      libraryLoaded = true;
+      const list = document.getElementById('libraryList');
+      list.innerHTML = `<div class="empty-state">Laden…</div>`;
+
+      const { data, error } = await supabaseClient
+        .from('content_items')
+        .select('*')
+        .eq('category', category)
+        .order('created_at', { ascending: false });
+
+      if (error || !data || !data.length) {
+        list.innerHTML = `<div class="empty-state">Nog geen content in deze categorie.</div>`;
+        return;
+      }
+
+      list.innerHTML = data.map((item) => `
+        <div class="content-item">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p class="muted" style="margin-top:6px;">${escapeHtml(item.description || '')}</p>
+          ${item.video_url ? `<p style="margin-top:10px;"><a href="${escapeAttr(item.video_url)}" target="_blank" rel="noopener">Openen →</a></p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function loadMatchReflections() {
+      const list = document.getElementById('matchList');
+      list.innerHTML = '<div class="empty-state">Laden…</div>';
+
+      const { data, error } = await supabaseClient
+        .from('match_reflections')
+        .select('*')
+        .order('datum', { ascending: false });
+
+      if (error || !data || !data.length) {
+        list.innerHTML = '<div class="empty-state">Nog geen wedstrijdreflecties.</div>';
+        return;
+      }
+
+      list.innerHTML = data.map((r) => `
+        <div class="content-item">
+          <strong>${escapeHtml(r.tegenstander)}</strong>
+          <span class="muted"> · ${escapeHtml(r.datum)}${r.score ? ' · ' + escapeHtml(r.score) : ''}</span>
+          <p class="muted" style="margin-top:8px;"><strong>Wat ging goed:</strong> ${escapeHtml(r.vraag1)}</p>
+          <p class="muted" style="margin-top:4px;"><strong>Verbeteren:</strong> ${escapeHtml(r.vraag2)}</p>
+          <p class="muted" style="margin-top:4px;"><strong>Aanpak:</strong> ${escapeHtml(r.vraag3)}</p>
+        </div>
+      `).join('');
+    }
+
+    function formatDate(d) {
+      return new Date(d).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str ?? '';
+      return div.innerHTML;
+    }
+    function escapeAttr(str) {
+      return (str ?? '').replace(/"/g, '&quot;');
+    }
+
+    (async function init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        location.href = 'login.html';
+        return;
+      }
+      await onAuthenticated();
+    })();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

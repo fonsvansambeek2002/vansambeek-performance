@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Inloggen · Van Sambeek Performance</title>
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/logo.png" />
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+
+  <div class="auth-screen">
+    <div class="auth-card">
+      <img src="assets/logo.png" class="logo" alt="" />
+      <h1 id="authTitle">Welkom terug</h1>
+      <p class="muted" id="authSubtitle">Log in om verder te gaan.</p>
+      <form id="loginForm">
+        <div class="field hidden" id="nameField">
+          <label>Naam</label>
+          <input type="text" id="signupName" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label>E-mailadres</label>
+          <input type="email" id="loginEmail" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label>Wachtwoord</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" minlength="6" required />
+        </div>
+        <button type="submit" class="btn btn-accent btn-block" id="loginSubmit">Inloggen</button>
+        <p id="loginError" class="error-msg hidden"></p>
+        <p id="loginInfo" class="success-msg hidden"></p>
+      </form>
+      <p class="muted" id="toggleModeText" style="text-align: center; margin-top: 18px;">
+        Nog geen account? <a href="#" id="toggleModeLink">Account aanmaken</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script>
+    let mode = 'login';
+
+    function setMode(newMode) {
+      mode = newMode;
+      const isSignup = mode === 'signup';
+
+      document.getElementById('nameField').classList.toggle('hidden', !isSignup);
+      document.getElementById('authTitle').textContent = isSignup ? 'Account aanmaken' : 'Welkom terug';
+      document.getElementById('authSubtitle').textContent = isSignup ? 'Maak een account aan om te starten.' : 'Log in om verder te gaan.';
+      document.getElementById('loginSubmit').textContent = isSignup ? 'Account aanmaken' : 'Inloggen';
+      document.getElementById('loginError').classList.add('hidden');
+      document.getElementById('loginInfo').classList.add('hidden');
+
+      document.getElementById('toggleModeText').innerHTML = isSignup
+        ? 'Heb je al een account? <a href="#" id="toggleModeLink">Inloggen</a>'
+        : 'Nog geen account? <a href="#" id="toggleModeLink">Account aanmaken</a>';
+      document.getElementById('toggleModeLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        setMode(isSignup ? 'login' : 'signup');
+      });
+    }
+
+    setMode('login');
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const name = document.getElementById('signupName').value.trim();
+      const errorEl = document.getElementById('loginError');
+      const infoEl = document.getElementById('loginInfo');
+      const submitBtn = document.getElementById('loginSubmit');
+      errorEl.classList.add('hidden');
+      infoEl.classList.add('hidden');
+      submitBtn.disabled = true;
+
+      if (mode === 'signup') {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: name } },
+        });
+
+        if (error) {
+          submitBtn.disabled = false;
+          errorEl.textContent = 'Account aanmaken mislukt: ' + error.message;
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        if (!data.session) {
+          submitBtn.disabled = false;
+          infoEl.textContent = 'Account aangemaakt. Check je e-mail om je account te bevestigen en log daarna in.';
+          infoEl.classList.remove('hidden');
+          setMode('login');
+          return;
+        }
+
+        location.href = 'portal.html';
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        submitBtn.disabled = false;
+        errorEl.textContent = 'Inloggen mislukt: controleer je e-mailadres en wachtwoord.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      location.href = 'portal.html';
+    });
+
+    (async function init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) location.href = 'portal.html';
+    })();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

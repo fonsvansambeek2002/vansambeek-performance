@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Van Sambeek Performance</title>
+  <meta name="description" content="Mentale performance coaching voor ambitieuze sporters." />
+  <meta name="google-site-verification" content="zCe0ZsSrFvaYfqaCnGWIgVvG7vNybOnH7XGEkoPSlh4" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:    #0B2C4A;
+      --navy2:   #0e3557;
+      --green:   #6BCB2E;
+      --green2:  #5ab526;
+      --offwhite:#F7F9FB;
+      --text:    #1F2933;
+      --muted:   #5b6b7a;
+      --line:    #E6ECF2;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: Inter, sans-serif; color: var(--text); background: var(--offwhite); }
+    img { display: block; max-width: 100%; }
+    h1,h2,h3 { font-family: Sora, sans-serif; color: var(--navy); line-height: 1.1; }
+    p { line-height: 1.7; }
+    a { text-decoration: none; }
+    .container { width: min(1100px, 92%); margin: 0 auto; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 0; border-radius: 999px; padding: 13px 26px;
+      font: 600 14px/1 Inter, sans-serif; cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .15s;
+      text-decoration: none; white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+    .btn-green   { background: var(--green); color: var(--navy); }
+    .btn-green:hover { background: var(--green2); }
+    .btn-navy    { background: var(--navy); color: #fff; }
+    .btn-outline { background: transparent; color: var(--navy); border: 2px solid var(--navy); }
+    .btn-outline:hover { background: var(--navy); color: #fff; }
+    .btn-white   { background: #fff; color: var(--navy); border: 1.5px solid var(--line); }
+    .btn-white:hover { border-color: var(--navy); }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(247,249,251,.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 16px rgba(11,44,74,.06);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 14px 0;
+    }
+    .brand {
+      font-family: Sora, sans-serif; font-weight: 800;
+      font-size: 16px; color: var(--navy); flex-shrink: 0;
+    }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      padding: 7px 11px; border-radius: 8px;
+      transition: background .15s, color .15s; white-space: nowrap;
+    }
+    .nav-links a:hover { background: var(--line); color: var(--navy); }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    /* LANG TOGGLE */
+    .lang-switch {
+      display: flex; align-items: center;
+      border: 1.5px solid var(--line); border-radius: 999px;
+      overflow: hidden; background: #fff; flex-shrink: 0;
+    }
+    .lang-switch button {
+      border: 0; background: none; cursor: pointer;
+      font: 700 12px/1 Inter, sans-serif;
+      padding: 8px 14px; color: var(--muted);
+      transition: background .15s, color .15s; letter-spacing: .04em;
+    }
+    .lang-switch button.active { background: var(--navy); color: #fff; }
+    .lang-divider { width: 1px; height: 18px; background: var(--line); flex-shrink: 0; }
+
+    /* HAMBURGER */
+    .hamburger {
+      display: none; flex-direction: column; justify-content: center;
+      gap: 5px; width: 40px; height: 40px;
+      border: 1.5px solid var(--line); border-radius: 10px;
+      background: #fff; cursor: pointer; padding: 8px;
+    }
+    .hamburger span { display: block; height: 2px; background: var(--navy); border-radius: 2px; transition: .25s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* MOBILE MENU */
+    .mobile-menu {
+      display: none; position: fixed; inset: 0; top: 65px;
+      background: rgba(247,249,251,.98); backdrop-filter: blur(12px);
+      z-index: 40; flex-direction: column; padding: 28px 24px;
+      gap: 6px; border-top: 1px solid var(--line);
+      overflow-y: auto;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 18px; font-weight: 600; color: var(--navy);
+      padding: 14px 16px; border-radius: 12px;
+      transition: background .15s;
+    }
+    .mobile-menu a:hover { background: var(--line); }
+    .mobile-menu .btn-green { margin-top: 8px; text-align: center; font-size: 16px; padding: 16px; }
+
+    /* SECTIONS */
+    .section { padding: 80px 0; }
+    .pill {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--green2); margin-bottom: 10px;
+    }
+    .section-title { font-size: clamp(26px,4vw,44px); margin-bottom: 16px; }
+    .section-sub { font-size: 16px; color: var(--muted); max-width: 600px; line-height: 1.75; }
+
+    /* CARDS */
+    .card {
+      background: #fff; border: 1px solid var(--line);
+      border-radius: 20px; padding: 28px;
+      box-shadow: 0 4px 24px rgba(11,44,74,.07);
+    }
+    .card h3 { font-size: 17px; margin-bottom: 10px; }
+    .card p  { font-size: 14px; color: var(--muted); }
+
+    /* GRIDS */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #1a4a6e 100%);
+      color: #fff; padding: 96px 0 80px; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 70% 80% at 75% 50%, rgba(107,203,46,.13) 0%, transparent 65%);
+    }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--green); margin-bottom: 20px;
+    }
+    .hero-eyebrow::before { content: ''; width: 28px; height: 2px; background: var(--green); }
+    .hero h1 { font-size: clamp(32px,5vw,58px); color: #fff; margin-bottom: 20px; line-height: 1.07; }
+    .hero h1 span { color: var(--green); }
+    .hero-sub { font-size: 17px; color: rgba(255,255,255,.75); max-width: 520px; margin-bottom: 32px; line-height: 1.75; }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-card {
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 20px; padding: 28px; backdrop-filter: blur(8px);
+    }
+    .hero-card h3 { color: #fff; font-size: 16px; margin-bottom: 16px; }
+    .hero-card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .hero-card li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: rgba(255,255,255,.8); }
+    .hero-card li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+    /* OVER MIJ */
+    .about-content { display: flex; flex-direction: column; gap: 18px; max-width: 720px; }
+    .about-content p { font-size: 16px; color: var(--muted); }
+    .about-content p strong { color: var(--navy); }
+    .cred-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .cred-badge {
+      display: flex; align-items: center; gap: 7px;
+      background: #fff; border: 1px solid var(--line);
+      border-radius: 10px; padding: 9px 13px;
+      font-size: 13px; font-weight: 600; color: var(--navy);
+      box-shadow: 0 2px 8px rgba(11,44,74,.06);
+    }
+
+    /* WAAROM */
+    .why-section { background: var(--navy); }
+    .why-section .pill { color: var(--green); }
+    .why-section .section-title { color: #fff; }
+    .why-quote {
+      border-left: 3px solid var(--green); padding-left: 20px;
+      font-size: 19px; font-style: italic; color: rgba(255,255,255,.82);
+      margin: 24px 0 32px; line-height: 1.65;
+    }
+    .why-card {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px; padding: 28px;
+    }
+    .why-card h3 { color: #fff; font-size: 16px; margin-bottom: 10px; }
+    .why-card p  { color: rgba(255,255,255,.62); font-size: 14px; }
+
+    /* TRAJECT */
+    .trajectory-wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; margin-top: 32px; }
+    #trajectoryArea {
+      position: relative; min-height: 390px; outline: none;
+      overflow: hidden; border-radius: 20px;
+      border: 1px solid var(--line); background: #fff;
+      box-shadow: 0 4px 24px rgba(11,44,74,.07);
+    }
+    #courtSvg { width: 100%; display: block; }
+    #nodesLayer { position: absolute; inset: 0; pointer-events: none; }
+    #racketGroup { transform: translate(92px,246px) rotate(-14deg); transform-origin: 92px 246px; }
+    #ballVisual { transform-box: fill-box; transform-origin: center; transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .55s ease; }
+    .step-node {
+      position: absolute; transform: translate(-50%,-50%);
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 2px solid #fff; font-size: 11px; font-weight: 700;
+      color: #fff; background: var(--navy); cursor: pointer;
+      transition: .2s ease; pointer-events: auto;
+      box-shadow: 0 2px 8px rgba(11,44,74,.25);
+    }
+    .step-node.active { background: var(--green); color: var(--navy); transform: translate(-50%,-50%) scale(1.12); }
+    .traj-controls { display: flex; gap: 10px; padding: 0 16px 16px; }
+    .session-card {
+      background: #fff; border: 1px solid var(--line);
+      border-radius: 20px; padding: 32px;
+      box-shadow: 0 4px 24px rgba(11,44,74,.07);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .session-num { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--green2); }
+    .session-title { font-size: 26px; font-family: Sora, sans-serif; color: var(--navy); }
+    .session-desc { font-size: 15px; color: var(--muted); line-height: 1.75; }
+
+    /* PRICING */
+    .pricing-section { background: var(--navy); }
+    .pricing-section .pill { color: var(--green); }
+    .pricing-section .section-title { color: #fff; }
+    .price-card {
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+      border-radius: 24px; padding: 48px 40px;
+      text-align: center; max-width: 500px; margin: 32px auto 0;
+    }
+    .price-amount { font-family: Sora, sans-serif; font-weight: 800; font-size: clamp(52px,8vw,80px); color: #fff; line-height: 1; }
+    .price-period { font-size: 20px; color: rgba(255,255,255,.5); font-weight: 500; margin-left: 6px; }
+    .price-includes { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 24px 0; text-align: left; }
+    .price-includes li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,.8); }
+    .price-includes li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+    /* OFF-COURT */
+    .offcourt-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .offcourt-card p  { font-size: 14px; color: var(--muted); }
+
+    /* CONTACT */
+    .contact-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: start; }
+    .contact-form { display: flex; flex-direction: column; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .form-group input, .form-group textarea {
+      border: 1.5px solid var(--line); border-radius: 12px;
+      padding: 12px 14px; font: 15px/1.5 Inter, sans-serif;
+      background: #fff; color: var(--text); transition: border-color .15s;
+      width: 100%;
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--navy); }
+    .form-error { font-size: 12px; color: #c0392b; min-height: 16px; }
+    .form-success {
+      background: rgba(107,203,46,.12); border: 1px solid rgba(107,203,46,.4);
+      border-radius: 12px; padding: 14px 16px;
+      color: var(--navy); font-size: 14px; font-weight: 500;
+    }
+    .contact-info { display: flex; flex-direction: column; gap: 20px; }
+    .contact-detail { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--navy); font-weight: 500; }
+
+    /* FOOTER */
+    .footer {
+      background: var(--navy); color: rgba(255,255,255,.45);
+      padding: 28px 0; font-size: 13px;
+    }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+    /* FADE */
+    .fade { opacity: 0; transform: translateY(20px); transition: .5s ease; }
+    .fade.show { opacity: 1; transform: translateY(0); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 900px) {
+      .hero-grid, .trajectory-wrap, .contact-grid { grid-template-columns: 1fr; }
+      .grid-2, .grid-4 { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .hero { padding: 64px 0 52px; }
+      .hero h1 { font-size: 34px; }
+      .hero-sub { font-size: 15px; }
+      .section { padding: 56px 0; }
+      .price-card { padding: 36px 24px; }
+      .session-card { padding: 24px; }
+      #trajectoryArea { min-height: 300px; }
+    }
+    @media (max-width: 560px) {
+      .grid-2, .grid-4 { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 30px; }
+      .section-title { font-size: 26px; }
+      .cred-row { flex-direction: column; }
+      .hero-ctas .btn { width: 100%; justify-content: center; }
+      .price-card { padding: 28px 18px; }
+      .traj-controls { flex-direction: column; }
+      .traj-controls .btn { width: 100%; }
+      .brand { font-size: 14px; }
+      .nav-inner { padding: 12px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="container nav-inner">
+    <span class="brand">Van Sambeek Performance</span>
+    <div class="nav-links">
+      <a id="navOverMij"   href="#over-mij">Over Mij</a>
+      <a id="navWaarom"    href="#waarom">Waarom mentaal</a>
+      <a id="navVoorWie"   href="#voor-wie">Voor wie</a>
+      <a id="navTrajecten" href="#traject">Traject</a>
+      <a id="navPrijzen"   href="#prijzen">Prijzen</a>
+      <a id="navPortal"    href="/login.html">Portal</a>
+    </div>
+    <div class="nav-right">
+      <div class="lang-switch" role="group" aria-label="Taal kiezen">
+        <button id="btnNL" class="active" type="button" onclick="setLang('nl')">NL</button>
+        <div class="lang-divider"></div>
+        <button id="btnEN" type="button" onclick="setLang('en')">EN</button>
+      </div>
+      
+      <button class="hamburger" id="hamburger" type="button" aria-label="Menu openen">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<nav class="mobile-menu" id="mobileMenu">
+  <a id="mNavOverMij"   href="#over-mij"  onclick="closeMenu()">Over Mij</a>
+  <a id="mNavWaarom"    href="#waarom"    onclick="closeMenu()">Waarom mentaal</a>
+  <a id="mNavVoorWie"   href="#voor-wie"  onclick="closeMenu()">Voor wie</a>
+  <a id="mNavTrajecten" href="#traject"   onclick="closeMenu()">Traject</a>
+  <a id="mNavPrijzen"   href="#prijzen"   onclick="closeMenu()">Prijzen</a>
+  <a id="mNavPortal"    href="/login.html" onclick="closeMenu()">Portal</a>
+  <a id="mNavContact"   href="#contact"   onclick="closeMenu()" class="btn btn-green">Plan kennismaking</a>
+</nav>
+
+<main id="top">
+
+<!-- 1. HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid fade">
+      <div>
+        <p class="hero-eyebrow" id="heroEyebrow">Mentale performance coaching</p>
+        <h1 id="heroTitle">Mentale coaching voor atleten die het verschil willen maken.</h1>
+        <p class="hero-sub" id="heroSub">Focus, vertrouwen, omgaan met druk en consistentie — mentale vaardigheden die je traint, net zoals elk ander onderdeel van je sport.</p>
+        <div class="hero-ctas">
+          <a id="heroCta2" href="#traject" class="btn btn-green">Bekijk traject</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <h3 id="trustTitle">Waarom sporters kiezen voor dit traject</h3>
+        <ul>
+          <li id="trust1">Actief ATP professional — coaching vanuit echte topsportervaring</li>
+          <li id="trust2">Psychologie — NC State University</li>
+          <li id="trust3">All-American college tennisser</li>
+          <li id="trust4">Praktisch en direct toepasbaar</li>
+          <li id="trust5">Begeleiding in Nederlands en Engels</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. OVER MIJ -->
+<section id="over-mij" class="section">
+  <div class="container fade">
+    <p class="pill" id="overMijPill">Over Mij</p>
+    <h2 class="section-title" id="overMijTitle">Van college tennis tot de pro tour</h2>
+    <div style="border-radius:20px;overflow:hidden;margin:20px auto 28px;box-shadow:0 8px 32px rgba(11,44,74,.12);display:flex;justify-content:center;">
+      <img src="./assets/fons.jpg" alt="Fons van Sambeek" style="max-height:400px;width:auto;height:auto;object-fit:contain;display:block;" />
+    </div>
+    <div class="about-content">
+      <p id="aboutText1">Ik ben <strong>Fons van Sambeek</strong>, professioneel tennisser en All-American. Ik studeerde Psychologie aan NC State University terwijl ik uitkwam als college tennisser — een combinatie die de basis vormt van mijn coaching.</p>
+      <p id="aboutText2">Tijdens mijn eigen route heb ik ervaren hoe groot de invloed van mentale vaardigheden is op prestaties. Druk, twijfels, overdenken en verwachtingen spelen vaak een beslissende rol in wedstrijden.</p>
+      <p id="aboutText3">Mijn doel is om sporters te helpen hun mentale vaardigheden te versterken, zodat zij met vertrouwen en helderheid kunnen presteren op de momenten die ertoe doen. Ik combineer mijn actieve carrière op de pro tour met het coachen van ambitieuze sporters.</p>
+      <div class="cred-row">
+        <div class="cred-badge">🎓 Psychologie — NC State</div>
+        <div class="cred-badge">🏆 All-American</div>
+        <div class="cred-badge">🎾 ATP Professional</div>
+      </div>
+      <a id="linkedinBtn" href="https://www.linkedin.com/in/fons-van-sambeek-674a73292/" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="align-self:flex-start;">LinkedIn →</a>
+    </div>
+  </div>
+</section>
+
+<!-- 3. WAAROM MENTAAL -->
+<section id="waarom" class="section why-section">
+  <div class="container fade">
+    <p class="pill" id="waaromPill">Waarom mentale coaching</p>
+    <h2 class="section-title" id="waaromTitle">Het mentale verschil maakt het verschil</h2>
+    <div class="why-quote" id="waaromQuote">"Losing is not the enemy. Fear of losing is the enemy." — Rafael Nadal</div>
+    <p id="waaromIntro" style="color:rgba(255,255,255,.75);font-size:17px;max-width:680px;margin-bottom:32px;line-height:1.75;">Mentale vaardigheden zijn geen talent dat je hebt of niet hebt. Ze zijn trainbaar — net zoals techniek, kracht of snelheid. Wie ze serieus traint, presteert beter op de momenten die ertoe doen.</p>
+    <div class="grid-2">
+      <div class="why-card">
+        <h3 id="whyCard1Title">Mentale vaardigheden bepalen prestaties</h3>
+        <p id="whyCard1Text">Op cruciale momenten bepalen focus, zelfvertrouwen en emotieregulatie het verschil. Techniek en fysiek zijn essentieel, maar zonder mentale stabiliteit komt je niveau niet volledig naar buiten.</p>
+      </div>
+      <div class="why-card">
+        <h3 id="whyCard2Title">Effect breder dan sport</h3>
+        <p id="whyCard2Text">Mentale coaching helpt niet alleen tijdens wedstrijden. Het versterkt ook dagelijkse keuzes: voorbereiding, herstel, communicatie en omgaan met verwachtingen vanuit je omgeving.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. VOOR WIE -->
+<section id="voor-wie" class="section">
+  <div class="container fade">
+    <p class="pill" id="voorWiePill">Voor wie</p>
+    <h2 class="section-title" id="voorWieTitle">Voor prestatieve sporters die stappen willen zetten</h2>
+    <p class="section-sub" id="voorWieSub">Dit traject is bedoeld voor sporters die serieus nemen wat ze doen — ongeacht de sport. Als je ambitieus bent en mentaal wil groeien, ben je hier op de juiste plek.</p>
+  </div>
+</section>
+
+<!-- 5. TRAJECT -->
+<section id="traject" class="section" style="background:var(--offwhite);">
+  <div class="container fade">
+    <p class="pill" id="trajectPill">Starttraject</p>
+    <h2 class="section-title" id="trajectTitle">10 sessies richting groei</h2>
+    <p class="section-sub" id="trajectSub">Voor we starten, plannen we een kennismaking om jouw situatie goed in kaart te brengen. Vanuit daar bouwen we sessie voor sessie aan jouw mentale spel.</p>
+    <div class="trajectory-wrap">
+      <div id="trajectoryArea" tabindex="0" aria-label="Interactieve sessie-navigator">
+        <svg id="courtSvg" viewBox="0 0 700 360" aria-hidden="true">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#f0f6fa"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="700" height="360" fill="url(#bg)"/>
+          <path d="M70 250 C 230 200, 400 140, 620 70" fill="none" stroke="#d0dde8" stroke-dasharray="6 8" stroke-width="2"/>
+          <g id="racketGroup">
+            <ellipse cx="0" cy="0" rx="55" ry="34" fill="none" stroke="#0B2C4A" stroke-width="8"/>
+            <line x1="40" y1="24" x2="94" y2="72" stroke="#0B2C4A" stroke-width="10" stroke-linecap="round"/>
+            <line x1="95" y1="72" x2="112" y2="92" stroke="#0B2C4A" stroke-width="12" stroke-linecap="round"/>
+            <line x1="-30" y1="-22" x2="30" y2="22" stroke="#b7c7d6" stroke-width="2"/>
+            <line x1="-30" y1="22" x2="30" y2="-22" stroke="#b7c7d6" stroke-width="2"/>
+          </g>
+          <circle id="ballVisual" cx="140" cy="240" r="11" fill="#6BCB2E" stroke="#0B2C4A" stroke-width="2"/>
+          <circle id="impactRing" cx="140" cy="240" r="11" fill="none" stroke="#6BCB2E" stroke-width="3" opacity="0"/>
+        </svg>
+        <div id="nodesLayer"></div>
+        <div class="traj-controls">
+          <button class="btn btn-white" id="prevBtn" type="button">← Vorige</button>
+          <button class="btn btn-navy" id="nextBtn" type="button">Volgende →</button>
+        </div>
+      </div>
+      <div class="session-card">
+        <p class="session-num" id="sessionNo">Sessie 1</p>
+        <p class="session-title" id="sessionTitle">Zelfbewustzijn</p>
+        <p class="session-desc" id="sessionDesc">We brengen jouw mentale profiel in kaart: je sterktes, uitdagingen en de situaties waar je de meeste energie verliest.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. PRICING -->
+<section id="prijzen" class="section pricing-section">
+  <div class="container fade" style="text-align:center;">
+    <p class="pill" id="prijzenPill">Investering</p>
+    
+    <div class="price-card">
+      <div><span class="price-amount">€75</span><span class="price-period" id="pricePeriod">per week</span></div>
+      <ul class="price-includes">
+        <li id="priceInc1">Wekelijkse 1-op-1 sessie</li>
+        <li id="priceInc2">Persoonlijk werkboek</li>
+        <li id="priceInc3">Voorbereidende content per sessie</li>
+        <li id="priceInc4">Contact via WhatsApp rondom wedstrijden</li>
+        <li id="priceInc5">Flexibele coaching — afgestemd op jouw schema</li>
+      </ul>
+      <a id="priceCta" href="#contact" class="btn btn-green" style="width:100%;font-size:15px;padding:15px;">Plan kennismaking</a>
+    </div>
+  </div>
+</section>
+
+<!-- 7. OFF-COURT -->
+<section class="section">
+  <div class="container fade">
+    <p class="pill" id="offPill">Meer dan mentale coaching</p>
+    <h2 class="section-title" id="offTitle">Off-court begeleiding</h2>
+    <div class="grid-4" style="margin-top:28px;">
+      <div class="card offcourt-card"><h3 id="off1Title">Voeding</h3><p id="off1Text">Wat jij nodig hebt op trainings- en wedstrijddagen, essentials, vitamines en herstel.</p></div>
+      <div class="card offcourt-card"><h3 id="off2Title">Planning</h3><p id="off2Text">Structuur in training, reizen en school.</p></div>
+      <div class="card offcourt-card"><h3 id="off3Title">Herstel</h3><p id="off3Text">Slaap, herstel en vaste gewoontes.</p></div>
+      <div class="card offcourt-card"><h3 id="off4Title">Omgeving</h3><p id="off4Text">Afstemming met ouders, coaches en team.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. CONTACT -->
+<section id="contact" class="section">
+  <div class="container fade">
+    <div class="contact-grid">
+      <div>
+        <p class="pill" id="contactPill">Contact</p>
+        <h2 class="section-title" id="contactHeading">Plan een kennismaking</h2>
+        <form class="contact-form card" id="contactForm" action="https://formspree.io/f/meebonob" method="POST" novalidate style="margin-top:24px;">
+          <div class="form-group">
+            <label id="labelName">Naam</label>
+            <input name="name" type="text" autocomplete="name" />
+            <span class="form-error" data-error="name"></span>
+          </div>
+          <div class="form-group">
+            <label id="labelEmail">E-mail</label>
+            <input name="email" type="email" autocomplete="email" />
+            <span class="form-error" data-error="email"></span>
+          </div>
+          <div class="form-group">
+            <label id="labelSport">Jouw sport / niveau</label>
+            <input name="sport" type="text" />
+            <span class="form-error" data-error="sport"></span>
+          </div>
+          <div class="form-group">
+            <label id="labelMessage">Bericht</label>
+            <textarea name="message" rows="5"></textarea>
+            <span class="form-error" data-error="message"></span>
+          </div>
+          <button id="submitBtn" class="btn btn-green" style="width:100%;font-size:15px;padding:15px;" type="submit">Plan kennismaking</button>
+          <div id="formSuccess" class="form-success" hidden></div>
+        </form>
+      </div>
+      <div class="contact-info" style="padding-top:60px;">
+        <div>
+          <h3 id="contactTitle">Contactgegevens</h3>
+          <p id="contactText" style="margin-top:10px;font-size:15px;color:var(--muted);">Iedereen start met het 10-sessies starttraject. Vanuit daar bouwen we verder aan jouw persoonlijke groei.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="contact-detail">📧 fonsvansambeek2002@gmail.com</div>
+          <div class="contact-detail">🌍 <span id="contactLang">Nederlands & Engels</span></div>
+          <div class="contact-detail">💻 <span id="contactFormat">Online of in person</span></div>
+        </div>
+        <a href="https://www.linkedin.com/in/fons-van-sambeek-674a73292/" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="align-self:flex-start;" id="linkedinContact">LinkedIn →</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <span style="color:#fff;font-family:Sora,sans-serif;font-weight:700;">Van Sambeek Performance</span>
+    <span id="footerText">Mentale coaching voor ambitieuze sporters</span>
+  </div>
+</footer>
+
+<script>
+// ── SESSIONS ────────────────────────────────────────────
+const sessions = {
+  nl:[
+    ["Zelfbewustzijn","We brengen jouw mentale profiel in kaart: je sterktes, uitdagingen en de situaties waar je de meeste energie verliest."],
+    ["Zelfvertrouwen","Je ontdekt waar jouw vertrouwen vandaan komt en hoe je het opbouwt met bewijs — onafhankelijk van resultaten."],
+    ["Focus & Concentratie","Je brengt in kaart wat jou afleidt en hoe jouw ideale mentale staat eruitziet. Je ontwikkelt een persoonlijk focuswoord."],
+    ["Omgaan met fouten","Je ontwerpt jouw eigen fout-protocol: een vaste routine voor de 20 seconden na een fout, zodat je snel herstelt."],
+    ["Druk & Grote momenten","Je analyseert hoe jij reageert onder druk en leert technieken om druk om te zetten naar brandstof."],
+    ["Emotionele controle","Je leert je emotionele triggers kennen en bouwt vaardigheden om rustiger en scherper te blijven in lastige momenten."],
+    ["Veerkracht","Je onderzoekt hoe jij omgaat met tegenslagen en ontwikkelt een mentaliteit die je sterker maakt na moeilijke periodes."],
+    ["Consistentie","Je ontwerpt jouw between-point routine en leert hoe je op je beste niveau presteert, ook als het tegenzit."],
+    ["Wedstrijdvoorbereiding","Je bouwt een complete mentale warming-up: visualisatie, routines en de juiste mindset voor je eerste punt."],
+    ["Terugblik & Vooruit","We evalueren jouw groei over 10 weken en maken een concreet plan voor de volgende fase van jouw ontwikkeling."]
+  ],
+  en:[
+    ["Self-Awareness","We map out your mental profile: your strengths, challenges, and the situations where you lose the most energy."],
+    ["Confidence","You discover where your confidence comes from and how to build it with evidence — independent of results."],
+    ["Focus & Concentration","You identify your distractions and what your ideal mental state looks like. You develop a personal focus word."],
+    ["Handling Mistakes","You design your personal mistake protocol: a fixed routine for the 20 seconds after an error so you recover fast."],
+    ["Pressure & Big Moments","You analyse how you respond under pressure and learn techniques to turn pressure into fuel."],
+    ["Emotional Control","You learn your emotional triggers and build skills to stay calmer and sharper in difficult moments."],
+    ["Resilience","You explore how you handle setbacks and develop a mindset that makes you stronger after tough periods."],
+    ["Consistency","You design your between-point routine and learn how to perform at your best even when things go against you."],
+    ["Competition Preparation","You build a complete mental warm-up: visualisation, routines, and the right mindset for your first point."],
+    ["Looking Back & Forward","We evaluate your growth over 10 weeks and build a concrete plan for the next phase of your development."]
+  ]
+};
+
+// ── TRANSLATIONS ─────────────────────────────────────────
+const t = {
+  nl:{
+    navOverMij:'Over Mij', navWaarom:'Waarom mentaal', navVoorWie:'Voor wie',
+    navTrajecten:'Traject', navPrijzen:'Prijzen', navPortal:'Portal', navContact:'Plan kennismaking',
+    mNavOverMij:'Over Mij', mNavWaarom:'Waarom mentaal', mNavVoorWie:'Voor wie',
+    mNavTrajecten:'Traject', mNavPrijzen:'Prijzen', mNavPortal:'Portal', mNavContact:'Plan kennismaking',
+    heroEyebrow:'Mentale performance coaching',
+    heroTitle:'Mentale coaching voor atleten die het verschil willen maken.',
+    heroSub:'Focus, vertrouwen, omgaan met druk en consistentie — mentale vaardigheden die je traint, net zoals elk ander onderdeel van je sport.',
+    heroCta1:'Plan kennismaking', heroCta2:'Bekijk traject',
+    trustTitle:'Waarom sporters kiezen voor dit traject',
+    trust1:'Actief ATP professional — coaching vanuit echte topsportervaring',
+    trust2:'Psychologie — NC State University',
+    trust3:'All-American college tennisser',
+    trust4:'Praktisch en direct toepasbaar',
+    trust5:'Begeleiding in Nederlands en Engels',
+    overMijPill:'Over Mij', overMijTitle:'Van college tennis tot de pro tour',
+    aboutText1:'Ik ben <strong>Fons van Sambeek</strong>, professioneel tennisser en All-American. Ik studeerde Psychologie aan NC State University terwijl ik uitkwam als college tennisser — een combinatie die de basis vormt van mijn coaching.',
+    aboutText2:'Tijdens mijn eigen route heb ik ervaren hoe groot de invloed van mentale vaardigheden is op prestaties. Druk, twijfels, overdenken en verwachtingen spelen vaak een beslissende rol in wedstrijden.',
+    aboutText3:'Mijn doel is om sporters te helpen hun mentale vaardigheden te versterken, zodat zij met vertrouwen en helderheid kunnen presteren op de momenten die ertoe doen. Ik combineer mijn actieve carrière op de pro tour met het coachen van ambitieuze sporters.',
+    linkedinBtn:'LinkedIn →',
+    waaromPill:'Waarom mentale coaching', waaromTitle:'Het mentale verschil maakt het verschil',
+    waaromQuote:'"Losing is not the enemy. Fear of losing is the enemy." — Rafael Nadal',
+    waaromIntro:'Mentale vaardigheden zijn geen talent dat je hebt of niet hebt. Ze zijn trainbaar — net zoals techniek, kracht of snelheid. Wie ze serieus traint, presteert beter op de momenten die ertoe doen.',
+    whyCard1Title:'Mentale vaardigheden bepalen prestaties',
+    whyCard1Text:'Op cruciale momenten bepalen focus, zelfvertrouwen en emotieregulatie het verschil. Techniek en fysiek zijn essentieel, maar zonder mentale stabiliteit komt je niveau niet volledig naar buiten.',
+    whyCard2Title:'Effect breder dan sport',
+    whyCard2Text:'Mentale coaching helpt niet alleen tijdens wedstrijden. Het versterkt ook dagelijkse keuzes: voorbereiding, herstel, communicatie en omgaan met verwachtingen vanuit je omgeving.',
+    voorWiePill:'Voor wie', voorWieTitle:'Voor prestatieve sporters die stappen willen zetten',
+    voorWieSub:'Dit traject is bedoeld voor sporters die serieus nemen wat ze doen — ongeacht de sport. Als je ambitieus bent en mentaal wil groeien, ben je hier op de juiste plek.',
+    trajectPill:'Starttraject', trajectTitle:'10 sessies richting groei',
+    trajectSub:'Voor we starten, plannen we een kennismaking om jouw situatie goed in kaart te brengen. Vanuit daar bouwen we sessie voor sessie aan jouw mentale spel.',
+    prevBtn:'← Vorige', nextBtn:'Volgende →', sessionLabel:'Sessie',
+    prijzenPill:'Investering', prijzenTitle:'',
+    pricePeriod:'per week',
+    priceInc1:'Wekelijkse 1-op-1 sessie', priceInc2:'Persoonlijk werkboek',
+    priceInc3:'Voorbereidende content per sessie', priceInc4:'Contact via WhatsApp rondom wedstrijden',
+    priceInc5:'Flexibele coaching — afgestemd op jouw schema',
+    priceCta:'Plan kennismaking',
+    offPill:'Meer dan mentale coaching', offTitle:'Off-court begeleiding',
+    off1Title:'Voeding', off1Text:'Wat jij nodig hebt op trainings- en wedstrijddagen, essentials, vitamines en herstel.',
+    off2Title:'Planning', off2Text:'Structuur in training, reizen en school.',
+    off3Title:'Herstel', off3Text:'Slaap, herstel en vaste gewoontes.',
+    off4Title:'Omgeving', off4Text:'Afstemming met ouders, coaches en team.',
+    contactPill:'Contact', contactHeading:'Plan een kennismaking',
+    labelName:'Naam', labelEmail:'E-mail', labelSport:'Jouw sport / niveau', labelMessage:'Bericht',
+    submitBtn:'Plan kennismaking',
+    contactTitle:'Contactgegevens',
+    contactText:'Iedereen start met het 10-sessies starttraject. Vanuit daar bouwen we verder aan jouw persoonlijke groei.',
+    contactLang:'Nederlands & Engels', contactFormat:'Online of in person',
+    linkedinContact:'LinkedIn →',
+    footerText:'Mentale coaching voor ambitieuze sporters',
+    formSuccess:'Bedankt! Je bericht is verzonden. Ik neem zo snel mogelijk contact op.',
+    formErrName:'Naam is verplicht.', formErrEmail:'E-mail is verplicht.',
+    formErrEmailInvalid:'Voer een geldig e-mailadres in.',
+    formErrSport:'Sport is verplicht.', formErrMsg:'Bericht is verplicht.'
+  },
+  en:{
+    navOverMij:'About me', navWaarom:'Why mental', navVoorWie:'For athletes',
+    navTrajecten:'Program', navPrijzen:'Pricing', navPortal:'Portal', navContact:'Book intro call',
+    mNavOverMij:'About me', mNavWaarom:'Why mental', mNavVoorWie:'For athletes',
+    mNavTrajecten:'Program', mNavPrijzen:'Pricing', mNavPortal:'Portal', mNavContact:'Book intro call',
+    heroEyebrow:'Mental performance coaching',
+    heroTitle:'Mental coaching for athletes who want to make the difference.',
+    heroSub:'Focus, confidence, handling pressure and consistency — mental skills you train, just like every other part of your sport.',
+    heroCta1:'Book intro call', heroCta2:'View program',
+    trustTitle:'Why athletes choose this program',
+    trust1:'Active ATP professional — coaching from real high-performance experience',
+    trust2:'Psychology degree — NC State University',
+    trust3:'All-American college tennis player',
+    trust4:'Practical and directly applicable',
+    trust5:'Coaching in Dutch and English',
+    overMijPill:'About me', overMijTitle:'From college tennis to the pro tour',
+    aboutText1:'I am <strong>Fons van Sambeek</strong>, a professional tennis player and All-American. I studied Psychology at NC State University while competing as a college tennis player — a combination that forms the foundation of my coaching.',
+    aboutText2:'During my own journey I experienced how strongly mental skills influence performance. Pressure, doubt, overthinking and expectations often decide matches.',
+    aboutText3:'My goal is to help athletes strengthen their mental skills so they can perform with confidence and clarity when it matters most. I combine my active career on the pro tour with coaching ambitious athletes.',
+    linkedinBtn:'LinkedIn →',
+    waaromPill:'Why mental coaching', waaromTitle:'The mental edge makes the difference',
+    waaromQuote:'"Losing is not the enemy. Fear of losing is the enemy." — Rafael Nadal',
+    waaromIntro:'Mental skills are not a talent you either have or you do not. They are trainable — just like technique, strength or speed. Athletes who train them seriously perform better when it matters most.',
+    whyCard1Title:'Mental skills determine performance',
+    whyCard1Text:'In key moments, focus, confidence, and emotional control decide outcomes. Technique and physicality matter, but without mental stability your full level never comes out.',
+    whyCard2Title:'Impact beyond sport',
+    whyCard2Text:'Mental coaching goes beyond match day. It strengthens daily choices: preparation, recovery, communication, and handling expectations around you.',
+    voorWiePill:'For athletes', voorWieTitle:'For competitive athletes ready to take the next step',
+    voorWieSub:"This program is for athletes who take what they do seriously — regardless of sport. If you're ambitious and want to grow mentally, you're in the right place.",
+    trajectPill:'Start Program', trajectTitle:'10 sessions toward growth',
+    trajectSub:'Before we begin, we start with an introduction to map your situation clearly. From there we build your mental game session by session.',
+    prevBtn:'← Previous', nextBtn:'Next →', sessionLabel:'Session',
+    prijzenPill:'Investment', prijzenTitle:'',
+    pricePeriod:'per week',
+    priceInc1:'Weekly 1-on-1 session', priceInc2:'Personal workbook',
+    priceInc3:'Preparatory content each session', priceInc4:'WhatsApp contact around matches',
+    priceInc5:'Flexible coaching — tailored to your schedule',
+    priceCta:'Book intro call',
+    offPill:'More than mental coaching', offTitle:'Off-court guidance',
+    off1Title:'Nutrition', off1Text:'What you need on training and match days, essentials, vitamins and recovery.',
+    off2Title:'Planning', off2Text:'Structure in training, travel and school.',
+    off3Title:'Recovery', off3Text:'Sleep, recovery and consistent habits.',
+    off4Title:'Environment', off4Text:'Alignment with parents, coaches and team.',
+    contactPill:'Contact', contactHeading:'Book an introduction call',
+    labelName:'Name', labelEmail:'Email', labelSport:'Your sport / level', labelMessage:'Message',
+    submitBtn:'Book intro call',
+    contactTitle:'Contact details',
+    contactText:'Everyone starts with the 10-session Start Program. From there we keep building your personal growth path.',
+    contactLang:'Dutch & English', contactFormat:'Online or in person',
+    linkedinContact:'LinkedIn →',
+    footerText:'Mental coaching for ambitious athletes',
+    formSuccess:'Thanks! Your message has been sent. I will get back to you as soon as possible.',
+    formErrName:'Name is required.', formErrEmail:'Email is required.',
+    formErrEmailInvalid:'Please enter a valid email address.',
+    formErrSport:'Sport is required.', formErrMsg:'Message is required.'
+  }
+};
+
+// ── LANGUAGE ──────────────────────────────────────────────
+let lang = localStorage.getItem('vsp-lang') || 'nl';
+const htmlFields = ['aboutText1','aboutText2','aboutText3'];
+
+function applyLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.getElementById('btnNL').classList.toggle('active', l==='nl');
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  localStorage.setItem('vsp-lang', l);
+  const d = t[l];
+  Object.keys(d).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (htmlFields.includes(id)) el.innerHTML = d[id];
+    else el.textContent = d[id];
+  });
+  setActive(active, true);
+}
+function setLang(l) { applyLang(l); }
+
+// ── HAMBURGER ─────────────────────────────────────────────
+const hamburger   = document.getElementById('hamburger');
+const mobileMenu  = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('open', open);
+  hamburger.setAttribute('aria-label', open ? 'Menu sluiten' : 'Menu openen');
+  document.body.style.overflow = open ? 'hidden' : '';
+});
+function closeMenu() {
+  mobileMenu.classList.remove('open');
+  hamburger.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── TRAJECTORY ────────────────────────────────────────────
+const ballTrack = [
+  {x:140,y:240,s:1.0},{x:190,y:222,s:.93},{x:244,y:200,s:.86},{x:300,y:178,s:.79},
+  {x:356,y:155,s:.72},{x:410,y:136,s:.66},{x:462,y:118,s:.60},{x:514,y:102,s:.55},
+  {x:566,y:86,s:.50},{x:620,y:70,s:.45}
+];
+let active = 0;
+const origin = ballTrack[0];
+const ball   = document.getElementById('ballVisual');
+const ring   = document.getElementById('impactRing');
+const racket = document.getElementById('racketGroup');
+const nodes  = [];
+
+function getBallTx(p) { return `translate(${p.x-origin.x}px,${p.y-origin.y}px) scale(${p.s})`; }
+
+function hitAnim() {
+  racket.animate([
+    {transform:'translate(92px,246px) rotate(-14deg)'},
+    {transform:'translate(92px,246px) rotate(10deg)'},
+    {transform:'translate(92px,246px) rotate(-9deg)'},
+    {transform:'translate(92px,246px) rotate(-14deg)'}
+  ],{duration:340,easing:'cubic-bezier(.2,.75,.2,1)'});
+  ring.animate([
+    {opacity:.9,transform:'scale(.9)'},{opacity:.2,transform:'scale(1.7)'},{opacity:0,transform:'scale(2.15)'}
+  ],{duration:420,easing:'ease-out'});
+}
+
+function setActive(i, skipAnim) {
+  const s = sessions[lang];
+  active = ((i % s.length) + s.length) % s.length;
+  nodes.forEach((n,idx) => n.classList.toggle('active', idx===active));
+  if (!skipAnim) hitAnim();
+  const p = ballTrack[active];
+  ball.style.transform = getBallTx(p);
+  ball.setAttribute('r', String(11*p.s));
+  ball.style.opacity = String(Math.max(0.45, 1-active*0.055));
+  document.getElementById('sessionNo').textContent    = `${t[lang].sessionLabel} ${active+1}`;
+  document.getElementById('sessionTitle').textContent = s[active][0];
+  document.getElementById('sessionDesc').textContent  = s[active][1];
+}
+
+(function createNodes(){
+  const layer = document.getElementById('nodesLayer');
+  ballTrack.forEach((p,i) => {
+    const btn = document.createElement('button');
+    btn.className   = 'step-node';
+    btn.textContent = String(i+1);
+    btn.type        = 'button';
+    btn.style.left  = (p.x/700*100)+'%';
+    btn.style.top   = (p.y/360*100)+'%';
+    btn.addEventListener('click', () => setActive(i));
+    layer.appendChild(btn);
+    nodes.push(btn);
+  });
+})();
+
+ball.style.transform = getBallTx(ballTrack[0]);
+document.getElementById('nextBtn').addEventListener('click', () => setActive(active+1));
+document.getElementById('prevBtn').addEventListener('click', () => setActive(active-1));
+const area = document.getElementById('trajectoryArea');
+let startX = null;
+area.addEventListener('touchstart', e => { startX = e.changedTouches[0].clientX; });
+area.addEventListener('touchend',   e => {
+  if (startX===null) return;
+  const dx = e.changedTouches[0].clientX - startX;
+  if (Math.abs(dx) > 35) setActive(active+(dx<0?1:-1));
+  startX = null;
+});
+area.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight') setActive(active+1);
+  if (e.key==='ArrowLeft')  setActive(active-1);
+});
+
+// ── CONTACT FORM ──────────────────────────────────────────
+document.getElementById('contactForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const vals = Object.fromEntries(data.entries());
+  const d    = t[lang];
+  const errs = {};
+  if (!String(vals.name||'').trim())    errs.name    = d.formErrName;
+  if (!String(vals.email||'').trim())   errs.email   = d.formErrEmail;
+  else if (!/^\S+@\S+\.\S+$/.test(vals.email)) errs.email = d.formErrEmailInvalid;
+  if (!String(vals.sport||'').trim())   errs.sport   = d.formErrSport;
+  if (!String(vals.message||'').trim()) errs.message = d.formErrMsg;
+  ['name','email','sport','message'].forEach(k => {
+    document.querySelector(`[data-error="${k}"]`).textContent = errs[k]||'';
+  });
+  if (Object.keys(errs).length) return;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const res = await fetch(form.action, {method:'POST',body:data,headers:{Accept:'application/json'}});
+    const ok  = document.getElementById('formSuccess');
+    ok.textContent = res.ok ? d.formSuccess : 'Stuur een e-mail naar fonsvansambeek2002@gmail.com';
+    ok.hidden = false;
+    if (res.ok) form.reset();
+  } catch {
+    const ok = document.getElementById('formSuccess');
+    ok.textContent = 'Stuur een e-mail naar fonsvansambeek2002@gmail.com';
+    ok.hidden = false;
+  }
+  btn.disabled = false; btn.textContent = t[lang].submitBtn;
+});
+
+// ── INIT ──────────────────────────────────────────────────
+applyLang(lang);
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); });
+}, {threshold:0.1});
+document.querySelectorAll('.fade').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
