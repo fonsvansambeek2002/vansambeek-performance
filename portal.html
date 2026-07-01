@@ -272,6 +272,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <a id="adminBtn" href="admin.html" class="btn-ghost-sm hidden">Beheer</a>
+        <button class="btn-ghost-sm" id="langBtn">EN</button>
         <button class="icon-btn" id="logoutBtn" title="Uitloggen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         </button>
@@ -281,10 +282,10 @@
     <main class="app-main">
       <section class="screen active" id="screen-home">
         <p class="greeting" id="homeGreeting">Hoi</p>
-        <p class="subgreeting">Fijn dat je er bent.</p>
+        <p class="subgreeting" id="subgreeting">Fijn dat je er bent.</p>
 
         <div class="card" id="tipCard">
-          <h3>Tip van de dag</h3>
+          <h3 id="tipTitle">Tip van de dag</h3>
           <p class="muted" id="tipBody">Tip laden…</p>
         </div>
       </section>
@@ -301,38 +302,38 @@
 
       <section class="screen" id="screen-wedstrijden">
         <div class="card">
-          <h3>Wedstrijdreflectie</h3>
+          <h3 id="matchFormTitle">Wedstrijdreflectie</h3>
           <form id="matchForm">
             <div class="field">
-              <label>Datum</label>
+              <label id="labelDatum">Datum</label>
               <input type="date" id="matchDatum" required />
             </div>
             <div class="field">
-              <label>Tegenstander</label>
+              <label id="labelTegenstander">Tegenstander</label>
               <input type="text" id="matchTegenstander" required placeholder="Naam tegenstander" />
             </div>
             <div class="field">
-              <label>Score</label>
+              <label id="labelScore">Score</label>
               <input type="text" id="matchScore" placeholder="bijv. 6-3 6-4" />
             </div>
             <div class="field">
-              <label>Wat heb ik vandaag goed gedaan?</label>
+              <label id="labelVraag1">Wat heb ik vandaag goed gedaan?</label>
               <textarea id="matchVraag1" required style="min-height: 80px;"></textarea>
             </div>
             <div class="field">
-              <label>Wat zou ik de volgende keer beter willen doen?</label>
+              <label id="labelVraag2">Wat zou ik de volgende keer beter willen doen?</label>
               <textarea id="matchVraag2" required style="min-height: 80px;"></textarea>
             </div>
             <div class="field">
-              <label>Hoe kan ik ervoor zorgen dat ik dit ga verbeteren?</label>
+              <label id="labelVraag3">Hoe kan ik ervoor zorgen dat ik dit ga verbeteren?</label>
               <textarea id="matchVraag3" required style="min-height: 80px;"></textarea>
             </div>
-            <button type="submit" class="btn-accent">Opslaan</button>
+            <button type="submit" class="btn-accent" id="matchSubmitBtn">Opslaan</button>
             <p id="matchMessage" class="hidden"></p>
           </form>
         </div>
 
-        <h3 style="margin: 24px 0 12px;">Eerder ingevulde reflecties</h3>
+        <h3 id="prevReflectionsTitle" style="margin: 24px 0 12px;">Eerder ingevulde reflecties</h3>
         <div id="matchList"></div>
       </section>
     </main>
@@ -340,15 +341,15 @@
     <nav class="bottom-nav">
       <button class="nav-btn active" data-screen="home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-        Home
+        <span>Home</span>
       </button>
       <button class="nav-btn" data-screen="library">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M18 4v16"/></svg>
-        Content
+        <span>Content</span>
       </button>
       <button class="nav-btn" data-screen="wedstrijden">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-        Wedstrijden
+        <span>Wedstrijden</span>
       </button>
     </nav>
   </div>
@@ -356,10 +357,128 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-config.js"></script>
   <script>
-    const titles = { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden' };
+    const i18n = {
+      nl: {
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden' },
+        admin: 'Beheer',
+        logout: 'Uitloggen',
+        greeting: (n) => `Hoi ${n}`,
+        subgreeting: 'Fijn dat je er bent.',
+        tipTitle: 'Tip van de dag',
+        noContent: 'Nog geen content beschikbaar.',
+        tabs: { mentaal: 'Mentaal', mindfulness: 'Mindfulness', voeding: 'Voeding', fysiek: 'Fysiek' },
+        loading: 'Laden…',
+        noCategory: 'Nog geen content in deze categorie.',
+        watchVideo: 'Bekijk video →',
+        matchTitle: 'Wedstrijdreflectie',
+        date: 'Datum',
+        opponent: 'Tegenstander',
+        opponentPlaceholder: 'Naam tegenstander',
+        score: 'Score',
+        scorePlaceholder: 'bijv. 6-3 6-4',
+        q1: 'Wat heb ik vandaag goed gedaan?',
+        q2: 'Wat zou ik de volgende keer beter willen doen?',
+        q3: 'Hoe kan ik ervoor zorgen dat ik dit ga verbeteren?',
+        save: 'Opslaan',
+        saveFailed: 'Opslaan mislukt: ',
+        saveSuccess: 'Reflectie opgeslagen.',
+        prevReflections: 'Eerder ingevulde reflecties',
+        noReflections: 'Nog geen wedstrijdreflecties.',
+        wentWell: 'Wat ging goed:',
+        improve: 'Verbeteren:',
+        approach: 'Aanpak:',
+        navHome: 'Home',
+        navContent: 'Content',
+        navMatches: 'Wedstrijden',
+      },
+      en: {
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches' },
+        admin: 'Admin',
+        logout: 'Log out',
+        greeting: (n) => `Hey ${n}`,
+        subgreeting: 'Good to have you here.',
+        tipTitle: 'Tip of the day',
+        noContent: 'No content available yet.',
+        tabs: { mentaal: 'Mental', mindfulness: 'Mindfulness', voeding: 'Nutrition', fysiek: 'Physical' },
+        loading: 'Loading…',
+        noCategory: 'No content in this category yet.',
+        watchVideo: 'Watch video →',
+        matchTitle: 'Match reflection',
+        date: 'Date',
+        opponent: 'Opponent',
+        opponentPlaceholder: 'Opponent name',
+        score: 'Score',
+        scorePlaceholder: 'e.g. 6-3 6-4',
+        q1: 'What did I do well today?',
+        q2: 'What would I like to do better next time?',
+        q3: 'How can I make sure I improve this?',
+        save: 'Save',
+        saveFailed: 'Save failed: ',
+        saveSuccess: 'Reflection saved.',
+        prevReflections: 'Previous reflections',
+        noReflections: 'No match reflections yet.',
+        wentWell: 'What went well:',
+        improve: 'Improve:',
+        approach: 'Approach:',
+        navHome: 'Home',
+        navContent: 'Content',
+        navMatches: 'Matches',
+      },
+    };
 
+    let lang = localStorage.getItem('lang') || 'nl';
     let currentUser = null;
     let libraryLoaded = false;
+
+    function applyTranslations() {
+      const T = i18n[lang];
+      document.documentElement.lang = lang;
+      document.getElementById('langBtn').textContent = lang === 'nl' ? 'EN' : 'NL';
+
+      const activeScreen = document.querySelector('.nav-btn.active')?.dataset.screen || 'home';
+      document.getElementById('topbarTitle').textContent = T.screenTitles[activeScreen];
+      document.getElementById('adminBtn').textContent = T.admin;
+      document.getElementById('logoutBtn').title = T.logout;
+
+      document.getElementById('subgreeting').textContent = T.subgreeting;
+      document.getElementById('tipTitle').textContent = T.tipTitle;
+
+      document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
+        tab.textContent = T.tabs[tab.dataset.category];
+      });
+
+      document.getElementById('matchFormTitle').textContent = T.matchTitle;
+      document.getElementById('labelDatum').textContent = T.date;
+      document.getElementById('labelTegenstander').textContent = T.opponent;
+      document.getElementById('matchTegenstander').placeholder = T.opponentPlaceholder;
+      document.getElementById('labelScore').textContent = T.score;
+      document.getElementById('matchScore').placeholder = T.scorePlaceholder;
+      document.getElementById('labelVraag1').textContent = T.q1;
+      document.getElementById('labelVraag2').textContent = T.q2;
+      document.getElementById('labelVraag3').textContent = T.q3;
+      document.getElementById('matchSubmitBtn').textContent = T.save;
+      document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
+
+      document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
+        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches' }[btn.dataset.screen];
+        btn.querySelector('span').textContent = T[key];
+      });
+
+      if (currentUser) loadHome();
+      if (libraryLoaded) {
+        const activeCategory = document.querySelector('#categoryTabs .tab.active').dataset.category;
+        loadLibrary(activeCategory);
+      }
+      if (document.getElementById('screen-wedstrijden').classList.contains('active')) {
+        loadMatchReflections();
+      }
+    }
+
+    document.getElementById('langBtn').addEventListener('click', () => {
+      lang = lang === 'nl' ? 'en' : 'nl';
+      localStorage.setItem('lang', lang);
+      applyTranslations();
+    });
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await supabaseClient.auth.signOut();
@@ -372,7 +491,7 @@
 
     document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('#categoryTabs .tab').forEach((t) => t.classList.remove('active'));
+        document.querySelectorAll('#categoryTabs .tab').forEach((el) => el.classList.remove('active'));
         tab.classList.add('active');
         loadLibrary(tab.dataset.category);
       });
@@ -380,6 +499,7 @@
 
     document.getElementById('matchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const T = i18n[lang];
       const messageEl = document.getElementById('matchMessage');
       const payload = {
         user_id: currentUser.id,
@@ -396,21 +516,22 @@
 
       if (error) {
         messageEl.classList.add('error-msg');
-        messageEl.textContent = 'Opslaan mislukt: ' + error.message;
+        messageEl.textContent = T.saveFailed + error.message;
         return;
       }
 
       messageEl.classList.add('success-msg');
-      messageEl.textContent = 'Reflectie opgeslagen.';
+      messageEl.textContent = T.saveSuccess;
       document.getElementById('matchForm').reset();
       loadMatchReflections();
     });
 
     function switchScreen(name) {
+      const T = i18n[lang];
       document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
       document.getElementById('screen-' + name).classList.add('active');
       document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.screen === name));
-      document.getElementById('topbarTitle').textContent = titles[name];
+      document.getElementById('topbarTitle').textContent = T.screenTitles[name];
 
       if (name === 'library' && !libraryLoaded) {
         const activeCategory = document.querySelector('#categoryTabs .tab.active').dataset.category;
@@ -429,12 +550,13 @@
       const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', user.id).single();
       document.getElementById('adminBtn').classList.toggle('hidden', !(profile && profile.is_admin));
 
-      loadHome();
+      applyTranslations();
     }
 
     async function loadHome() {
+      const T = i18n[lang];
       const name = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'sporter';
-      document.getElementById('homeGreeting').textContent = `Hoi ${name}`;
+      document.getElementById('homeGreeting').textContent = T.greeting(name);
 
       const { data: tips } = await supabaseClient
         .from('content_items')
@@ -447,14 +569,15 @@
         const tip = tips[Math.floor(Math.random() * tips.length)];
         document.getElementById('tipBody').textContent = `${tip.title}${tip.description ? ' — ' + tip.description : ''}`;
       } else {
-        document.getElementById('tipBody').textContent = 'Nog geen content beschikbaar.';
+        document.getElementById('tipBody').textContent = T.noContent;
       }
     }
 
     async function loadLibrary(category) {
+      const T = i18n[lang];
       libraryLoaded = true;
       const list = document.getElementById('libraryList');
-      list.innerHTML = `<div class="empty-state">Laden…</div>`;
+      list.innerHTML = `<div class="empty-state">${T.loading}</div>`;
 
       const { data, error } = await supabaseClient
         .from('content_items')
@@ -464,7 +587,7 @@
         .order('sort_order', { ascending: true });
 
       if (error || !data || !data.length) {
-        list.innerHTML = `<div class="empty-state">Nog geen content in deze categorie.</div>`;
+        list.innerHTML = `<div class="empty-state">${T.noCategory}</div>`;
         return;
       }
 
@@ -474,15 +597,16 @@
               <span class="muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.07em;">${escapeHtml(item.category)}</span>
               <strong style="display:block;margin-top:4px;">${escapeHtml(item.title)}</strong>
               ${item.description ? `<p class="muted" style="margin-top:6px;">${escapeHtml(item.description)}</p>` : ''}
-              ${item.video_url ? `<p style="margin-top:12px;"><a href="${escapeAttr(item.video_url)}" target="_blank" rel="noopener">Bekijk video →</a></p>` : ''}
+              ${item.video_url ? `<p style="margin-top:12px;"><a href="${escapeAttr(item.video_url)}" target="_blank" rel="noopener">${T.watchVideo}</a></p>` : ''}
             </div>
           </div>
         `).join('');
     }
 
     async function loadMatchReflections() {
+      const T = i18n[lang];
       const list = document.getElementById('matchList');
-      list.innerHTML = '<div class="empty-state">Laden…</div>';
+      list.innerHTML = `<div class="empty-state">${T.loading}</div>`;
 
       const { data, error } = await supabaseClient
         .from('match_reflections')
@@ -490,7 +614,7 @@
         .order('datum', { ascending: false });
 
       if (error || !data || !data.length) {
-        list.innerHTML = '<div class="empty-state">Nog geen wedstrijdreflecties.</div>';
+        list.innerHTML = `<div class="empty-state">${T.noReflections}</div>`;
         return;
       }
 
@@ -498,9 +622,9 @@
         <div class="content-item">
           <strong>${escapeHtml(r.tegenstander)}</strong>
           <span class="muted"> · ${escapeHtml(r.datum)}${r.score ? ' · ' + escapeHtml(r.score) : ''}</span>
-          <p class="muted" style="margin-top:10px;"><strong style="color:#AAA;">Wat ging goed:</strong><br>${escapeHtml(r.vraag1)}</p>
-          <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">Verbeteren:</strong><br>${escapeHtml(r.vraag2)}</p>
-          <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">Aanpak:</strong><br>${escapeHtml(r.vraag3)}</p>
+          <p class="muted" style="margin-top:10px;"><strong style="color:#AAA;">${T.wentWell}</strong><br>${escapeHtml(r.vraag1)}</p>
+          <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">${T.improve}</strong><br>${escapeHtml(r.vraag2)}</p>
+          <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">${T.approach}</strong><br>${escapeHtml(r.vraag3)}</p>
         </div>
       `).join('');
     }
@@ -516,6 +640,7 @@
     }
 
     (async function init() {
+      applyTranslations();
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) {
         location.href = 'login.html';
