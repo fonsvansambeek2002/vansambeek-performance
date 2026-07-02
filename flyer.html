@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flyer · Van Sambeek Performance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #d0d8e4;
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+      min-height: 100vh;
+    }
+
+    /* ── FLYER SHELL ── */
+    .flyer {
+      width: 210mm;
+      min-height: 297mm;
+      background: #0B2C4A;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 72px rgba(0,0,0,.35);
+    }
+
+    /* decorative green glow top-right */
+    .flyer::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(ellipse, rgba(107,203,46,.16) 0%, transparent 68%);
+      pointer-events: none;
+    }
+
+    /* ── HEADER ── */
+    .f-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 36px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-row img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      line-height: 1.15;
+      color: #fff;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,.5);
+      margin-top: 3px;
+      letter-spacing: .03em;
+    }
+
+    .badge {
+      border: 1.5px solid rgba(107,203,46,.5);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #6BCB2E;
+      background: rgba(107,203,46,.08);
+      white-space: nowrap;
+    }
+
+    /* ── HERO ── */
+    .f-hero {
+      padding: 40px 36px 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #6BCB2E;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 22px;
+      height: 2px;
+      background: #6BCB2E;
+      flex-shrink: 0;
+    }
+
+    .f-hero h1 {
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      font-size: 36px;
+      line-height: 1.1;
+      color: #fff;
+      max-width: 460px;
+      margin-bottom: 16px;
+    }
+
+    .f-hero h1 span { color: #6BCB2E; }
+
+    .f-hero p {
+      font-size: 14.5px;
+      color: rgba(255,255,255,.7);
+      line-height: 1.75;
+      max-width: 440px;
+    }
+
+    /* ── DIVIDER ── */
+    .rule {
+      height: 1px;
+      background: rgba(255,255,255,.1);
+      margin: 0 36px;
+    }
+
+    /* ── PILLARS ── */
+    .pillars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 28px 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pillar {
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+
+    .pillar-icon {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .pillar h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 5px;
+    }
+
+    .pillar p {
+      font-size: 12px;
+      color: rgba(255,255,255,.58);
+      line-height: 1.6;
+    }
+
+    /* ── ABOUT STRIP ── */
+    .about-strip {
+      background: rgba(107,203,46,.07);
+      border-top: 1px solid rgba(107,203,46,.2);
+      border-bottom: 1px solid rgba(107,203,46,.2);
+      padding: 22px 36px;
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-copy { flex: 1; }
+
+    .about-copy h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .about-copy p {
+      font-size: 12.5px;
+      color: rgba(255,255,255,.68);
+      line-height: 1.65;
+    }
+
+    .creds {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    .cred {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 8px;
+      padding: 6px 13px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: rgba(255,255,255,.85);
+      white-space: nowrap;
+    }
+
+    /* ── PRICING ── */
+    .pricing {
+      padding: 26px 36px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .price-block { flex-shrink: 0; }
+
+    .price-num {
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      font-size: 56px;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .price-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,.45);
+      margin-top: 3px;
+    }
+
+    .price-sep {
+      width: 1px;
+      height: 64px;
+      background: rgba(255,255,255,.15);
+      flex-shrink: 0;
+    }
+
+    .includes {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 1;
+    }
+
+    .includes li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(255,255,255,.78);
+      line-height: 1.4;
+    }
+
+    .includes li::before {
+      content: '✓';
+      color: #6BCB2E;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── FOOTER ── */
+    .f-footer {
+      margin-top: auto;
+      background: rgba(0,0,0,.22);
+      border-top: 1px solid rgba(255,255,255,.1);
+      padding: 22px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 12.5px;
+      color: rgba(255,255,255,.7);
+    }
+
+    .contact-row strong {
+      color: #fff;
+    }
+
+    .cta-pill {
+      background: #6BCB2E;
+      color: #0B2C4A;
+      border-radius: 14px;
+      padding: 14px 24px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13.5px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.25;
+      flex-shrink: 0;
+    }
+
+    .cta-pill small {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      opacity: .7;
+      margin-top: 3px;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: none; padding: 0; }
+      .flyer { box-shadow: none; width: 100%; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="flyer">
+
+  <!-- HEADER -->
+  <div class="f-header">
+    <div class="logo-row">
+      <img src="assets/logo.png" alt="Van Sambeek Performance logo" />
+      <div>
+        <div class="brand-name">Van Sambeek Performance</div>
+        <div class="brand-sub">Mentale coaching voor ambitieuze sporters</div>
+      </div>
+    </div>
+    <div class="badge">ATP Professional</div>
+  </div>
+
+  <!-- HERO -->
+  <div class="f-hero">
+    <div class="eyebrow">Mentale performance coaching</div>
+    <h1>Mentale coaching voor atleten die het <span>verschil</span> willen maken.</h1>
+    <p>Focus, vertrouwen, omgaan met druk en consistentie — mentale vaardigheden die je traint, net zoals elk ander onderdeel van je sport.</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- PILLARS -->
+  <div class="pillars">
+    <div class="pillar">
+      <span class="pillar-icon">🧠</span>
+      <h3>Focus & Concentratie</h3>
+      <p>Leer je aandacht richten op wat ertoe doet, ook onder druk.</p>
+    </div>
+    <div class="pillar">
+      <span class="pillar-icon">💪</span>
+      <h3>Zelfvertrouwen</h3>
+      <p>Bouw vertrouwen op basis van bewijs, onafhankelijk van resultaten.</p>
+    </div>
+    <div class="pillar">
+      <span class="pillar-icon">🎯</span>
+      <h3>Omgaan met druk</h3>
+      <p>Zet druk om in brandstof op cruciale wedstrijdmomenten.</p>
+    </div>
+    <div class="pillar">
+      <span class="pillar-icon">🔁</span>
+      <h3>Consistentie</h3>
+      <p>Presteer op jouw beste niveau, ook als het tegenzit.</p>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ABOUT -->
+  <div class="about-strip">
+    <div class="about-copy">
+      <h3>Coaching vanuit echte topsportervaring</h3>
+      <p>Ik ben Fons van Sambeek — actief ATP professioneel tennisser en All-American. Ik studeerde Psychologie aan NC State University en combineer wetenschappelijke kennis met echte wedstrijdervaring op hoog niveau.</p>
+    </div>
+    <div class="creds">
+      <div class="cred">🎓 Psychologie — NC State</div>
+      <div class="cred">🏆 All-American</div>
+      <div class="cred">🎾 ATP Professional</div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="pricing">
+    <div class="price-block">
+      <div class="price-num">€75</div>
+      <div class="price-sub">per week</div>
+    </div>
+    <div class="price-sep"></div>
+    <ul class="includes">
+      <li>Wekelijkse 1-op-1 sessie (10 sessies starttraject)</li>
+      <li>Persoonlijk werkboek</li>
+      <li>Voorbereidende content per sessie</li>
+      <li>WhatsApp contact rondom wedstrijden</li>
+      <li>Flexibele coaching — afgestemd op jouw schema</li>
+    </ul>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="f-footer">
+    <div class="contact-list">
+      <div class="contact-row">📧 <strong>fonsvansambeek2002@gmail.com</strong></div>
+      <div class="contact-row">💼 <span>linkedin.com/in/fons-van-sambeek-674a73292</span></div>
+      <div class="contact-row">🌍 <strong>Nederlands & Engels · Online of in person</strong></div>
+    </div>
+    <div class="cta-pill">
+      Plan een kennismaking
+      <small>Gratis introgesprek</small>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
