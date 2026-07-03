@@ -327,6 +327,163 @@
       font-weight: 700;
       margin-top: 2px;
     }
+    .bottom-nav {
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+    }
+    .bottom-nav::-webkit-scrollbar { display: none; }
+    .bottom-nav .nav-btn { min-width: 54px; flex-shrink: 0; }
+
+    /* ── PLANNING ── */
+    .plan-year-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .plan-year-label {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      flex: 1;
+    }
+    .plan-month-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+      scrollbar-width: none;
+    }
+    .plan-month-tabs::-webkit-scrollbar { display: none; }
+    .plan-month-tab {
+      flex-shrink: 0;
+      background: #1A1A1A;
+      border: 1px solid #2A2A2A;
+      border-radius: 999px;
+      color: #666;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .plan-month-tab.active {
+      background: #C8F135;
+      border-color: #C8F135;
+      color: #0A0A0A;
+    }
+    .plan-cal {
+      background: #111;
+      border: 1px solid #1E1E1E;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .plan-cal-header {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      color: #777;
+      margin-bottom: 10px;
+    }
+    .plan-cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .plan-cal-dayname {
+      text-align: center;
+      font-size: 0.63rem;
+      font-weight: 700;
+      color: #444;
+      padding: 4px 0;
+      letter-spacing: 0.04em;
+    }
+    .plan-cal-day {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #555;
+      padding: 6px 2px;
+      border-radius: 6px;
+    }
+    .plan-cal-day.today {
+      background: #1A1A1A;
+      color: #C8F135;
+      font-weight: 700;
+    }
+    .plan-cal-day.has-event {
+      background: rgba(200,241,53,.15);
+      color: #C8F135;
+      font-weight: 700;
+      border: 1px solid rgba(200,241,53,.25);
+    }
+    .plan-cal-day.empty { opacity: 0; }
+    .plan-tournament-card {
+      background: #111;
+      border: 1px solid #1E1E1E;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .plan-surface-badge {
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .plan-form-card {
+      background: #111;
+      border: 1px solid #2A2A2A;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+
+    /* ── VIDEO ANALYSE ── */
+    .vid-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-top: 8px;
+    }
+    .vid-status-pending {
+      background: #1A1A1A;
+      color: #555;
+      border: 1px solid #2A2A2A;
+    }
+    .vid-status-done {
+      background: rgba(200,241,53,.12);
+      color: #C8F135;
+      border: 1px solid rgba(200,241,53,.25);
+    }
+    .vid-feedback-box {
+      margin-top: 12px;
+      background: rgba(200,241,53,.05);
+      border: 1px solid rgba(200,241,53,.15);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .vid-feedback-label {
+      font-size: 0.7rem;
+      color: #C8F135;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+
     .macro-block {
       padding: 12px 0 12px 14px;
       border-left: 3px solid;
@@ -587,6 +744,89 @@
         <div id="highlightsList"></div>
       </section>
 
+      <section class="screen" id="screen-planning">
+        <div class="plan-year-nav">
+          <button class="icon-btn" id="planPrevYear" style="font-size:1.4rem;padding:4px 10px;">‹</button>
+          <span class="plan-year-label" id="planYearLabel">2026</span>
+          <button class="icon-btn" id="planNextYear" style="font-size:1.4rem;padding:4px 10px;">›</button>
+          <button class="btn-ghost-sm" id="planAddBtn">+ Toernooi</button>
+        </div>
+
+        <div class="plan-month-tabs" id="planMonthTabs"></div>
+
+        <div class="plan-cal" id="planCal"></div>
+
+        <div id="planList"></div>
+
+        <div class="plan-form-card" id="planFormCard" style="display:none;">
+          <h3 style="margin-bottom:14px;">Toernooi toevoegen</h3>
+          <div class="field">
+            <label>Naam toernooi *</label>
+            <input type="text" id="planName" placeholder="bijv. ITS Rotterdam" />
+          </div>
+          <div class="field">
+            <label>Locatie</label>
+            <input type="text" id="planLocation" placeholder="bijv. Rotterdam" />
+          </div>
+          <div class="field">
+            <label>Ondergrond</label>
+            <select id="planSurface">
+              <option value="">Selecteer...</option>
+              <option value="hard">Hard</option>
+              <option value="gravel">Gravel</option>
+              <option value="grass">Gras</option>
+              <option value="indoor">Indoor</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Startdatum *</label>
+            <input type="date" id="planStart" />
+          </div>
+          <div class="field">
+            <label>Einddatum</label>
+            <input type="date" id="planEnd" />
+          </div>
+          <div class="field">
+            <label>Notities</label>
+            <textarea id="planNotes" style="min-height:70px;" placeholder="Bijv. ranking punten, verwachtingen..."></textarea>
+          </div>
+          <button class="btn-accent" id="planSubmitBtn">Toernooi opslaan</button>
+          <button class="btn btn-ghost btn-block" id="planCancelBtn" style="margin-top:8px;">Annuleren</button>
+          <p id="planMessage" class="hidden"></p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-video">
+        <div class="card" style="margin-bottom:20px;">
+          <h3 style="margin-bottom:6px;">Video insturen</h3>
+          <p class="muted" style="font-size:0.85rem;margin-bottom:16px;">Stuur een videolink in van je training of wedstrijd. Ik kijk ernaar en geef je persoonlijke feedback.</p>
+          <div class="field">
+            <label>Video link *</label>
+            <input type="url" id="vidUrl" placeholder="YouTube, Google Drive, WeTransfer..." />
+          </div>
+          <div class="field">
+            <label>Titel *</label>
+            <input type="text" id="vidTitle" placeholder="bijv. Training 1 juli" />
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <select id="vidType">
+              <option value="training">Training</option>
+              <option value="wedstrijd">Wedstrijd</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Context / Waar moet ik op letten?</label>
+            <textarea id="vidDesc" style="min-height:80px;" placeholder="Beschrijf wat je graag wil dat ik analyseer..."></textarea>
+          </div>
+          <button class="btn-accent" id="vidSubmitBtn">Video insturen</button>
+          <p id="vidMessage" class="hidden"></p>
+        </div>
+
+        <h3 style="margin:0 0 12px;" id="vidHistoryTitle">Ingediende video's</h3>
+        <div id="vidList"></div>
+      </section>
+
       <section class="screen" id="screen-checkin">
         <div class="card">
           <h3 id="ciTitle">Wekelijkse check-in</h3>
@@ -689,6 +929,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M14 2H18a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
         <span>Check-in</span>
       </button>
+      <button class="nav-btn" data-screen="planning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+        <span>Planning</span>
+      </button>
+      <button class="nav-btn" data-screen="video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
+        <span>Video</span>
+      </button>
     </nav>
   </div>
 
@@ -697,7 +945,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in', highlights: 'Highlights' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analyse' },
         admin: 'Beheer',
         logout: 'Uitloggen',
         greeting: (n) => `Hoi ${n}`,
@@ -760,9 +1008,26 @@
         ciChallengingShort: 'Uitdagend',
         ciFocusShort: 'Focus volgende week',
         watchHighlights: 'Bekijk highlights',
+        navPlanning: 'Planning',
+        navVideo: 'Video',
+        planAddBtn: '+ Toernooi',
+        planSave: 'Toernooi opslaan',
+        planCancel: 'Annuleren',
+        planSaved: 'Toernooi opgeslagen!',
+        planSaveFailed: 'Opslaan mislukt: ',
+        planNoTournaments: 'Geen toernooien deze maand.',
+        planDeleteConfirm: 'Toernooi verwijderen?',
+        planThisMonth: 'Toernooien deze maand',
+        vidSubmit: 'Video insturen',
+        vidSaved: 'Video ingediend!',
+        vidSaveFailed: 'Opslaan mislukt: ',
+        vidHistoryTitle: 'Ingediende video\'s',
+        vidNoHistory: 'Nog geen video\'s ingediend.',
+        vidFeedbackLabel: 'Feedback van Fons',
+        vidPending: 'Wacht op feedback',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in', highlights: 'Highlights' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analysis' },
         admin: 'Admin',
         logout: 'Log out',
         greeting: (n) => `Hey ${n}`,
@@ -825,6 +1090,23 @@
         ciChallengingShort: 'Challenging',
         ciFocusShort: 'Focus next week',
         watchHighlights: 'Watch highlights',
+        navPlanning: 'Planning',
+        navVideo: 'Video',
+        planAddBtn: '+ Tournament',
+        planSave: 'Save tournament',
+        planCancel: 'Cancel',
+        planSaved: 'Tournament saved!',
+        planSaveFailed: 'Save failed: ',
+        planNoTournaments: 'No tournaments this month.',
+        planDeleteConfirm: 'Delete tournament?',
+        planThisMonth: 'Tournaments this month',
+        vidSubmit: 'Submit video',
+        vidSaved: 'Video submitted!',
+        vidSaveFailed: 'Submit failed: ',
+        vidHistoryTitle: 'Submitted videos',
+        vidNoHistory: 'No videos submitted yet.',
+        vidFeedbackLabel: 'Feedback from Fons',
+        vidPending: 'Awaiting feedback',
       },
     };
 
@@ -862,9 +1144,10 @@
       document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
 
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
-        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin', highlights: 'navHighlights' }[btn.dataset.screen];
-        btn.querySelector('span').textContent = T[key];
+        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin', highlights: 'navHighlights', planning: 'navPlanning', video: 'navVideo' }[btn.dataset.screen];
+        if (key) btn.querySelector('span').textContent = T[key];
       });
+      document.getElementById('vidHistoryTitle').textContent = T.vidHistoryTitle;
 
       document.getElementById('ciTitle').textContent = T.ciTitle;
       document.getElementById('ciLabelOverall').textContent = T.ciLabelOverall;
@@ -964,6 +1247,12 @@
       }
       if (name === 'checkin') {
         loadCheckin();
+      }
+      if (name === 'planning') {
+        loadPlanning();
+      }
+      if (name === 'video') {
+        loadVideoAnalyse();
       }
     }
 
@@ -1347,6 +1636,299 @@
         </div>
       `).join('');
     }
+
+    // ── PLANNING ──────────────────────────────────────────
+
+    let planYear = new Date().getFullYear();
+    let planMonth = new Date().getMonth();
+    let planTournaments = [];
+    let planLoaded = false;
+
+    const MONTH_NAMES_NL = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+    const MONTH_SHORT_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+    const SURFACE_COLORS = { hard: '#3b82f6', gravel: '#d97706', grass: '#16a34a', indoor: '#7c3aed' };
+    const SURFACE_LABELS = { hard: 'Hard', gravel: 'Gravel', grass: 'Gras', indoor: 'Indoor' };
+
+    function loadPlanning() {
+      const T = i18n[lang];
+      document.getElementById('planYearLabel').textContent = planYear;
+      document.getElementById('planAddBtn').textContent = T.planAddBtn;
+      renderMonthTabsPlanning();
+      if (!planLoaded) {
+        planLoaded = true;
+        fetchTournaments();
+      } else {
+        renderPlanCalendar();
+        renderPlanList();
+      }
+    }
+
+    function renderMonthTabsPlanning() {
+      const tabs = document.getElementById('planMonthTabs');
+      tabs.innerHTML = MONTH_SHORT_NL.map((m, i) => `
+        <button class="plan-month-tab${i === planMonth ? ' active' : ''}" data-month="${i}">${m}</button>
+      `).join('');
+      tabs.querySelectorAll('.plan-month-tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          planMonth = Number(btn.dataset.month);
+          tabs.querySelectorAll('.plan-month-tab').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderPlanCalendar();
+          renderPlanList();
+        });
+      });
+    }
+
+    async function fetchTournaments() {
+      const { data } = await supabaseClient
+        .from('tournaments')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('start_date', { ascending: true });
+      planTournaments = data || [];
+      renderPlanCalendar();
+      renderPlanList();
+    }
+
+    function renderPlanCalendar() {
+      const cal = document.getElementById('planCal');
+      const year = planYear;
+      const month = planMonth;
+
+      const firstDayOfWeek = new Date(year, month, 1).getDay();
+      const startOffset = (firstDayOfWeek === 0) ? 6 : firstDayOfWeek - 1;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      const eventDays = new Set();
+      planTournaments.forEach((t) => {
+        const start = new Date(t.start_date + 'T00:00:00');
+        const end = t.end_date ? new Date(t.end_date + 'T00:00:00') : new Date(start);
+        for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          if (d.getFullYear() === year && d.getMonth() === month) eventDays.add(d.getDate());
+        }
+      });
+
+      const today = new Date();
+      const dayNames = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+      cal.innerHTML = `
+        <div class="plan-cal-header">${MONTH_NAMES_NL[month]} ${year}</div>
+        <div class="plan-cal-grid">
+          ${dayNames.map((d) => `<div class="plan-cal-dayname">${d}</div>`).join('')}
+          ${Array(startOffset).fill('<div class="plan-cal-day empty"></div>').join('')}
+          ${Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+            const hasEvent = eventDays.has(day);
+            return `<div class="plan-cal-day${hasEvent ? ' has-event' : ''}${isToday ? ' today' : ''}">${day}</div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderPlanList() {
+      const T = i18n[lang];
+      const list = document.getElementById('planList');
+      const year = planYear;
+      const month = planMonth;
+      const monthStart = new Date(year, month, 1);
+      const monthEnd = new Date(year, month + 1, 0);
+
+      const filtered = planTournaments.filter((t) => {
+        const start = new Date(t.start_date + 'T00:00:00');
+        const end = t.end_date ? new Date(t.end_date + 'T00:00:00') : new Date(start);
+        return start <= monthEnd && end >= monthStart;
+      });
+
+      if (!filtered.length) {
+        list.innerHTML = `<div class="empty-state">${T.planNoTournaments}</div>`;
+        return;
+      }
+
+      list.innerHTML = `<h4 style="margin:0 0 10px;font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#888;">${T.planThisMonth}</h4>` +
+        filtered.map((t) => {
+          const surfColor = SURFACE_COLORS[t.surface] || '#333';
+          const surfLabel = SURFACE_LABELS[t.surface] || t.surface;
+          return `
+            <div class="plan-tournament-card">
+              <div style="flex:1;min-width:0;">
+                <strong style="font-size:0.97rem;">${escapeHtml(t.name)}</strong>
+                ${t.location ? `<span class="muted" style="font-size:0.82rem;"> · ${escapeHtml(t.location)}</span>` : ''}
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:7px;">
+                  ${t.surface ? `<span class="plan-surface-badge" style="background:${surfColor};">${escapeHtml(surfLabel)}</span>` : ''}
+                  <span class="muted" style="font-size:0.78rem;">${escapeHtml(t.start_date)}${t.end_date ? ' t/m ' + escapeHtml(t.end_date) : ''}</span>
+                </div>
+                ${t.notes ? `<p class="muted" style="font-size:0.82rem;margin-top:6px;">${escapeHtml(t.notes)}</p>` : ''}
+              </div>
+              <button class="icon-btn plan-del-btn" data-id="${escapeAttr(t.id)}" style="color:#555;font-size:1rem;flex-shrink:0;">✕</button>
+            </div>
+          `;
+        }).join('');
+
+      list.querySelectorAll('.plan-del-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(T.planDeleteConfirm)) return;
+          await supabaseClient.from('tournaments').delete().eq('id', btn.dataset.id);
+          planTournaments = planTournaments.filter((t) => t.id !== btn.dataset.id);
+          renderPlanCalendar();
+          renderPlanList();
+        });
+      });
+    }
+
+    document.getElementById('planAddBtn').addEventListener('click', () => {
+      const form = document.getElementById('planFormCard');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      if (form.style.display === 'block') form.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    document.getElementById('planCancelBtn').addEventListener('click', () => {
+      document.getElementById('planFormCard').style.display = 'none';
+      document.getElementById('planMessage').classList.add('hidden');
+    });
+
+    document.getElementById('planSubmitBtn').addEventListener('click', async () => {
+      const T = i18n[lang];
+      const name = document.getElementById('planName').value.trim();
+      const start = document.getElementById('planStart').value;
+      const msg = document.getElementById('planMessage');
+
+      if (!name || !start) {
+        msg.classList.remove('hidden');
+        msg.className = 'error-msg';
+        msg.textContent = 'Vul naam en startdatum in.';
+        return;
+      }
+
+      const payload = {
+        user_id: currentUser.id,
+        name,
+        location: document.getElementById('planLocation').value.trim() || null,
+        surface: document.getElementById('planSurface').value || null,
+        start_date: start,
+        end_date: document.getElementById('planEnd').value || null,
+        notes: document.getElementById('planNotes').value.trim() || null,
+      };
+
+      const { error } = await supabaseClient.from('tournaments').insert(payload);
+      msg.classList.remove('hidden');
+
+      if (error) {
+        msg.className = 'error-msg';
+        msg.textContent = T.planSaveFailed + error.message;
+        return;
+      }
+
+      msg.className = 'success-msg';
+      msg.textContent = T.planSaved;
+      ['planName','planLocation','planStart','planEnd','planNotes'].forEach((id) => { document.getElementById(id).value = ''; });
+      document.getElementById('planSurface').value = '';
+      document.getElementById('planFormCard').style.display = 'none';
+      fetchTournaments();
+    });
+
+    document.getElementById('planPrevYear').addEventListener('click', () => {
+      planYear--;
+      document.getElementById('planYearLabel').textContent = planYear;
+      planLoaded = false;
+      loadPlanning();
+    });
+
+    document.getElementById('planNextYear').addEventListener('click', () => {
+      planYear++;
+      document.getElementById('planYearLabel').textContent = planYear;
+      planLoaded = false;
+      loadPlanning();
+    });
+
+    // ── VIDEO ANALYSE ─────────────────────────────────────
+
+    async function loadVideoAnalyse() {
+      const T = i18n[lang];
+      document.getElementById('vidHistoryTitle').textContent = T.vidHistoryTitle;
+      document.getElementById('vidSubmitBtn').textContent = T.vidSubmit;
+      await fetchVideos();
+    }
+
+    async function fetchVideos() {
+      const { data } = await supabaseClient
+        .from('video_submissions')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+      renderVideoList(data || []);
+    }
+
+    function renderVideoList(videos) {
+      const T = i18n[lang];
+      const list = document.getElementById('vidList');
+
+      if (!videos.length) {
+        list.innerHTML = `<div class="empty-state">${T.vidNoHistory}</div>`;
+        return;
+      }
+
+      const typeColors = { training: '#3b82f6', wedstrijd: '#d97706' };
+      const typeLabels = { training: 'Training', wedstrijd: 'Wedstrijd' };
+
+      list.innerHTML = videos.map((v) => `
+        <div class="content-item" style="margin-bottom:12px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <strong style="font-size:0.97rem;">${escapeHtml(v.title)}</strong>
+              ${v.video_type ? `<span style="background:${typeColors[v.video_type]||'#333'};color:#fff;border-radius:4px;padding:2px 8px;font-size:0.68rem;font-weight:700;">${escapeHtml(typeLabels[v.video_type]||v.video_type)}</span>` : ''}
+            </div>
+            <div class="muted" style="font-size:0.75rem;margin-top:3px;">${new Date(v.created_at).toLocaleDateString('nl-NL')}</div>
+            ${v.description ? `<p class="muted" style="font-size:0.85rem;margin-top:8px;">${escapeHtml(v.description)}</p>` : ''}
+            <a href="${escapeAttr(v.video_url)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:0.85rem;color:#C8F135;text-decoration:none;">Video bekijken →</a>
+            ${v.feedback
+              ? `<div class="vid-feedback-box">
+                   <div class="vid-feedback-label">${escapeHtml(T.vidFeedbackLabel)}</div>
+                   <p style="font-size:0.87rem;color:#DDD;line-height:1.65;white-space:pre-line;">${escapeHtml(v.feedback)}</p>
+                 </div>`
+              : `<div class="vid-status-badge vid-status-pending">${escapeHtml(T.vidPending)}</div>`
+            }
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('vidSubmitBtn').addEventListener('click', async () => {
+      const T = i18n[lang];
+      const url = document.getElementById('vidUrl').value.trim();
+      const title = document.getElementById('vidTitle').value.trim();
+      const msg = document.getElementById('vidMessage');
+
+      if (!url || !title) {
+        msg.classList.remove('hidden');
+        msg.className = 'error-msg';
+        msg.textContent = 'Vul link en titel in.';
+        return;
+      }
+
+      const payload = {
+        user_id: currentUser.id,
+        title,
+        video_url: url,
+        video_type: document.getElementById('vidType').value || null,
+        description: document.getElementById('vidDesc').value.trim() || null,
+      };
+
+      const { error } = await supabaseClient.from('video_submissions').insert(payload);
+      msg.classList.remove('hidden');
+
+      if (error) {
+        msg.className = 'error-msg';
+        msg.textContent = T.vidSaveFailed + error.message;
+        return;
+      }
+
+      msg.className = 'success-msg';
+      msg.textContent = T.vidSaved;
+      document.getElementById('vidUrl').value = '';
+      document.getElementById('vidTitle').value = '';
+      document.getElementById('vidDesc').value = '';
+      fetchVideos();
+    });
 
     // ── HIGHLIGHTS ────────────────────────────────────────
 
