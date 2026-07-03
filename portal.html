@@ -448,6 +448,56 @@
     }
 
     /* ── VIDEO ANALYSE ── */
+    .vid-pick-label {
+      display: block;
+      cursor: pointer;
+    }
+    .vid-pick-area {
+      border: 2px dashed #2A2A2A;
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .vid-pick-area.selected {
+      border-color: #C8F135;
+      background: rgba(200,241,53,.05);
+    }
+    .vid-pick-icon { color: #444; margin-bottom: 10px; }
+    .vid-pick-name {
+      font-size: 0.85rem;
+      color: #666;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+    .vid-pick-sub {
+      font-size: 0.72rem;
+      color: #444;
+      margin-top: 4px;
+    }
+    .vid-upload-bar-wrap {
+      background: #1A1A1A;
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .vid-upload-bar {
+      height: 100%;
+      background: #C8F135;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .vid-upload-bar.indeterminate {
+      width: 100%;
+      animation: indeterminate 1.5s ease-in-out infinite;
+    }
+    @keyframes indeterminate {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
     .vid-status-badge {
       display: inline-flex;
       align-items: center;
@@ -799,11 +849,25 @@
       <section class="screen" id="screen-video">
         <div class="card" style="margin-bottom:20px;">
           <h3 style="margin-bottom:6px;">Video insturen</h3>
-          <p class="muted" style="font-size:0.85rem;margin-bottom:16px;">Stuur een videolink in van je training of wedstrijd. Ik kijk ernaar en geef je persoonlijke feedback.</p>
+          <p class="muted" style="font-size:0.85rem;margin-bottom:16px;">Upload een video van je training of wedstrijd direct vanuit je camera. Ik kijk ernaar en geef je persoonlijke feedback.</p>
+
           <div class="field">
-            <label>Video link *</label>
-            <input type="url" id="vidUrl" placeholder="YouTube, Google Drive, WeTransfer..." />
+            <label>Video *</label>
+            <label class="vid-pick-label" id="vidPickLabel">
+              <input type="file" id="vidFile" accept="video/*" style="display:none;" />
+              <div class="vid-pick-area" id="vidPickArea">
+                <div class="vid-pick-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
+                </div>
+                <div class="vid-pick-name" id="vidPickName">Tik om video te kiezen</div>
+                <div class="vid-pick-sub">Vanuit je camera of fotoalbum</div>
+              </div>
+            </label>
+            <div class="vid-upload-bar-wrap" id="vidBarWrap" style="display:none;">
+              <div class="vid-upload-bar indeterminate" id="vidBar"></div>
+            </div>
           </div>
+
           <div class="field">
             <label>Titel *</label>
             <input type="text" id="vidTitle" placeholder="bijv. Training 1 juli" />
@@ -1855,10 +1919,10 @@
         .select('*')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
-      renderVideoList(data || []);
+      await renderVideoList(data || []);
     }
 
-    function renderVideoList(videos) {
+    async function renderVideoList(videos) {
       const T = i18n[lang];
       const list = document.getElementById('vidList');
 
@@ -1870,7 +1934,20 @@
       const typeColors = { training: '#3b82f6', wedstrijd: '#d97706' };
       const typeLabels = { training: 'Training', wedstrijd: 'Wedstrijd' };
 
-      list.innerHTML = videos.map((v) => `
+      const withUrls = await Promise.all(videos.map(async (v) => {
+        let viewUrl = null;
+        if (v.storage_path) {
+          const { data } = await supabaseClient.storage
+            .from('player-videos')
+            .createSignedUrl(v.storage_path, 3600);
+          viewUrl = data?.signedUrl || null;
+        } else if (v.video_url && v.video_url.startsWith('http')) {
+          viewUrl = v.video_url;
+        }
+        return { ...v, viewUrl };
+      }));
+
+      list.innerHTML = withUrls.map((v) => `
         <div class="content-item" style="margin-bottom:12px;">
           <div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1879,7 +1956,10 @@
             </div>
             <div class="muted" style="font-size:0.75rem;margin-top:3px;">${new Date(v.created_at).toLocaleDateString('nl-NL')}</div>
             ${v.description ? `<p class="muted" style="font-size:0.85rem;margin-top:8px;">${escapeHtml(v.description)}</p>` : ''}
-            <a href="${escapeAttr(v.video_url)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:0.85rem;color:#C8F135;text-decoration:none;">Video bekijken →</a>
+            ${v.viewUrl
+              ? `<a href="${escapeAttr(v.viewUrl)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:0.85rem;color:#C8F135;text-decoration:none;">Video bekijken →</a>`
+              : `<span class="muted" style="font-size:0.82rem;margin-top:8px;display:block;">Link niet beschikbaar</span>`
+            }
             ${v.feedback
               ? `<div class="vid-feedback-box">
                    <div class="vid-feedback-label">${escapeHtml(T.vidFeedbackLabel)}</div>
@@ -1892,29 +1972,76 @@
       `).join('');
     }
 
+    document.getElementById('vidFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      const area = document.getElementById('vidPickArea');
+      const name = document.getElementById('vidPickName');
+      if (file) {
+        area.classList.add('selected');
+        const mb = (file.size / 1024 / 1024).toFixed(1);
+        name.textContent = file.name + ` (${mb} MB)`;
+      } else {
+        area.classList.remove('selected');
+        name.textContent = 'Tik om video te kiezen';
+      }
+    });
+
     document.getElementById('vidSubmitBtn').addEventListener('click', async () => {
       const T = i18n[lang];
-      const url = document.getElementById('vidUrl').value.trim();
+      const file = document.getElementById('vidFile').files[0];
       const title = document.getElementById('vidTitle').value.trim();
       const msg = document.getElementById('vidMessage');
+      const btn = document.getElementById('vidSubmitBtn');
+      const barWrap = document.getElementById('vidBarWrap');
 
-      if (!url || !title) {
+      if (!file || !title) {
         msg.classList.remove('hidden');
         msg.className = 'error-msg';
-        msg.textContent = 'Vul link en titel in.';
+        msg.textContent = 'Kies een video en voer een titel in.';
+        return;
+      }
+
+      if (file.size > 500 * 1024 * 1024) {
+        msg.classList.remove('hidden');
+        msg.className = 'error-msg';
+        msg.textContent = 'Video is te groot (max 500 MB). Trim de video in de Camera-app.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Uploaden...';
+      barWrap.style.display = 'block';
+      msg.classList.remove('hidden');
+      msg.className = 'muted';
+      msg.textContent = 'Video wordt geüpload — even geduld, dit kan een minuut duren…';
+
+      const ext = file.name.split('.').pop() || 'mp4';
+      const storagePath = `${currentUser.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('player-videos')
+        .upload(storagePath, file, { cacheControl: '3600', upsert: false });
+
+      barWrap.style.display = 'none';
+      btn.disabled = false;
+      btn.textContent = T.vidSubmit;
+
+      if (uploadError) {
+        msg.className = 'error-msg';
+        msg.textContent = 'Upload mislukt: ' + uploadError.message;
         return;
       }
 
       const payload = {
         user_id: currentUser.id,
         title,
-        video_url: url,
+        storage_path: storagePath,
+        video_url: null,
         video_type: document.getElementById('vidType').value || null,
         description: document.getElementById('vidDesc').value.trim() || null,
       };
 
       const { error } = await supabaseClient.from('video_submissions').insert(payload);
-      msg.classList.remove('hidden');
 
       if (error) {
         msg.className = 'error-msg';
@@ -1924,7 +2051,9 @@
 
       msg.className = 'success-msg';
       msg.textContent = T.vidSaved;
-      document.getElementById('vidUrl').value = '';
+      document.getElementById('vidFile').value = '';
+      document.getElementById('vidPickArea').classList.remove('selected');
+      document.getElementById('vidPickName').textContent = 'Tik om video te kiezen';
       document.getElementById('vidTitle').value = '';
       document.getElementById('vidDesc').value = '';
       fetchVideos();

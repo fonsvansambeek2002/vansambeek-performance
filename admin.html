@@ -431,7 +431,20 @@
       const typeColors = { training: '#3b82f6', wedstrijd: '#d97706' };
       const typeLabels = { training: 'Training', wedstrijd: 'Wedstrijd' };
 
-      overview.innerHTML = videos.map((v) => `
+      const withUrls = await Promise.all(videos.map(async (v) => {
+        let viewUrl = null;
+        if (v.storage_path) {
+          const { data } = await supabaseClient.storage
+            .from('player-videos')
+            .createSignedUrl(v.storage_path, 86400);
+          viewUrl = data?.signedUrl || null;
+        } else if (v.video_url && v.video_url.startsWith('http')) {
+          viewUrl = v.video_url;
+        }
+        return { ...v, viewUrl };
+      }));
+
+      overview.innerHTML = withUrls.map((v) => `
         <div class="card" style="margin-bottom: 14px;">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
             <strong>${escapeHtml(v.title)}</strong>
@@ -442,7 +455,10 @@
             ${escapeHtml(profileMap[v.user_id] || v.user_id)} · ${new Date(v.created_at).toLocaleDateString('nl-NL')}
           </div>
           ${v.description ? `<p class="muted" style="font-size:0.85rem;margin-bottom:10px;">${escapeHtml(v.description)}</p>` : ''}
-          <a href="${escapeHtml(v.video_url)}" target="_blank" rel="noopener" style="color:#C8F135;font-size:0.85rem;text-decoration:none;">Video bekijken →</a>
+          ${v.viewUrl
+            ? `<a href="${escapeHtml(v.viewUrl)}" target="_blank" rel="noopener" style="color:#C8F135;font-size:0.85rem;text-decoration:none;">Video bekijken →</a>`
+            : `<span style="font-size:0.82rem;color:#555;">Geen link beschikbaar</span>`
+          }
 
           <div style="margin-top:14px;">
             <label style="font-size:0.78rem;color:#666;display:block;margin-bottom:6px;">Feedback schrijven:</label>
