@@ -327,6 +327,127 @@
       font-weight: 700;
       margin-top: 2px;
     }
+    .macro-block {
+      padding: 12px 0 12px 14px;
+      border-left: 3px solid;
+      margin: 14px 0;
+    }
+    .macro-block h4 {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.05rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+    .macro-block p {
+      font-size: 0.85rem;
+      color: #888;
+      line-height: 1.7;
+      margin-bottom: 3px;
+    }
+    .macro-block strong { color: #CCC; }
+    .voeding-cta {
+      background: rgba(200,241,53,.07);
+      border: 1px solid rgba(200,241,53,.15);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 0.9rem;
+      color: #DDD;
+      line-height: 1.65;
+      margin-top: 20px;
+      font-style: italic;
+    }
+    .recipe-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .recipe-tab {
+      flex-shrink: 0;
+      background: #1A1A1A;
+      border: 1px solid #2A2A2A;
+      border-radius: 999px;
+      color: #666;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .recipe-tab.active {
+      background: #C8F135;
+      border-color: #C8F135;
+      color: #0A0A0A;
+    }
+    .recipe-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 7px 0 10px;
+    }
+    .recipe-tag {
+      background: #111;
+      border: 1px solid #2A2A2A;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      color: #666;
+    }
+    .recipe-section { margin-top: 12px; }
+    .recipe-section > .rs-label {
+      display: block;
+      color: #555;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .recipe-section ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .recipe-section ul li {
+      font-size: 0.875rem;
+      color: #888;
+      padding-left: 10px;
+      position: relative;
+    }
+    .recipe-section ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: #444;
+    }
+    .recipe-section p {
+      font-size: 0.875rem;
+      color: #888;
+      line-height: 1.65;
+    }
+    .recipe-tip {
+      background: #111;
+      border-left: 3px solid #C8F135;
+      border-radius: 0 6px 6px 0;
+      padding: 8px 10px;
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: #888;
+      line-height: 1.6;
+    }
+    .recipe-macros {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #222;
+      font-size: 0.78rem;
+      color: #C8F135;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
     .highlight-card {
       border-radius: 14px;
       overflow: hidden;
@@ -923,6 +1044,12 @@
       const T = i18n[lang];
       libraryLoaded = true;
       const list = document.getElementById('libraryList');
+
+      if (category === 'voeding') {
+        loadVoedingSection(list);
+        return;
+      }
+
       list.innerHTML = `<div class="empty-state">${T.loading}</div>`;
 
       const { data, error } = await supabaseClient
@@ -971,6 +1098,252 @@
           <p class="muted" style="margin-top:10px;"><strong style="color:#AAA;">${T.wentWell}</strong><br>${escapeHtml(r.vraag1)}</p>
           <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">${T.improve}</strong><br>${escapeHtml(r.vraag2)}</p>
           <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">${T.approach}</strong><br>${escapeHtml(r.vraag3)}</p>
+        </div>
+      `).join('');
+    }
+
+    // ── VOEDING ───────────────────────────────────────────
+
+    const recipeData = {
+      ontbijt: [
+        {
+          name: 'Havermout Power Bowl',
+          tags: ['Hoog in KH', 'Pre-training', '10 min'],
+          ingredients: ['80g havermout', '300ml melk of plantaardige melk', '1 banaan', 'Handvol walnoten of amandelen', '1 el honing', 'Optioneel: 30g eiwitpoeder (vanille)'],
+          prep: 'Kook de havermout met de melk op middelhoog vuur in 5 minuten. Voeg eiwitpoeder toe en roer goed door. Schep in een kom en beleg met plakjes banaan, noten en een druppel honing.',
+          tip: 'Ideaal 1.5–2 uur voor training. De combinatie van complexe koolhydraten en eiwitten geeft stabiele energie zonder crash.',
+          macros: { kcal: 580, protein: 28, carbs: 78, fat: 14 },
+        },
+        {
+          name: 'Eieren met Avocado Toast',
+          tags: ['Hoog in eiwit', 'Hersteldag', '10 min'],
+          ingredients: ['3 eieren', '2 sneetjes volkoren brood', '½ rijpe avocado', 'Zout, peper, chilivlokken', 'Optioneel: gerookte zalm'],
+          prep: 'Klop de eieren los en bak roerei op laag vuur. Rooster het brood. Prak de avocado met zout en peper en smeer op het brood. Leg het roerei erop.',
+          tip: 'De vetten van avocado en het eiwit van eieren maken dit ideaal voor een rustigere dag. Niet vlak voor intensieve training — vetten vertragen de vertering.',
+          macros: { kcal: 520, protein: 28, carbs: 34, fat: 28 },
+        },
+        {
+          name: 'Griekse Yoghurt Bowl',
+          tags: ['Hoog in eiwit', 'Snel', '5 min'],
+          ingredients: ['250g Griekse yoghurt (10% vet)', '50g granola', 'Handvol bessen (vers of bevroren)', '1 el honing', 'Optioneel: 1 el chiazaad'],
+          prep: 'Doe de yoghurt in een kom. Leg de granola en bessen erop. Besprenkel met honing.',
+          tip: 'Snelle eiwitbron — perfect als je weinig tijd hebt. Bessen leveren antioxidanten die herstel ondersteunen en ontstekingen remmen.',
+          macros: { kcal: 480, protein: 22, carbs: 54, fat: 16 },
+        },
+        {
+          name: 'Protein Smoothie',
+          tags: ['Post-training', 'Snel', '5 min'],
+          ingredients: ['300ml melk', '1 bevroren banaan', '30g eiwitpoeder (chocolade of vanille)', '2 el pindakaas', 'Handvol spinazie', '4–5 ijsblokjes'],
+          prep: 'Blend alle ingrediënten tot een gladde mix. Direct opdrinken.',
+          tip: 'Ideaal als je geen honger hebt na training maar wel snel eiwitten en koolhydraten nodig hebt. De spinazie proef je niet maar levert ijzer en magnesium.',
+          macros: { kcal: 560, protein: 38, carbs: 52, fat: 18 },
+        },
+      ],
+      lunch: [
+        {
+          name: 'Kip Rijst Bowl',
+          tags: ['Hoog in eiwit', 'Klassiek', '20 min'],
+          ingredients: ['150g kipfilet', '100g rijst (droog)', '½ komkommer', '1 tomaat', '½ avocado', 'Olijfolie, citroensap, zout en peper'],
+          prep: 'Kook de rijst. Grill de kip (5–6 min per kant op middelhoog vuur). Laat even rusten, snijd in stukken. Snijd de groenten en verdeel alles in een kom. Besprenkel met olijfolie en citroensap.',
+          tip: 'De standaardmaaltijd van een professionele sporter. Simpel, effectief en volledig. Varieer het met sojasaus, harissa of sriracha voor andere smaken.',
+          macros: { kcal: 620, protein: 45, carbs: 70, fat: 12 },
+        },
+        {
+          name: 'Tonijn Wrap',
+          tags: ['Snel', 'Hoog in eiwit', '10 min'],
+          ingredients: ['1 grote volkoren tortilla', '1 blik tonijn op water (150g)', '2 el Griekse yoghurt', 'Sla, tomaat, komkommer', 'Peper en paprikapoeder'],
+          prep: 'Meng de tonijn met Griekse yoghurt, peper en paprikapoeder. Leg sla, groenten en het tonijnmengsel op de tortilla en rol op.',
+          tip: 'Tonijn is een van de goedkoopste en meest complete eiwitbronnen. Griekse yoghurt als vervanger voor mayonaise houdt het licht maar smeuïg.',
+          macros: { kcal: 480, protein: 38, carbs: 42, fat: 8 },
+        },
+        {
+          name: 'Quinoa Salade met Kikkererwten',
+          tags: ['Plantaardig', 'Vezelrijk', '25 min'],
+          ingredients: ['100g quinoa (droog)', '1 blik kikkererwten (uitgelekt)', '1 rode paprika', '½ komkommer', 'Cherry tomaten', 'Peterselie', '3 el olijfolie, 2 el citroensap, zout'],
+          prep: 'Kook de quinoa (12–15 min). Laat afkoelen. Snijd de groenten. Meng alles met de kikkererwten, olijfolie en citroensap.',
+          tip: 'Quinoa is een van de weinige plantaardige complete eiwitbronnen — het bevat alle essentiële aminozuren. Kan de avond ervoor worden klaargemaakt.',
+          macros: { kcal: 520, protein: 22, carbs: 68, fat: 14 },
+        },
+        {
+          name: 'Pasta Salade met Kip',
+          tags: ['Hoog in KH', 'Pre-wedstrijd lunch', '25 min'],
+          ingredients: ['100g volkoren fusilli', '150g kipfilet', 'Cherry tomaten', 'Handvol rucola', '2 el pesto', 'Zout en peper'],
+          prep: 'Kook de pasta al dente. Grill de kip en snijd in stukjes. Meng alles met de pesto terwijl de pasta nog warm is. Serveer warm of gekoeld.',
+          tip: 'Kan de avond ervoor worden bereid. Ideale lunchoptie als je \'s middags een wedstrijd of zware training hebt.',
+          macros: { kcal: 580, protein: 42, carbs: 62, fat: 16 },
+        },
+      ],
+      diner: [
+        {
+          name: 'Zalm met Zoete Aardappel & Broccoli',
+          tags: ['Omega-3', 'Herstel', '30 min'],
+          ingredients: ['180g zalm (filet)', '1 grote zoete aardappel', '200g broccoli', '2 el olijfolie', '2 teentjes knoflook', 'Citroen, zout, peper'],
+          prep: 'Verwarm de oven op 200°C. Snijd de zoete aardappel in blokjes en rooster 20–25 min. Bak de zalm in een koekenpan met olie en knoflook (3–4 min per kant). Stoom de broccoli.',
+          tip: 'De omega-3 vetten in zalm zijn essentieel voor herstel en het remmen van ontsteking na zware training. Eet dit na intensieve trainings- of wedstrijddagen.',
+          macros: { kcal: 580, protein: 40, carbs: 44, fat: 22 },
+        },
+        {
+          name: 'Kip met Rijst en Groenten',
+          tags: ['Klassiek', 'Hoog in eiwit', '30 min'],
+          ingredients: ['180g kipfilet', '120g rijst (droog)', '1 rode paprika', '1 courgette', '1 ui', 'Olijfolie, knoflookpoeder, paprikapoeder, zout'],
+          prep: 'Kook de rijst. Snijd de kip in stukken en bak in olijfolie met knoflookpoeder. Voeg de groenten toe en bak tot gaar. Breng op smaak en serveer.',
+          tip: 'De meest veelzijdige sportmaaltijd. Ideaal de avond voor een wedstrijd om glycogeenvoorraden te vullen. Varieer met kruiden en groenten.',
+          macros: { kcal: 640, protein: 50, carbs: 72, fat: 14 },
+        },
+        {
+          name: 'Pasta Bolognese',
+          tags: ['Hoog in KH', 'Avond voor wedstrijd', '35 min'],
+          ingredients: ['150g volkoren spaghetti', '150g mager rundergehakt', '1 pot tomatensaus', '1 ui, 2 teentjes knoflook', 'Oregano, basilicum, zout', 'Optioneel: geraspte Parmezaan'],
+          prep: 'Fruit de ui en knoflook in olijfolie. Voeg het gehakt toe en bak rul. Voeg tomatensaus en kruiden toe en laat 15 min sudderen. Kook de pasta al dente. Meng en serveer.',
+          tip: 'De klassieke wedstrijdavond maaltijd. Hoog in koolhydraten voor het maximaal vullen van glycogeenvoorraden. Eet dit 3–4 uur voor de wedstrijd of de avond ervoor.',
+          macros: { kcal: 680, protein: 44, carbs: 76, fat: 18 },
+        },
+        {
+          name: 'Steak met Aardappelen & Salade',
+          tags: ['IJzerrijk', 'Herstel', '25 min'],
+          ingredients: ['180g rundersteak (biefstuk of entrecôte)', '250g aardappelen', 'Groene salade naar keuze', 'Cherry tomaten', '2 el olijfolie, 1 tl mosterd, citroensap', 'Zout, peper, rozemarijn'],
+          prep: 'Kook of rooster de aardappelen. Breng de steak op kamertemperatuur en bak 2–3 min per kant op hoog vuur. Laat 5 min rusten. Maak vinaigrette van olijfolie, mosterd en citroensap.',
+          tip: 'Rood vlees is rijk aan ijzer en zink — cruciaal voor zuurstoftransport en immuunfunctie. Eet 1–2x per week als sporter.',
+          macros: { kcal: 650, protein: 48, carbs: 46, fat: 22 },
+        },
+      ],
+      snacks: [
+        {
+          name: 'Rijstwafels met Pindakaas',
+          tags: ['Pre-training', 'Snel', '2 min'],
+          ingredients: ['3 rijstwafels', '2 el 100% pindakaas (naturel)', '1 banaan (optioneel)'],
+          prep: 'Smeer de pindakaas op de rijstwafels. Beleg met plakjes banaan.',
+          tip: 'De perfecte snack 30–60 min voor training. Kies pindakaas zonder toegevoegde suiker of palmolie — gewoon 100% pinda\'s.',
+          macros: { kcal: 280, protein: 9, carbs: 34, fat: 13 },
+        },
+        {
+          name: 'Cottage Cheese Bowl',
+          tags: ['Hoog in eiwit', 'Voor het slapen', '5 min'],
+          ingredients: ['200g cottage cheese', '1 banaan of handvol bessen', '1 el honing', 'Optioneel: kaneel'],
+          prep: 'Schep de cottage cheese in een kom. Voeg fruit en honing toe.',
+          tip: 'Cottage cheese bevat caseïne-eiwit — dat wordt langzaam verteerd. Ideaal voor het slapen: ondersteunt spierherstel gedurende de nacht.',
+          macros: { kcal: 260, protein: 28, carbs: 30, fat: 2 },
+        },
+        {
+          name: 'Eiwitshake',
+          tags: ['Post-training', 'Snel', '3 min'],
+          ingredients: ['300ml melk of water', '30g eiwitpoeder (whey of caseïne)', 'Optioneel: 1 banaan voor extra KH'],
+          prep: 'Meng met een shakebeker of blender. Direct opdrinken.',
+          tip: 'Gebruik direct na training als je geen tijd of honger hebt voor een maaltijd. Voeg een banaan toe na zware training voor koolhydraatherstel.',
+          macros: { kcal: 320, protein: 35, carbs: 30, fat: 5 },
+        },
+        {
+          name: 'Noten & Fruit Mix',
+          tags: ['Tussendoor', 'Energie', '1 min'],
+          ingredients: ['30g gemengde noten (amandelen, walnoten, cashews)', '2 dadels of handvol rozijnen', '1 mandarijn of appel'],
+          prep: 'Geen bereiding. Klaar.',
+          tip: 'De perfecte tas-snack. Noten geven gezonde vetten en mineralen, dadels snelle koolhydraten, fruit vezels en vitamines. Vermijd gezouten of gesuikerde noten.',
+          macros: { kcal: 280, protein: 6, carbs: 32, fat: 16 },
+        },
+      ],
+    };
+
+    function loadVoedingSection(list) {
+      list.innerHTML = `
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="margin-bottom:4px;">Voeding voor sporters</h3>
+          <p class="muted" style="font-size:0.82rem;margin-bottom:16px;">Alles wat je moet weten over eten als atleet.</p>
+
+          <div class="macro-block" style="border-color:#ef4444;">
+            <h4 style="color:#ef4444;">Eiwitten</h4>
+            <p>Eiwitten zijn de bouwstenen van je lichaam — onmisbaar voor spieropbouw, herstel en het aanmaken van enzymen en hormonen.</p>
+            <p><strong>Hoeveel:</strong> 1.6–2.2g per kg lichaamsgewicht per dag. Bij 70kg = 112–154g eiwit.</p>
+            <p><strong>Wanneer:</strong> Verspreid over 4–5 maaltijden (20–40g per keer). Na training binnen 60 min een eiwitbron eten is cruciaal.</p>
+            <p><strong>Bronnen:</strong> Kip, zalm, tonijn, eieren, Griekse yoghurt, kwark, cottage cheese, peulvruchten.</p>
+            <p><strong>Let op:</strong> Meer dan 40g per maaltijd wordt niet beter benut. Verspreid is altijd beter dan alles in één keer.</p>
+          </div>
+
+          <div class="macro-block" style="border-color:#f59e0b;">
+            <h4 style="color:#f59e0b;">Koolhydraten</h4>
+            <p>Koolhydraten zijn jouw primaire brandstof. Ze slaan op als glycogeen in spieren en lever — je energiereserve voor training en wedstrijden.</p>
+            <p><strong>Hoeveel:</strong> 3–7g per kg lichaamsgewicht, afhankelijk van trainingsintensiteit.</p>
+            <p><strong>Wanneer:</strong> Vóór training (2–3 uur van tevoren, of 30–60 min licht). Na training voor herstel. Avond voor wedstrijd: koolhydraten laden.</p>
+            <p><strong>Kies:</strong> Complex (havermout, rijst, zoete aardappel, volkoren pasta) voor langdurige energie. Simpel (fruit, wit brood) direct voor of na training.</p>
+            <p><strong>Let op:</strong> Schrap koolhydraten nooit volledig. Sporters die te weinig eten presteren slechter, herstellen trager en raken sneller geblesseerd.</p>
+          </div>
+
+          <div class="macro-block" style="border-color:#3b82f6;">
+            <h4 style="color:#3b82f6;">Vetten</h4>
+            <p>Vetten zijn essentieel voor hormoonproductie, de opname van vitamine A, D, E en K, en de bescherming van gewrichten.</p>
+            <p><strong>Hoeveel:</strong> 0.8–1.2g per kg lichaamsgewicht per dag.</p>
+            <p><strong>Wanneer:</strong> Niet vlak voor training — vetten vertragen de vertering. Wel bij ontbijt, lunch en diner.</p>
+            <p><strong>Bronnen:</strong> Olijfolie, avocado, noten, vette vis (zalm, makreel), eieren.</p>
+            <p><strong>Let op:</strong> Vermijd transvetten (bewerkt eten, frituur). Omega-3 is essentieel voor herstel en het remmen van ontsteking.</p>
+          </div>
+
+          <div class="macro-block" style="border-color:#06b6d4;">
+            <h4 style="color:#06b6d4;">Hydratatie</h4>
+            <p>Al 2% vochtverlies verlaagt je prestatievermogen met 10–20%. Een van de meest onderschatte factoren bij sporters.</p>
+            <p><strong>Norm:</strong> 2.5–3.5 liter water per dag als sporter. Meer bij hitte en lange inspanning.</p>
+            <p><strong>Wanneer:</strong> Begin elke dag met een groot glas water. Drink regelmatig — niet alleen als je dorst hebt. Goede hydratatie begint de dag vóór een wedstrijd.</p>
+            <p><strong>Elektrolyten:</strong> Bij inspanning langer dan 60–90 minuten verlies je ook natrium, kalium en magnesium. Aanvullen via voeding of sportdrank.</p>
+          </div>
+
+          <div class="macro-block" style="border-color:#C8F135;">
+            <h4 style="color:#C8F135;">Timing</h4>
+            <p><strong>2–3 uur voor training:</strong> Uitgebalanceerde maaltijd — koolhydraten, eiwit, weinig vet.</p>
+            <p><strong>30–60 min voor training:</strong> Klein en licht — banaan, rijstwafels met pindakaas.</p>
+            <p><strong>Na training (binnen 60 min):</strong> Eiwit + koolhydraten. Dit herstelvenster is cruciaal.</p>
+            <p><strong>Avond voor wedstrijd:</strong> Hoog in koolhydraten, matig eiwit, weinig vet. Vroeg eten.</p>
+            <p><strong>Wedstrijddag zelf:</strong> Vertrouwde maaltijden. Experimenteer nooit op wedstrijddag.</p>
+          </div>
+
+          <div class="voeding-cta">
+            Daarom heb ik hier recepten uitgeschreven die specifiek goed zijn om te eten als sporter — afgestemd op timing, herstel en prestatie. Klik op een categorie om de recepten te zien.
+          </div>
+        </div>
+
+        <div class="recipe-tabs" id="recipeTabs">
+          <button class="recipe-tab active" data-recipe="ontbijt">Ontbijt</button>
+          <button class="recipe-tab" data-recipe="lunch">Lunch</button>
+          <button class="recipe-tab" data-recipe="diner">Diner</button>
+          <button class="recipe-tab" data-recipe="snacks">Snacks</button>
+        </div>
+
+        <div id="recipeList"></div>
+      `;
+
+      document.querySelectorAll('.recipe-tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.recipe-tab').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderRecipes(btn.dataset.recipe);
+        });
+      });
+
+      renderRecipes('ontbijt');
+    }
+
+    function renderRecipes(cat) {
+      const list = document.getElementById('recipeList');
+      const recipes = recipeData[cat];
+      list.innerHTML = recipes.map((r) => `
+        <div class="content-item" style="margin-bottom:12px;">
+          <div class="content-item-body">
+            <strong style="font-size:1rem;">${escapeHtml(r.name)}</strong>
+            <div class="recipe-tags">${r.tags.map((t) => `<span class="recipe-tag">${escapeHtml(t)}</span>`).join('')}</div>
+
+            <div class="recipe-section">
+              <span class="rs-label">Ingrediënten</span>
+              <ul>${r.ingredients.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+            </div>
+
+            <div class="recipe-section">
+              <span class="rs-label">Bereiding</span>
+              <p>${escapeHtml(r.prep)}</p>
+            </div>
+
+            <div class="recipe-tip">${escapeHtml(r.tip)}</div>
+
+            <div class="recipe-macros">
+              ${r.macros.kcal} kcal &nbsp;·&nbsp; ${r.macros.protein}g eiwit &nbsp;·&nbsp; ${r.macros.carbs}g KH &nbsp;·&nbsp; ${r.macros.fat}g vet
+            </div>
+          </div>
         </div>
       `).join('');
     }
