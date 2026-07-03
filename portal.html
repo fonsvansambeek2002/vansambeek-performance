@@ -260,6 +260,84 @@
       color: #FFF;
       border-color: #555;
     }
+
+    .slider-field {
+      margin-bottom: 18px;
+    }
+    .slider-field .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      color: #AAA;
+      font-size: 0.82rem;
+      margin-bottom: 8px;
+    }
+    .slider-val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #C8F135;
+      min-width: 24px;
+      text-align: right;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: #2A2A2A;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      padding: 0;
+      border: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      background: #C8F135;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      background: #C8F135;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+    .rating-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .rating-badge {
+      background: #111;
+      border: 1px solid #2A2A2A;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .rating-badge .rb-label {
+      font-size: 0.72rem;
+      color: #666;
+    }
+    .rating-badge .rb-val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .ci-already {
+      background: rgba(200,241,53,.07);
+      border: 1px solid rgba(200,241,53,.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #C8F135;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+    #ciMessage.success-msg { color: #C8F135; font-size: 0.9rem; margin-top: 10px; }
+    #ciMessage.error-msg   { color: #ff4444; font-size: 0.9rem; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -336,6 +414,85 @@
         <h3 id="prevReflectionsTitle" style="margin: 24px 0 12px;">Eerder ingevulde reflecties</h3>
         <div id="matchList"></div>
       </section>
+      <section class="screen" id="screen-checkin">
+        <div class="card">
+          <h3 id="ciTitle">Wekelijkse check-in</h3>
+          <p class="muted" id="ciWeekLabel" style="margin: -4px 0 16px; font-size: 0.85rem;"></p>
+          <div id="ciAlreadyNotice" class="ci-already hidden"></div>
+
+          <form id="checkinForm">
+            <div class="slider-field">
+              <div class="slider-label">
+                <span id="ciLabelOverall">Hoe was je week overall?</span>
+                <span class="slider-val" id="valOverall">7</span>
+              </div>
+              <input type="range" min="1" max="10" value="7" id="ciOverall" />
+            </div>
+
+            <div class="field">
+              <label id="ciLabelSessions">Aantal trainingen deze week</label>
+              <input type="number" min="0" max="20" id="ciSessions" placeholder="bijv. 5" />
+            </div>
+
+            <div class="slider-field">
+              <div class="slider-label">
+                <span id="ciLabelMentalTraining">Mentale focus tijdens trainingen</span>
+                <span class="slider-val" id="valMentalTraining">7</span>
+              </div>
+              <input type="range" min="1" max="10" value="7" id="ciMentalTraining" />
+            </div>
+
+            <div class="field" style="margin-bottom: 10px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #AAA; font-size: 0.82rem;">
+                <input type="checkbox" id="ciNoMatches" style="width: auto; accent-color: #C8F135; width: 16px; height: 16px;" />
+                <span id="ciLabelNoMatches">Geen wedstrijden gespeeld deze week</span>
+              </label>
+            </div>
+            <div class="slider-field" id="ciMatchesWrap">
+              <div class="slider-label">
+                <span id="ciLabelMentalMatches">Mentale performance tijdens wedstrijden</span>
+                <span class="slider-val" id="valMentalMatches">7</span>
+              </div>
+              <input type="range" min="1" max="10" value="7" id="ciMentalMatches" />
+            </div>
+
+            <div class="slider-field">
+              <div class="slider-label">
+                <span id="ciLabelEnergy">Energie & fysiek niveau</span>
+                <span class="slider-val" id="valEnergy">7</span>
+              </div>
+              <input type="range" min="1" max="10" value="7" id="ciEnergy" />
+            </div>
+
+            <div class="slider-field">
+              <div class="slider-label">
+                <span id="ciLabelSleep">Slaap & herstel</span>
+                <span class="slider-val" id="valSleep">7</span>
+              </div>
+              <input type="range" min="1" max="10" value="7" id="ciSleep" />
+            </div>
+
+            <div class="field">
+              <label id="ciLabelWentWell">Wat ging er goed deze week?</label>
+              <textarea id="ciWentWell" style="min-height: 80px;"></textarea>
+            </div>
+            <div class="field">
+              <label id="ciLabelChallenging">Wat was uitdagend?</label>
+              <textarea id="ciChallenging" style="min-height: 80px;"></textarea>
+            </div>
+            <div class="field">
+              <label id="ciLabelFocus">Waar wil je volgende week op focussen?</label>
+              <textarea id="ciFocus" style="min-height: 80px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn-accent" id="ciSubmitBtn">Check-in opslaan</button>
+            <p id="ciMessage" class="hidden"></p>
+          </form>
+        </div>
+
+        <h3 id="ciHistoryTitle" style="margin: 24px 0 12px;">Vorige check-ins</h3>
+        <div id="ciHistoryList"></div>
+      </section>
     </main>
 
     <nav class="bottom-nav">
@@ -351,6 +508,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
         <span>Wedstrijden</span>
       </button>
+      <button class="nav-btn" data-screen="checkin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M14 2H18a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
+        <span>Check-in</span>
+      </button>
     </nav>
   </div>
 
@@ -359,7 +520,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in' },
         admin: 'Beheer',
         logout: 'Uitloggen',
         greeting: (n) => `Hoi ${n}`,
@@ -390,9 +551,38 @@
         navHome: 'Home',
         navContent: 'Content',
         navMatches: 'Wedstrijden',
+        navCheckin: 'Check-in',
+        screenTitleCheckin: 'Check-in',
+        ciTitle: 'Wekelijkse check-in',
+        ciWeekOf: 'Week van',
+        ciLabelOverall: 'Hoe was je week overall?',
+        ciLabelSessions: 'Aantal trainingen deze week',
+        ciLabelMentalTraining: 'Mentale focus tijdens trainingen',
+        ciLabelNoMatches: 'Geen wedstrijden gespeeld deze week',
+        ciLabelMentalMatches: 'Mentale performance tijdens wedstrijden',
+        ciLabelEnergy: 'Energie & fysiek niveau',
+        ciLabelSleep: 'Slaap & herstel',
+        ciLabelWentWell: 'Wat ging er goed deze week?',
+        ciLabelChallenging: 'Wat was uitdagend?',
+        ciLabelFocus: 'Waar wil je volgende week op focussen?',
+        ciSubmit: 'Check-in opslaan',
+        ciSaveSuccess: 'Check-in opgeslagen!',
+        ciSaveFailed: 'Opslaan mislukt: ',
+        ciAlreadyDone: 'Je check-in voor deze week is al ingediend.',
+        ciHistoryTitle: 'Vorige check-ins',
+        ciNoHistory: 'Nog geen check-ins ingediend.',
+        ciOverall: 'Overall',
+        ciMentalTr: 'Mentaal training',
+        ciMentalM: 'Mentaal wedstrijden',
+        ciEnergy: 'Energie',
+        ciSleep: 'Slaap',
+        ciSessionsShort: 'trainingen',
+        ciWentWellShort: 'Wat ging goed',
+        ciChallengingShort: 'Uitdagend',
+        ciFocusShort: 'Focus volgende week',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in' },
         admin: 'Admin',
         logout: 'Log out',
         greeting: (n) => `Hey ${n}`,
@@ -423,6 +613,35 @@
         navHome: 'Home',
         navContent: 'Content',
         navMatches: 'Matches',
+        navCheckin: 'Check-in',
+        screenTitleCheckin: 'Check-in',
+        ciTitle: 'Weekly check-in',
+        ciWeekOf: 'Week of',
+        ciLabelOverall: 'How was your week overall?',
+        ciLabelSessions: 'Training sessions this week',
+        ciLabelMentalTraining: 'Mental focus during training',
+        ciLabelNoMatches: 'No matches played this week',
+        ciLabelMentalMatches: 'Mental performance in matches',
+        ciLabelEnergy: 'Energy & physical level',
+        ciLabelSleep: 'Sleep & recovery',
+        ciLabelWentWell: 'What went well this week?',
+        ciLabelChallenging: 'What was challenging?',
+        ciLabelFocus: 'What do you want to focus on next week?',
+        ciSubmit: 'Save check-in',
+        ciSaveSuccess: 'Check-in saved!',
+        ciSaveFailed: 'Save failed: ',
+        ciAlreadyDone: 'Your check-in for this week has already been submitted.',
+        ciHistoryTitle: 'Previous check-ins',
+        ciNoHistory: 'No check-ins submitted yet.',
+        ciOverall: 'Overall',
+        ciMentalTr: 'Mental training',
+        ciMentalM: 'Mental matches',
+        ciEnergy: 'Energy',
+        ciSleep: 'Sleep',
+        ciSessionsShort: 'sessions',
+        ciWentWellShort: 'What went well',
+        ciChallengingShort: 'Challenging',
+        ciFocusShort: 'Focus next week',
       },
     };
 
@@ -460,9 +679,23 @@
       document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
 
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
-        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches' }[btn.dataset.screen];
+        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin' }[btn.dataset.screen];
         btn.querySelector('span').textContent = T[key];
       });
+
+      document.getElementById('ciTitle').textContent = T.ciTitle;
+      document.getElementById('ciLabelOverall').textContent = T.ciLabelOverall;
+      document.getElementById('ciLabelSessions').textContent = T.ciLabelSessions;
+      document.getElementById('ciLabelMentalTraining').textContent = T.ciLabelMentalTraining;
+      document.getElementById('ciLabelNoMatches').textContent = T.ciLabelNoMatches;
+      document.getElementById('ciLabelMentalMatches').textContent = T.ciLabelMentalMatches;
+      document.getElementById('ciLabelEnergy').textContent = T.ciLabelEnergy;
+      document.getElementById('ciLabelSleep').textContent = T.ciLabelSleep;
+      document.getElementById('ciLabelWentWell').textContent = T.ciLabelWentWell;
+      document.getElementById('ciLabelChallenging').textContent = T.ciLabelChallenging;
+      document.getElementById('ciLabelFocus').textContent = T.ciLabelFocus;
+      document.getElementById('ciSubmitBtn').textContent = T.ciSubmit;
+      document.getElementById('ciHistoryTitle').textContent = T.ciHistoryTitle;
 
       if (currentUser) loadHome();
       if (libraryLoaded) {
@@ -471,6 +704,9 @@
       }
       if (document.getElementById('screen-wedstrijden').classList.contains('active')) {
         loadMatchReflections();
+      }
+      if (document.getElementById('screen-checkin').classList.contains('active')) {
+        loadCheckin();
       }
     }
 
@@ -539,6 +775,9 @@
       }
       if (name === 'wedstrijden') {
         loadMatchReflections();
+      }
+      if (name === 'checkin') {
+        loadCheckin();
       }
     }
 
@@ -628,6 +867,141 @@
         </div>
       `).join('');
     }
+
+    // ── CHECK-IN ──────────────────────────────────────────
+
+    function getWeekStart() {
+      const d = new Date();
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      return d.toISOString().split('T')[0];
+    }
+
+    ['ciOverall', 'ciMentalTraining', 'ciMentalMatches', 'ciEnergy', 'ciSleep'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', function () {
+        document.getElementById('val' + id.charAt(2).toUpperCase() + id.slice(3)).textContent = this.value;
+      });
+    });
+
+    document.getElementById('ciNoMatches').addEventListener('change', function () {
+      document.getElementById('ciMatchesWrap').style.display = this.checked ? 'none' : '';
+    });
+
+    document.getElementById('checkinForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const T = i18n[lang];
+      const msgEl = document.getElementById('ciMessage');
+      const noMatches = document.getElementById('ciNoMatches').checked;
+
+      const payload = {
+        user_id: currentUser.id,
+        week_start: getWeekStart(),
+        overall_rating:    Number(document.getElementById('ciOverall').value),
+        training_sessions: Number(document.getElementById('ciSessions').value) || 0,
+        mental_training:   Number(document.getElementById('ciMentalTraining').value),
+        mental_matches:    noMatches ? null : Number(document.getElementById('ciMentalMatches').value),
+        energy_level:      Number(document.getElementById('ciEnergy').value),
+        sleep_recovery:    Number(document.getElementById('ciSleep').value),
+        went_well:         document.getElementById('ciWentWell').value.trim() || null,
+        was_challenging:   document.getElementById('ciChallenging').value.trim() || null,
+        focus_next_week:   document.getElementById('ciFocus').value.trim() || null,
+      };
+
+      const { error } = await supabaseClient.from('weekly_checkins').insert(payload);
+      msgEl.classList.remove('hidden', 'success-msg', 'error-msg');
+
+      if (error) {
+        msgEl.classList.add('error-msg');
+        msgEl.textContent = T.ciSaveFailed + error.message;
+        return;
+      }
+
+      msgEl.classList.add('success-msg');
+      msgEl.textContent = T.ciSaveSuccess;
+      document.getElementById('checkinForm').reset();
+      ['ciOverall','ciMentalTraining','ciMentalMatches','ciEnergy','ciSleep'].forEach((id) => {
+        document.getElementById(id).value = 7;
+        document.getElementById('val' + id.charAt(2).toUpperCase() + id.slice(3)).textContent = '7';
+      });
+      document.getElementById('ciMatchesWrap').style.display = '';
+      loadCheckin();
+    });
+
+    async function loadCheckin() {
+      const T = i18n[lang];
+      const weekStart = getWeekStart();
+      const d = new Date(weekStart + 'T00:00:00');
+      const opts = { day: 'numeric', month: 'long', year: 'numeric' };
+      document.getElementById('ciWeekLabel').textContent =
+        T.ciWeekOf + ' ' + d.toLocaleDateString(lang === 'nl' ? 'nl-NL' : 'en-US', opts);
+
+      const { data: existing } = await supabaseClient
+        .from('weekly_checkins')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('week_start', weekStart)
+        .maybeSingle();
+
+      const noticeEl = document.getElementById('ciAlreadyNotice');
+      const submitBtn = document.getElementById('ciSubmitBtn');
+
+      if (existing) {
+        noticeEl.classList.remove('hidden');
+        noticeEl.textContent = T.ciAlreadyDone;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.4';
+      } else {
+        noticeEl.classList.add('hidden');
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '';
+      }
+
+      const histList = document.getElementById('ciHistoryList');
+      const { data: history } = await supabaseClient
+        .from('weekly_checkins')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('week_start', { ascending: false })
+        .limit(12);
+
+      if (!history || !history.length) {
+        histList.innerHTML = `<div class="empty-state">${T.ciNoHistory}</div>`;
+        return;
+      }
+
+      histList.innerHTML = history.map((c) => {
+        const wd = new Date(c.week_start + 'T00:00:00');
+        const wLabel = T.ciWeekOf + ' ' + wd.toLocaleDateString(lang === 'nl' ? 'nl-NL' : 'en-US', opts);
+        return `
+          <div class="content-item">
+            <div class="content-item-body">
+              <strong>${wLabel}</strong>
+              <div class="rating-grid">
+                ${ratingBadge(T.ciOverall, c.overall_rating)}
+                ${ratingBadge(T.ciMentalTr, c.mental_training)}
+                ${c.mental_matches ? ratingBadge(T.ciMentalM, c.mental_matches) : ''}
+                ${ratingBadge(T.ciEnergy, c.energy_level)}
+                ${ratingBadge(T.ciSleep, c.sleep_recovery)}
+              </div>
+              ${c.training_sessions != null ? `<p class="muted" style="margin-top:10px;font-size:0.85rem;">${c.training_sessions} ${T.ciSessionsShort}</p>` : ''}
+              ${c.went_well ? `<p class="muted" style="margin-top:10px;"><strong style="color:#AAA;">${T.ciWentWellShort}:</strong><br>${escapeHtml(c.went_well)}</p>` : ''}
+              ${c.was_challenging ? `<p class="muted" style="margin-top:6px;"><strong style="color:#AAA;">${T.ciChallengingShort}:</strong><br>${escapeHtml(c.was_challenging)}</p>` : ''}
+              ${c.focus_next_week ? `<p class="muted" style="margin-top:6px;"><strong style="color:#AAA;">${T.ciFocusShort}:</strong><br>${escapeHtml(c.focus_next_week)}</p>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function ratingBadge(label, value) {
+      const color = value >= 8 ? '#C8F135' : value >= 6 ? '#88BB44' : value >= 4 ? '#EEAA33' : '#EE4444';
+      return `<div class="rating-badge">
+        <div class="rb-label">${label}</div>
+        <div class="rb-val" style="color:${color};">${value}<span style="font-size:0.75rem;color:#555;">/10</span></div>
+      </div>`;
+    }
+
+    // ─────────────────────────────────────────────────────
 
     function escapeHtml(str) {
       const div = document.createElement('div');

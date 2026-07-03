@@ -27,6 +27,7 @@
       <div class="tabs" id="viewTabs" style="margin-bottom: 16px;">
         <button class="tab active" data-view="content">Content</button>
         <button class="tab" data-view="reflecties">Wedstrijdreflecties</button>
+        <button class="tab" data-view="checkins">Check-ins</button>
       </div>
 
       <div id="view-content">
@@ -90,6 +91,11 @@
         <h3 style="margin: 0 0 16px;">Wedstrijdreflecties per atleet</h3>
         <div id="reflectiesOverview"></div>
       </div>
+
+      <div id="view-checkins" class="hidden">
+        <h3 style="margin: 0 0 16px;">Wekelijkse check-ins per atleet</h3>
+        <div id="checkinsOverview"></div>
+      </div>
     </main>
   </div>
 
@@ -115,7 +121,9 @@
         const view = tab.dataset.view;
         document.getElementById('view-content').classList.toggle('hidden', view !== 'content');
         document.getElementById('view-reflecties').classList.toggle('hidden', view !== 'reflecties');
+        document.getElementById('view-checkins').classList.toggle('hidden', view !== 'checkins');
         if (view === 'reflecties') loadReflectiesOverview();
+        if (view === 'checkins') loadCheckinsOverview();
       });
     });
 
@@ -288,6 +296,68 @@
           `).join('')}
         </div>
       `).join('');
+    }
+
+    async function loadCheckinsOverview() {
+      const overview = document.getElementById('checkinsOverview');
+      overview.innerHTML = '<div class="empty-state">Laden…</div>';
+
+      const [{ data: checkins, error: cErr }, { data: profiles, error: pErr }] = await Promise.all([
+        supabaseClient.from('weekly_checkins').select('*').order('week_start', { ascending: false }),
+        supabaseClient.from('profiles').select('id, full_name'),
+      ]);
+
+      if (cErr || pErr || !checkins) {
+        overview.innerHTML = '<div class="empty-state">Kon check-ins niet laden.</div>';
+        return;
+      }
+
+      if (!checkins.length) {
+        overview.innerHTML = '<div class="empty-state">Nog geen check-ins ingediend.</div>';
+        return;
+      }
+
+      const profileMap = {};
+      (profiles || []).forEach((p) => { profileMap[p.id] = p.full_name || p.id; });
+
+      const grouped = {};
+      checkins.forEach((c) => {
+        if (!grouped[c.user_id]) grouped[c.user_id] = [];
+        grouped[c.user_id].push(c);
+      });
+
+      overview.innerHTML = Object.entries(grouped).map(([userId, records]) => `
+        <div class="card" style="margin-bottom: 20px;">
+          <h3 style="margin-bottom: 16px;">${escapeHtml(profileMap[userId] || userId)}</h3>
+          ${records.map((c) => `
+            <div class="content-item" style="margin-bottom: 12px;">
+              <div style="padding: 14px 16px;">
+                <strong>Week van ${escapeHtml(c.week_start)}</strong>
+                <span class="muted" style="font-size:0.8rem;"> · ${c.training_sessions ?? 0} trainingen</span>
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px;">
+                  ${adminRating('Overall', c.overall_rating)}
+                  ${adminRating('Mentaal training', c.mental_training)}
+                  ${adminRating('Mentaal wedstrijden', c.mental_matches)}
+                  ${adminRating('Energie', c.energy_level)}
+                  ${adminRating('Slaap', c.sleep_recovery)}
+                </div>
+                ${c.went_well ? `<p class="muted" style="margin-top:10px;font-size:0.85rem;"><strong style="color:#555;">Goed:</strong> ${escapeHtml(c.went_well)}</p>` : ''}
+                ${c.was_challenging ? `<p class="muted" style="margin-top:4px;font-size:0.85rem;"><strong style="color:#555;">Uitdagend:</strong> ${escapeHtml(c.was_challenging)}</p>` : ''}
+                ${c.focus_next_week ? `<p class="muted" style="margin-top:4px;font-size:0.85rem;"><strong style="color:#555;">Focus:</strong> ${escapeHtml(c.focus_next_week)}</p>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    function adminRating(label, value) {
+      if (value == null) return `<div style="background:#0D0D0D;border:1px solid #222;border-radius:6px;padding:6px 8px;text-align:center;"><div style="font-size:0.65rem;color:#444;">${label}</div><div style="font-size:1rem;color:#333;margin-top:2px;">—</div></div>`;
+      const color = value >= 8 ? '#6BCB2E' : value >= 6 ? '#AACC44' : value >= 4 ? '#EEAA33' : '#EE4444';
+      return `<div style="background:#0D0D0D;border:1px solid #222;border-radius:6px;padding:6px 8px;text-align:center;">
+        <div style="font-size:0.65rem;color:#555;">${label}</div>
+        <div style="font-size:1.1rem;font-weight:700;color:${color};margin-top:2px;">${value}</div>
+      </div>`;
     }
 
     function escapeHtml(str) {
