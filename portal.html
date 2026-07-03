@@ -447,6 +447,139 @@
       margin-top: 16px;
     }
 
+    /* ── OPDRACHTEN ── */
+    .opr-progress-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .opr-bar-wrap {
+      flex: 1;
+      background: #1A1A1A;
+      border-radius: 999px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .opr-bar {
+      height: 100%;
+      background: #C8F135;
+      border-radius: 999px;
+      transition: width 0.4s;
+    }
+    .opr-progress-label { font-size: 0.78rem; color: #555; white-space: nowrap; }
+
+    .opr-card {
+      background: #111;
+      border: 1px solid #2A2A2A;
+      border-radius: 14px;
+      padding: 22px 18px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .opr-ghost {
+      position: absolute;
+      top: -14px;
+      right: 10px;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 7rem;
+      color: rgba(200,241,53,.05);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+    .opr-num-label {
+      font-size: 0.7rem;
+      color: #C8F135;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .opr-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.55rem;
+      letter-spacing: 0.04em;
+      color: #FFF;
+      margin-bottom: 5px;
+    }
+    .opr-intro {
+      font-size: 0.84rem;
+      color: #555;
+      font-style: italic;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+    .opr-question {
+      font-size: 0.92rem;
+      color: #CCC;
+      line-height: 1.8;
+      margin-bottom: 18px;
+      white-space: pre-line;
+    }
+
+    .opr-done-list { margin-top: 8px; }
+    .opr-done-item {
+      background: #0D0D0D;
+      border: 1px solid #1A1A1A;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .opr-done-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .opr-done-check {
+      width: 20px;
+      height: 20px;
+      background: rgba(200,241,53,.1);
+      border: 1px solid rgba(200,241,53,.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.65rem;
+      color: #C8F135;
+    }
+    .opr-done-title { flex: 1; font-size: 0.86rem; color: #888; }
+    .opr-done-date { font-size: 0.7rem; color: #3A3A3A; }
+    .opr-chevron { color: #333; transition: transform 0.2s; flex-shrink: 0; }
+    .opr-done-item.open .opr-chevron { transform: rotate(180deg); }
+    .opr-done-body {
+      display: none;
+      padding: 12px 14px 14px;
+      border-top: 1px solid #1A1A1A;
+      font-size: 0.87rem;
+      color: #666;
+      line-height: 1.75;
+      white-space: pre-line;
+    }
+    .opr-done-item.open .opr-done-body { display: block; }
+
+    .opr-all-done {
+      background: rgba(200,241,53,.07);
+      border: 1px solid rgba(200,241,53,.2);
+      border-radius: 14px;
+      padding: 28px 20px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .opr-all-done h3 {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+      color: #C8F135;
+      margin-bottom: 8px;
+    }
+    .opr-all-done p { font-size: 0.88rem; color: #777; line-height: 1.7; }
+
     /* ── VIDEO ANALYSE ── */
     .vid-pick-label {
       display: block;
@@ -794,6 +927,10 @@
         <div id="highlightsList"></div>
       </section>
 
+      <section class="screen" id="screen-opdrachten">
+        <div id="opdrachtContent"></div>
+      </section>
+
       <section class="screen" id="screen-planning">
         <div class="plan-year-nav">
           <button class="icon-btn" id="planPrevYear" style="font-size:1.4rem;padding:4px 10px;">‹</button>
@@ -993,6 +1130,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M14 2H18a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
         <span>Check-in</span>
       </button>
+      <button class="nav-btn" data-screen="opdrachten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>Opdrachten</span>
+      </button>
       <button class="nav-btn" data-screen="planning">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
         <span>Planning</span>
@@ -1009,7 +1150,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analyse' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analyse', opdrachten: 'Opdrachten' },
         admin: 'Beheer',
         logout: 'Uitloggen',
         greeting: (n) => `Hoi ${n}`,
@@ -1072,6 +1213,7 @@
         ciChallengingShort: 'Uitdagend',
         ciFocusShort: 'Focus volgende week',
         watchHighlights: 'Bekijk highlights',
+        navOpdrachten: 'Opdrachten',
         navPlanning: 'Planning',
         navVideo: 'Video',
         planAddBtn: '+ Toernooi',
@@ -1091,7 +1233,7 @@
         vidPending: 'Wacht op feedback',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analysis' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analysis', opdrachten: 'Assignments' },
         admin: 'Admin',
         logout: 'Log out',
         greeting: (n) => `Hey ${n}`,
@@ -1154,6 +1296,7 @@
         ciChallengingShort: 'Challenging',
         ciFocusShort: 'Focus next week',
         watchHighlights: 'Watch highlights',
+        navOpdrachten: 'Assignments',
         navPlanning: 'Planning',
         navVideo: 'Video',
         planAddBtn: '+ Tournament',
@@ -1208,7 +1351,7 @@
       document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
 
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
-        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin', highlights: 'navHighlights', planning: 'navPlanning', video: 'navVideo' }[btn.dataset.screen];
+        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin', highlights: 'navHighlights', planning: 'navPlanning', video: 'navVideo', opdrachten: 'navOpdrachten' }[btn.dataset.screen];
         if (key) btn.querySelector('span').textContent = T[key];
       });
       document.getElementById('vidHistoryTitle').textContent = T.vidHistoryTitle;
@@ -1311,6 +1454,9 @@
       }
       if (name === 'checkin') {
         loadCheckin();
+      }
+      if (name === 'opdrachten') {
+        loadOpdrachten();
       }
       if (name === 'planning') {
         loadPlanning();
@@ -1699,6 +1845,201 @@
           </div>
         </div>
       `).join('');
+    }
+
+    // ── OPDRACHTEN ────────────────────────────────────────
+
+    const assignments = [
+      {
+        num: 1,
+        title: 'Wie ben jij als sporter?',
+        intro: 'De basis van mentale prestatie begint bij zelfkennis.',
+        question: 'Beschrijf in 3 tot 5 zinnen wie jij bent als tennisser — niet je resultaten of ranking, maar je karakter op de baan. Hoe zou jouw coach jou omschrijven? Wat maakt jou uniek als speler?',
+      },
+      {
+        num: 2,
+        title: 'Je beste moment',
+        intro: 'We leren het meest van onze eigen piekprestaties.',
+        question: 'Denk aan een wedstrijd of training waarbij je je op je allerbest voelde. Wanneer was dat? Wat was er anders aan die dag? Hoe voelde je je van binnen — in je lichaam, je gedachten, je energie?',
+      },
+      {
+        num: 3,
+        title: 'Wat kost je energie?',
+        intro: 'Elke sporter heeft situaties die mentale energie vreten.',
+        question: 'Welke momenten kosten jou de meeste mentale energie op de baan? Denk aan: een fout op een belangrijk punt, een irritante tegenstander, een slechte start.\n\nWat merk je aan jezelf op die momenten — in je gedachten en je lichaam?',
+      },
+      {
+        num: 4,
+        title: 'Hoe praat jij tegen jezelf?',
+        intro: 'Je innerlijke stem is de meest constante coach die je hebt.',
+        question: 'Schrijf 3 dingen die je tegen jezelf zegt als het goed gaat op de baan.\nSchrijf daarna 3 dingen die je zegt als het tegenzit.\n\nWat valt je op aan het verschil?',
+      },
+      {
+        num: 5,
+        title: 'Omgaan met fouten',
+        intro: 'Hoe je reageert na een fout bepaalt wat er daarna gebeurt.',
+        question: 'Beschrijf een concrete situatie waarin je een fout maakte op een belangrijk moment. Wat deed je in de 20 seconden daarna? Wat dacht je? Wat voelde je?\n\nHoe pakte die reactie uit voor de rest van het punt of het spel?',
+      },
+      {
+        num: 6,
+        title: 'Druk en spanning',
+        intro: 'Druk is een privilege — het betekent dat het ertoe doet.',
+        question: 'Denk aan een moment waarop je druk voelde tijdens een wedstrijd. Wat gebeurde er in je lichaam (hartslag, ademhaling, spieren)? Wat deden je gedachten?\n\nHoe reageerde je — speelde je anders, nam je andere beslissingen?',
+      },
+      {
+        num: 7,
+        title: 'Jouw voorbereiding',
+        intro: 'Winst wordt gewonnen vóórdat de eerste bal geslagen is.',
+        question: 'Beschrijf wat je normaal doet in de aanloop naar een wedstrijd: de ochtend, de warming-up, de minuten voor het eerste punt.\n\nWat doe je nu al bewust? Wat doe je op de automatische piloot? Wat zou je willen veranderen of toevoegen?',
+      },
+      {
+        num: 8,
+        title: 'Jouw krachten',
+        intro: 'Vertrouwen bouw je op bewijs, niet op gevoel.',
+        question: 'Wat zijn jouw 3 grootste krachten als tennisser — mentaal, tactisch of technisch?\n\nOp welke kwaliteiten kun jij vertrouwen als het erop aankomt? Geef bij elke kracht een concreet voorbeeld van wanneer je die hebt laten zien.',
+      },
+      {
+        num: 9,
+        title: 'Concentratie',
+        intro: 'Focus is een spier — je kunt hem trainen.',
+        question: 'Wanneer verlies jij het makkelijkst je concentratie? (Denk aan: lange punten, omgevingsgeluid, een beslissing van de scheids, een slecht gespeelde game.)\n\nWat doe je nu al om je focus terug te pakken? Wat werkt, en wat werkt niet?',
+      },
+      {
+        num: 10,
+        title: 'Doelen stellen',
+        intro: 'De juiste doelen geven de juiste energie.',
+        question: 'Schrijf één doel op voor elk niveau:\n\n• Resultaatdoel — wat wil je bereiken? (bijv. top 100 nationaal)\n• Prestatiedoel — welke prestatie wil je verbeteren? (bijv. eerste service %)\n• Procesdoel — wat doe je elke training of wedstrijd? (bijv. na elke fout drie keer ademhalen)\n\nWaarom zijn deze doelen belangrijk voor jou?',
+      },
+      {
+        num: 11,
+        title: 'Jouw ideale mindset',
+        intro: 'Als jij op je best bent — hoe ziet dat er van binnen uit?',
+        question: 'Beschrijf zo concreet mogelijk hoe jij je voelt wanneer je op je allerbest speelt.\n\nWat zijn je gedachten? Wat is je energieniveau? Hoe is je lichaamstaal? Hoe kijk je naar je tegenstander? Hoe reageer je op fouten?\n\nDit is jouw blauwdruk voor topprestaties.',
+      },
+      {
+        num: 12,
+        title: 'Brief aan jezelf',
+        intro: 'De laatste opdracht — en misschien de krachtigste.',
+        question: 'Schrijf een korte brief aan jezelf voor de volgende moeilijke wedstrijd.\n\nWat wil je jezelf herinneren? Waar moet je op letten? Wat heb je nodig om op je best te presteren?\n\nSchrijf het alsof je je eigen beste coach bent.',
+      },
+    ];
+
+    async function loadOpdrachten() {
+      const container = document.getElementById('opdrachtContent');
+      container.innerHTML = `<div class="empty-state">Laden…</div>`;
+
+      const { data: completions } = await supabaseClient
+        .from('assignment_completions')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('assignment_num', { ascending: true });
+
+      const done = completions || [];
+      const doneNums = new Set(done.map((c) => c.assignment_num));
+      const currentNum = done.length + 1;
+      const total = assignments.length;
+      const allDone = done.length >= total;
+      const pct = Math.round((done.length / total) * 100);
+
+      let html = `
+        <div class="opr-progress-row">
+          <div class="opr-bar-wrap"><div class="opr-bar" style="width:${pct}%"></div></div>
+          <span class="opr-progress-label">${done.length} / ${total}</span>
+        </div>
+      `;
+
+      if (allDone) {
+        html += `
+          <div class="opr-all-done">
+            <h3>Alle opdrachten voltooid</h3>
+            <p>Goed gedaan — je hebt alle 12 opdrachten ingevuld. Gebruik deze reflecties als basis voor je sessies.</p>
+          </div>
+        `;
+      } else {
+        const a = assignments[currentNum - 1];
+        html += `
+          <div class="opr-card">
+            <div class="opr-ghost">${a.num}</div>
+            <div class="opr-num-label">Opdracht ${a.num} van ${total}</div>
+            <div class="opr-title">${escapeHtml(a.title)}</div>
+            <div class="opr-intro">${escapeHtml(a.intro)}</div>
+            <div class="opr-question">${escapeHtml(a.question)}</div>
+            <div class="field">
+              <textarea id="opdrachtResponse" style="min-height:120px;" placeholder="Schrijf hier je antwoord…"></textarea>
+            </div>
+            <button class="btn-accent" id="opdrachtSubmitBtn">Opdracht insturen</button>
+            <p id="opdrachtMessage" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
+          </div>
+        `;
+      }
+
+      if (done.length > 0) {
+        html += `<h4 style="font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#444;font-size:1rem;margin:0 0 10px;">Voltooide opdrachten</h4>`;
+        html += `<div class="opr-done-list">`;
+        done.slice().reverse().forEach((c) => {
+          const a = assignments.find((x) => x.num === c.assignment_num);
+          if (!a) return;
+          const dateStr = new Date(c.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+          html += `
+            <div class="opr-done-item" data-id="${escapeAttr(c.id)}">
+              <div class="opr-done-header">
+                <div class="opr-done-check">✓</div>
+                <span class="opr-done-title">${a.num}. ${escapeHtml(a.title)}</span>
+                <span class="opr-done-date">${dateStr}</span>
+                <svg class="opr-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="opr-done-body">${escapeHtml(c.response)}</div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      container.innerHTML = html;
+
+      container.querySelectorAll('.opr-done-item').forEach((item) => {
+        item.querySelector('.opr-done-header').addEventListener('click', () => {
+          item.classList.toggle('open');
+        });
+      });
+
+      const submitBtn = document.getElementById('opdrachtSubmitBtn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', () => submitAssignment(currentNum));
+      }
+    }
+
+    async function submitAssignment(num) {
+      const response = document.getElementById('opdrachtResponse').value.trim();
+      const msg = document.getElementById('opdrachtMessage');
+      const btn = document.getElementById('opdrachtSubmitBtn');
+
+      if (response.length < 20) {
+        msg.classList.remove('hidden');
+        msg.className = 'error-msg';
+        msg.textContent = 'Schrijf iets meer — de opdracht vraagt om echte reflectie.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Opslaan…';
+
+      const { error } = await supabaseClient.from('assignment_completions').insert({
+        user_id: currentUser.id,
+        assignment_num: num,
+        response,
+      });
+
+      if (error) {
+        btn.disabled = false;
+        btn.textContent = 'Opdracht insturen';
+        msg.classList.remove('hidden');
+        msg.className = 'error-msg';
+        msg.textContent = 'Opslaan mislukt: ' + error.message;
+        return;
+      }
+
+      await loadOpdrachten();
     }
 
     // ── PLANNING ──────────────────────────────────────────

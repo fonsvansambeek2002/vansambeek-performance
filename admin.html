@@ -28,6 +28,7 @@
         <button class="tab active" data-view="content" style="flex-shrink:0;">Content</button>
         <button class="tab" data-view="reflecties" style="flex-shrink:0;">Wedstrijdreflecties</button>
         <button class="tab" data-view="checkins" style="flex-shrink:0;">Check-ins</button>
+        <button class="tab" data-view="opdrachten" style="flex-shrink:0;">Opdrachten</button>
         <button class="tab" data-view="planning" style="flex-shrink:0;">Planning</button>
         <button class="tab" data-view="video" style="flex-shrink:0;">Video Analyse</button>
       </div>
@@ -99,6 +100,11 @@
         <div id="checkinsOverview"></div>
       </div>
 
+      <div id="view-opdrachten" class="hidden">
+        <h3 style="margin: 0 0 16px;">Opdrachten per atleet</h3>
+        <div id="opdrachtenOverview"></div>
+      </div>
+
       <div id="view-planning" class="hidden">
         <h3 style="margin: 0 0 16px;">Toernooiplanning per atleet</h3>
         <div id="planningOverview"></div>
@@ -126,7 +132,7 @@
       location.href = 'login.html';
     }
 
-    const ALL_VIEWS = ['content', 'reflecties', 'checkins', 'planning', 'video'];
+    const ALL_VIEWS = ['content', 'reflecties', 'checkins', 'opdrachten', 'planning', 'video'];
 
     document.querySelectorAll('#viewTabs .tab').forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -136,6 +142,7 @@
         ALL_VIEWS.forEach((v) => document.getElementById('view-' + v).classList.toggle('hidden', v !== view));
         if (view === 'reflecties') loadReflectiesOverview();
         if (view === 'checkins') loadCheckinsOverview();
+        if (view === 'opdrachten') loadOpdrachtenOverview();
         if (view === 'planning') loadPlanningOverview();
         if (view === 'video') loadVideoOverview();
       });
@@ -363,6 +370,79 @@
           `).join('')}
         </div>
       `).join('');
+    }
+
+    const ASSIGNMENTS_ADMIN = [
+      { num:1, title:'Wie ben jij als sporter?' },
+      { num:2, title:'Je beste moment' },
+      { num:3, title:'Wat kost je energie?' },
+      { num:4, title:'Hoe praat jij tegen jezelf?' },
+      { num:5, title:'Omgaan met fouten' },
+      { num:6, title:'Druk en spanning' },
+      { num:7, title:'Jouw voorbereiding' },
+      { num:8, title:'Jouw krachten' },
+      { num:9, title:'Concentratie' },
+      { num:10, title:'Doelen stellen' },
+      { num:11, title:'Jouw ideale mindset' },
+      { num:12, title:'Brief aan jezelf' },
+    ];
+
+    async function loadOpdrachtenOverview() {
+      const overview = document.getElementById('opdrachtenOverview');
+      overview.innerHTML = '<div class="empty-state">Laden…</div>';
+
+      const [{ data: completions }, { data: profiles }] = await Promise.all([
+        supabaseClient.from('assignment_completions').select('*').order('assignment_num', { ascending: true }),
+        supabaseClient.from('profiles').select('id, full_name'),
+      ]);
+
+      if (!completions || !completions.length) {
+        overview.innerHTML = '<div class="empty-state">Nog geen opdrachten ingeleverd.</div>';
+        return;
+      }
+
+      const profileMap = {};
+      (profiles || []).forEach((p) => { profileMap[p.id] = p.full_name || p.id; });
+
+      const grouped = {};
+      completions.forEach((c) => {
+        if (!grouped[c.user_id]) grouped[c.user_id] = [];
+        grouped[c.user_id].push(c);
+      });
+
+      overview.innerHTML = Object.entries(grouped).map(([userId, recs]) => {
+        const total = ASSIGNMENTS_ADMIN.length;
+        const pct = Math.round((recs.length / total) * 100);
+
+        const items = recs.map((c) => {
+          const a = ASSIGNMENTS_ADMIN.find((x) => x.num === c.assignment_num);
+          const dateStr = new Date(c.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+          return `
+            <div style="border:1px solid #1A1A1A;border-radius:8px;overflow:hidden;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;background:#0D0D0D;"
+                   onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+                <span style="background:rgba(200,241,53,.1);border:1px solid rgba(200,241,53,.2);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:#C8F135;flex-shrink:0;">✓</span>
+                <span style="flex:1;font-size:0.86rem;color:#888;">${c.assignment_num}. ${escapeHtml(a ? a.title : '')}</span>
+                <span style="font-size:0.7rem;color:#444;">${dateStr}</span>
+              </div>
+              <div style="display:none;padding:12px 14px;font-size:0.87rem;color:#666;line-height:1.75;white-space:pre-line;border-top:1px solid #1A1A1A;">${escapeHtml(c.response)}</div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="card" style="margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <h3>${escapeHtml(profileMap[userId] || userId)}</h3>
+              <span style="font-size:0.78rem;color:#555;">${recs.length} / ${total} voltooid</span>
+            </div>
+            <div style="background:#1A1A1A;border-radius:999px;height:4px;overflow:hidden;margin-bottom:14px;">
+              <div style="height:100%;background:#C8F135;border-radius:999px;width:${pct}%;"></div>
+            </div>
+            ${items}
+          </div>
+        `;
+      }).join('');
     }
 
     async function loadPlanningOverview() {
