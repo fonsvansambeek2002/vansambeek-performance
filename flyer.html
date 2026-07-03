@@ -29,7 +29,7 @@
     /* ── FLYER SHELL ── */
     .flyer {
       width: 210mm;
-      min-height: 297mm;
+      height: 297mm;
       background: #0B2C4A;
       color: #fff;
       position: relative;
@@ -104,7 +104,7 @@
 
     /* ── HERO ── */
     .f-hero {
-      padding: 40px 36px 36px;
+      padding: 30px 36px 26px;
       position: relative;
       z-index: 1;
     }
@@ -160,7 +160,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      padding: 28px 36px;
+      padding: 20px 36px;
       position: relative;
       z-index: 1;
     }
@@ -353,8 +353,10 @@
     /* ── PRINT ── */
     @media print {
       body { background: none; padding: 0; }
-      .flyer { box-shadow: none; width: 100%; min-height: 100vh; }
+      .flyer { box-shadow: none; width: 100%; height: 100vh; }
     }
+
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   </style>
 </head>
 <body>
