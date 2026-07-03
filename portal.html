@@ -327,6 +327,54 @@
       font-weight: 700;
       margin-top: 2px;
     }
+    .highlight-card {
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid #2A2A2A;
+    }
+    .highlight-banner {
+      padding: 22px 20px 18px;
+    }
+    .hl-tour-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.55);
+      margin-bottom: 10px;
+    }
+    .hl-players {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.55rem;
+      letter-spacing: 0.05em;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .hl-event {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,.5);
+    }
+    .highlight-body {
+      padding: 14px 16px 16px;
+      background: #141414;
+    }
+    .highlight-desc {
+      font-size: 0.875rem;
+      color: #888;
+      line-height: 1.65;
+      margin-bottom: 12px;
+    }
+    .highlight-watch {
+      color: #C8F135;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .highlight-watch:hover { text-decoration: underline; }
+
     .ci-already {
       background: rgba(200,241,53,.07);
       border: 1px solid rgba(200,241,53,.2);
@@ -414,6 +462,10 @@
         <h3 id="prevReflectionsTitle" style="margin: 24px 0 12px;">Eerder ingevulde reflecties</h3>
         <div id="matchList"></div>
       </section>
+      <section class="screen" id="screen-highlights">
+        <div id="highlightsList"></div>
+      </section>
+
       <section class="screen" id="screen-checkin">
         <div class="card">
           <h3 id="ciTitle">Wekelijkse check-in</h3>
@@ -508,6 +560,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
         <span>Wedstrijden</span>
       </button>
+      <button class="nav-btn" data-screen="highlights">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Highlights</span>
+      </button>
       <button class="nav-btn" data-screen="checkin">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M14 2H18a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
         <span>Check-in</span>
@@ -520,7 +576,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in', highlights: 'Highlights' },
         admin: 'Beheer',
         logout: 'Uitloggen',
         greeting: (n) => `Hoi ${n}`,
@@ -552,7 +608,9 @@
         navContent: 'Content',
         navMatches: 'Wedstrijden',
         navCheckin: 'Check-in',
+        navHighlights: 'Highlights',
         screenTitleCheckin: 'Check-in',
+        screenTitleHighlights: 'Highlights',
         ciTitle: 'Wekelijkse check-in',
         ciWeekOf: 'Week van',
         ciLabelOverall: 'Hoe was je week overall?',
@@ -580,9 +638,10 @@
         ciWentWellShort: 'Wat ging goed',
         ciChallengingShort: 'Uitdagend',
         ciFocusShort: 'Focus volgende week',
+        watchHighlights: 'Bekijk highlights',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in', highlights: 'Highlights' },
         admin: 'Admin',
         logout: 'Log out',
         greeting: (n) => `Hey ${n}`,
@@ -614,7 +673,9 @@
         navContent: 'Content',
         navMatches: 'Matches',
         navCheckin: 'Check-in',
+        navHighlights: 'Highlights',
         screenTitleCheckin: 'Check-in',
+        screenTitleHighlights: 'Highlights',
         ciTitle: 'Weekly check-in',
         ciWeekOf: 'Week of',
         ciLabelOverall: 'How was your week overall?',
@@ -642,6 +703,7 @@
         ciWentWellShort: 'What went well',
         ciChallengingShort: 'Challenging',
         ciFocusShort: 'Focus next week',
+        watchHighlights: 'Watch highlights',
       },
     };
 
@@ -679,7 +741,7 @@
       document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
 
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
-        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin' }[btn.dataset.screen];
+        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin', highlights: 'navHighlights' }[btn.dataset.screen];
         btn.querySelector('span').textContent = T[key];
       });
 
@@ -775,6 +837,9 @@
       }
       if (name === 'wedstrijden') {
         loadMatchReflections();
+      }
+      if (name === 'highlights') {
+        loadHighlights();
       }
       if (name === 'checkin') {
         loadCheckin();
@@ -908,6 +973,111 @@
           <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">${T.approach}</strong><br>${escapeHtml(r.vraag3)}</p>
         </div>
       `).join('');
+    }
+
+    // ── HIGHLIGHTS ────────────────────────────────────────
+
+    const highlightMatches = [
+      {
+        players: 'Federer vs Nadal',
+        event: 'Wimbledon Final',
+        year: '2008',
+        gradient: 'linear-gradient(135deg, #14532d, #065f46)',
+        desc: 'Widely regarded as the greatest tennis match ever played. Five extraordinary sets in near-total darkness — Nadal ends Federer\'s five-year Wimbledon reign after 4 hours and 48 minutes of breathtaking tennis.',
+        search: 'Federer Nadal Wimbledon 2008 Final highlights',
+      },
+      {
+        players: 'Djokovic vs Federer',
+        event: 'Wimbledon Final',
+        year: '2019',
+        gradient: 'linear-gradient(135deg, #14532d, #065f46)',
+        desc: 'Federer serves for the match twice and holds two championship points — Djokovic saves them both and wins in the first-ever Wimbledon final tie-break. The most dramatic conclusion in Grand Slam history.',
+        search: 'Djokovic Federer Wimbledon 2019 Final highlights',
+      },
+      {
+        players: 'Alcaraz vs Djokovic',
+        event: 'Wimbledon Final',
+        year: '2023',
+        gradient: 'linear-gradient(135deg, #14532d, #065f46)',
+        desc: 'The next generation announces itself. Alcaraz defeats the 4-time defending champion in a stunning 5-set battle, becoming the youngest Wimbledon men\'s champion since Boris Becker.',
+        search: 'Alcaraz Djokovic Wimbledon 2023 Final highlights',
+      },
+      {
+        players: 'Djokovic vs Nadal',
+        event: 'Australian Open Final',
+        year: '2012',
+        gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
+        desc: 'The longest Grand Slam final ever: 5 hours and 53 minutes. An extraordinary physical and mental battle settled only in the fifth set. Djokovic wins 7-5 to claim his 5th Slam title.',
+        search: 'Djokovic Nadal Australian Open 2012 Final highlights',
+      },
+      {
+        players: 'Nadal vs Verdasco',
+        event: 'Australian Open SF',
+        year: '2009',
+        gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
+        desc: 'Five gruelling sets over 5 hours 14 minutes in the Melbourne heat. Fernando Verdasco pushes Nadal to the absolute limit in one of the most physically brutal and thrilling semifinals ever played.',
+        search: 'Nadal Verdasco Australian Open 2009 semifinal highlights',
+      },
+      {
+        players: 'Federer vs Nadal',
+        event: 'Australian Open Final',
+        year: '2009',
+        gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
+        desc: 'An emotional masterpiece. Nadal defeats Federer in five sets and as Federer breaks down in tears during the trophy ceremony, the world witnesses one of the most human moments in the history of sport.',
+        search: 'Federer Nadal Australian Open 2009 Final highlights',
+      },
+      {
+        players: 'Djokovic vs Federer',
+        event: 'US Open Semifinal',
+        year: '2010',
+        gradient: 'linear-gradient(135deg, #1a237e, #283593)',
+        desc: 'Federer leads two sets to love and holds two match points at 5-3 in the fifth. Djokovic hits two impossible passing shots to survive — then completes one of the greatest comebacks in tennis history.',
+        search: 'Djokovic Federer US Open 2010 semifinal highlights',
+      },
+      {
+        players: 'Alcaraz vs Sinner',
+        event: 'US Open Quarterfinal',
+        year: '2022',
+        gradient: 'linear-gradient(135deg, #1a237e, #283593)',
+        desc: 'Two 21-year-olds play a five-set thriller past midnight in New York City. The match that announced the next era of tennis had officially begun — raw power, elegance and unstoppable will from both sides.',
+        search: 'Alcaraz Sinner US Open 2022 quarterfinal highlights',
+      },
+      {
+        players: 'Nadal vs Djokovic',
+        event: 'Roland Garros SF',
+        year: '2022',
+        gradient: 'linear-gradient(135deg, #7c2d12, #c2410c)',
+        desc: 'Their final great rivalry match at Roland Garros. Nadal, carrying injuries, fights back from a set down to defeat Djokovic in four sets — a display of mental courage that defines his legend on clay.',
+        search: 'Nadal Djokovic Roland Garros 2022 semifinal highlights',
+      },
+      {
+        players: 'Djokovic vs Thiem',
+        event: 'Australian Open Final',
+        year: '2020',
+        gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
+        desc: 'Thiem leads two sets to love and is two points from the title. Djokovic somehow turns it around to win in five — a staggering display of mental resilience that defines what it means to never give up.',
+        search: 'Djokovic Thiem Australian Open 2020 Final highlights',
+      },
+    ];
+
+    function loadHighlights() {
+      const T = i18n[lang];
+      const list = document.getElementById('highlightsList');
+      list.innerHTML = highlightMatches.map((h) => {
+        const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(h.players + ' ' + h.event + ' ' + h.year + ' highlights');
+        return `
+          <div class="highlight-card">
+            <div class="highlight-banner" style="background:${h.gradient};">
+              <div class="hl-tour-badge">${h.event.split(' ')[0]}</div>
+              <div class="hl-players">${h.players}</div>
+              <div class="hl-event">${h.event} &middot; ${h.year}</div>
+            </div>
+            <div class="highlight-body">
+              <p class="highlight-desc">${h.desc}</p>
+              <a href="${url}" target="_blank" rel="noopener" class="highlight-watch">${T.watchHighlights} →</a>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     // ── CHECK-IN ──────────────────────────────────────────
