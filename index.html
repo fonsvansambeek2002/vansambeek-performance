@@ -59,9 +59,12 @@
       gap: 12px; padding: 14px 0;
     }
     .brand {
+      display: flex; align-items: center; gap: 10px;
       font-family: Sora, sans-serif; font-weight: 800;
       font-size: 16px; color: var(--navy); flex-shrink: 0;
+      text-decoration: none;
     }
+    .brand img { height: 44px; width: 44px; object-fit: contain; }
     .nav-links { display: flex; align-items: center; gap: 4px; }
     .nav-links a {
       font-size: 13px; font-weight: 500; color: var(--muted);
@@ -312,7 +315,10 @@
 <!-- NAV -->
 <header class="nav">
   <div class="container nav-inner">
-    <span class="brand">Van Sambeek Performance</span>
+    <a class="brand" href="#top">
+      <img src="assets/logo.png" alt="Van Sambeek Performance" />
+      <span>Van Sambeek Performance</span>
+    </a>
     <div class="nav-links">
       <a id="navOverMij"   href="#over-mij">Over Mij</a>
       <a id="navWaarom"    href="#waarom">Waarom mentaal</a>
@@ -353,6 +359,7 @@
   <div class="container">
     <div class="hero-grid fade">
       <div>
+        <img src="assets/logo.png" alt="Van Sambeek Performance" style="height:80px;width:80px;object-fit:contain;margin-bottom:20px;" />
         <p class="hero-eyebrow" id="heroEyebrow">Mentale performance coaching</p>
         <h1 id="heroTitle">Mentale coaching voor atleten die het verschil willen maken.</h1>
         <p class="hero-sub" id="heroSub">Focus, vertrouwen, omgaan met druk en consistentie — mentale vaardigheden die je traint, net zoals elk ander onderdeel van je sport.</p>
