@@ -1673,16 +1673,20 @@
         return;
       }
 
-      list.innerHTML = data.map((item) => `
+      list.innerHTML = data.map((item) => {
+        const title = (lang === 'en' && item.title_en) ? item.title_en : item.title;
+        const desc  = (lang === 'en' && item.description_en) ? item.description_en : item.description;
+        return `
           <div class="content-item">
             <div class="content-item-body">
               <span class="muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.07em;">${escapeHtml(item.category)}</span>
-              <strong style="display:block;margin-top:4px;">${escapeHtml(item.title)}</strong>
-              ${item.description ? `<p class="muted" style="margin-top:6px;">${escapeHtml(item.description)}</p>` : ''}
+              <strong style="display:block;margin-top:4px;">${escapeHtml(title)}</strong>
+              ${desc ? `<p class="muted" style="margin-top:6px;">${escapeHtml(desc)}</p>` : ''}
               ${item.video_url ? `<p style="margin-top:12px;"><a href="${escapeAttr(item.video_url)}" target="_blank" rel="noopener">${T.watchVideo}</a></p>` : ''}
             </div>
           </div>
-        `).join('');
+        `;
+      }).join('');
     }
 
     async function loadMatchReflections() {

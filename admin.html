@@ -54,16 +54,20 @@
               </select>
             </div>
             <div class="field">
-              <label>Titel</label>
+              <label>Titel (NL)</label>
               <input id="contentTitle" required />
             </div>
             <div class="field">
-              <label>Korte beschrijving</label>
-              <textarea id="contentDescription"></textarea>
+              <label>Inhoud (NL)</label>
+              <textarea id="contentBody" style="min-height: 100px;"></textarea>
             </div>
-            <div class="field">
-              <label>Inhoud</label>
-              <textarea id="contentBody" style="min-height: 140px;"></textarea>
+            <div class="field" style="border-left:3px solid #3b82f6;padding-left:12px;">
+              <label style="color:#3b82f6;">Titel (EN)</label>
+              <input id="contentTitleEn" placeholder="English title" />
+            </div>
+            <div class="field" style="border-left:3px solid #3b82f6;padding-left:12px;">
+              <label style="color:#3b82f6;">Inhoud (EN)</label>
+              <textarea id="contentBodyEn" style="min-height:100px;" placeholder="English description / body"></textarea>
             </div>
             <div class="field">
               <label>Media URL (optioneel)</label>
@@ -166,6 +170,8 @@
       const payload = {
         title: document.getElementById('contentTitle').value.trim(),
         description: document.getElementById('contentBody').value.trim(),
+        title_en: document.getElementById('contentTitleEn').value.trim() || null,
+        description_en: document.getElementById('contentBodyEn').value.trim() || null,
         category: document.getElementById('contentCategory').value,
         video_url: document.getElementById('contentMediaUrl').value.trim() || null,
         published: document.getElementById('contentPublished').value === 'true',
@@ -197,6 +203,8 @@
       document.getElementById('contentCategory').value = item.category;
       document.getElementById('contentTitle').value = item.title;
       document.getElementById('contentBody').value = item.description || '';
+      document.getElementById('contentTitleEn').value = item.title_en || '';
+      document.getElementById('contentBodyEn').value = item.description_en || '';
       document.getElementById('contentMediaUrl').value = item.video_url || '';
       document.getElementById('contentPublished').value = item.published ? 'true' : 'false';
       document.getElementById('contentSortOrder').value = item.sort_order ?? 0;
