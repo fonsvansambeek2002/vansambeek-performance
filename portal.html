@@ -912,6 +912,7 @@
           <button class="tab" data-category="mindfulness">Mindfulness</button>
           <button class="tab" data-category="voeding">Voeding</button>
           <button class="tab" data-category="fysiek">Fysiek</button>
+          <button class="tab" data-category="highlights">Highlights</button>
         </div>
         <div id="libraryList"></div>
       </section>
@@ -920,7 +921,6 @@
         <div class="sgn-bar" id="sgn-reflectie">
           <button class="sgn-btn active" data-screen="wedstrijden" id="sgnWedstrijden">Wedstrijden</button>
           <button class="sgn-btn" data-screen="checkin" id="sgnCheckin">Check-in</button>
-          <button class="sgn-btn" data-screen="highlights" id="sgnHighlights">Highlights</button>
         </div>
         <div class="card">
           <h3 id="matchFormTitle">Wedstrijdreflectie</h3>
@@ -1079,7 +1079,6 @@
         <div class="sgn-bar">
           <button class="sgn-btn" data-screen="wedstrijden">Wedstrijden</button>
           <button class="sgn-btn active" data-screen="checkin">Check-in</button>
-          <button class="sgn-btn" data-screen="highlights">Highlights</button>
         </div>
         <div class="card">
           <h3 id="ciTitle">Wekelijkse check-in</h3>
@@ -1211,7 +1210,7 @@
         subgreeting: 'Fijn dat je er bent.',
         tipTitle: 'Quote van de dag',
         noContent: 'Nog geen content beschikbaar.',
-        tabs: { mentaal: 'Mentaal', mindfulness: 'Mindfulness', voeding: 'Voeding', fysiek: 'Fysiek' },
+        tabs: { mentaal: 'Mentaal', mindfulness: 'Mindfulness', voeding: 'Voeding', fysiek: 'Fysiek', highlights: 'Highlights' },
         loading: 'Laden…',
         noCategory: 'Nog geen content in deze categorie.',
         watchVideo: 'Bekijk video →',
@@ -1355,7 +1354,7 @@
         subgreeting: 'Good to have you here.',
         tipTitle: 'Quote of the day',
         noContent: 'No content available yet.',
-        tabs: { mentaal: 'Mental', mindfulness: 'Mindfulness', voeding: 'Nutrition', fysiek: 'Physical' },
+        tabs: { mentaal: 'Mental', mindfulness: 'Mindfulness', voeding: 'Nutrition', fysiek: 'Physical', highlights: 'Highlights' },
         loading: 'Loading…',
         noCategory: 'No content in this category yet.',
         watchVideo: 'Watch video →',
@@ -1549,9 +1548,6 @@
       if (document.getElementById('screen-checkin').classList.contains('active')) {
         loadCheckin();
       }
-      if (document.getElementById('screen-highlights').classList.contains('active')) {
-        loadHighlights();
-      }
       if (document.getElementById('screen-opdrachten').classList.contains('active')) {
         loadOpdrachten();
       }
@@ -1621,7 +1617,7 @@
     });
 
     const screenNavGroup = {
-      wedstrijden: 'reflectie', checkin: 'reflectie', highlights: 'reflectie',
+      wedstrijden: 'reflectie', checkin: 'reflectie',
       planning: 'traject', video: 'traject',
     };
 
@@ -1651,9 +1647,6 @@
       }
       if (name === 'wedstrijden') {
         loadMatchReflections();
-      }
-      if (name === 'highlights') {
-        loadHighlights();
       }
       if (name === 'checkin') {
         loadCheckin();
@@ -1808,6 +1801,11 @@
       const T = i18n[lang];
       libraryLoaded = true;
       const list = document.getElementById('libraryList');
+
+      if (category === 'highlights') {
+        loadHighlights(list);
+        return;
+      }
 
       if (category === 'voeding') {
         loadVoedingSection(list);
@@ -2898,9 +2896,9 @@
       },
     ];
 
-    function loadHighlights() {
+    function loadHighlights(container) {
       const T = i18n[lang];
-      const list = document.getElementById('highlightsList');
+      const list = container || document.getElementById('highlightsList');
       list.innerHTML = highlightMatches.map((h) => {
         const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(h.players + ' ' + h.event + ' ' + h.year + ' highlights');
         return `
