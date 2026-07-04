@@ -73,6 +73,14 @@
     }
     .nav-links a:hover { background: var(--line); color: var(--navy); }
     .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .nav-portal-btn {
+      display: none;
+      font-size: 13px; font-weight: 700; color: var(--navy);
+      background: var(--green); border: none; border-radius: 8px;
+      padding: 8px 14px; cursor: pointer; text-decoration: none;
+      white-space: nowrap; transition: background .15s;
+    }
+    .nav-portal-btn:hover { background: var(--green2); }
 
     /* LANG TOGGLE */
     .lang-switch {
@@ -288,6 +296,7 @@
       .grid-2, .grid-4 { grid-template-columns: 1fr 1fr; }
       .nav-links { display: none; }
       .hamburger { display: flex; }
+      .nav-portal-btn { display: inline-flex; align-items: center; }
       .hero { padding: 64px 0 52px; }
       .hero h1 { font-size: 34px; }
       .hero-sub { font-size: 15px; }
@@ -333,7 +342,7 @@
         <div class="lang-divider"></div>
         <button id="btnEN" type="button" onclick="setLang('en')">EN</button>
       </div>
-      
+      <a class="nav-portal-btn" href="/login.html" id="navPortalMobile">Portal</a>
       <button class="hamburger" id="hamburger" type="button" aria-label="Menu openen">
         <span></span><span></span><span></span>
       </button>
@@ -597,7 +606,7 @@ const sessions = {
 const t = {
   nl:{
     navOverMij:'Over Mij', navWaarom:'Waarom mentaal', navVoorWie:'Voor wie',
-    navTrajecten:'Traject', navPrijzen:'Prijzen', navPortal:'Portal', navContact:'Plan kennismaking',
+    navTrajecten:'Traject', navPrijzen:'Prijzen', navPortal:'Portal', navPortalMobile:'Portal', navContact:'Plan kennismaking',
     mNavOverMij:'Over Mij', mNavWaarom:'Waarom mentaal', mNavVoorWie:'Voor wie',
     mNavTrajecten:'Traject', mNavPrijzen:'Prijzen', mNavPortal:'Portal', mNavContact:'Plan kennismaking',
     heroEyebrow:'Mentale performance coaching',
@@ -653,7 +662,7 @@ const t = {
   },
   en:{
     navOverMij:'About me', navWaarom:'Why mental', navVoorWie:'For athletes',
-    navTrajecten:'Program', navPrijzen:'Pricing', navPortal:'Portal', navContact:'Book intro call',
+    navTrajecten:'Program', navPrijzen:'Pricing', navPortal:'Portal', navPortalMobile:'Portal', navContact:'Book intro call',
     mNavOverMij:'About me', mNavWaarom:'Why mental', mNavVoorWie:'For athletes',
     mNavTrajecten:'Program', mNavPrijzen:'Pricing', mNavPortal:'Portal', mNavContact:'Book intro call',
     heroEyebrow:'Mental performance coaching',

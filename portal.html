@@ -948,33 +948,33 @@
         <div class="plan-form-card" id="planFormCard" style="display:none;">
           <h3 style="margin-bottom:14px;">Toernooi toevoegen</h3>
           <div class="field">
-            <label>Naam toernooi *</label>
+            <label id="planNameLabel">Naam toernooi *</label>
             <input type="text" id="planName" placeholder="bijv. ITS Rotterdam" />
           </div>
           <div class="field">
-            <label>Locatie</label>
+            <label id="planLocationLabel">Locatie</label>
             <input type="text" id="planLocation" placeholder="bijv. Rotterdam" />
           </div>
           <div class="field">
-            <label>Ondergrond</label>
+            <label id="planSurfaceLabel">Ondergrond</label>
             <select id="planSurface">
-              <option value="">Selecteer...</option>
+              <option value="" id="planSurfaceDefault">Selecteer...</option>
               <option value="hard">Hard</option>
               <option value="gravel">Gravel</option>
-              <option value="grass">Gras</option>
+              <option value="grass" id="planSurfaceGrass">Gras</option>
               <option value="indoor">Indoor</option>
             </select>
           </div>
           <div class="field">
-            <label>Startdatum *</label>
+            <label id="planStartLabel">Startdatum *</label>
             <input type="date" id="planStart" />
           </div>
           <div class="field">
-            <label>Einddatum</label>
+            <label id="planEndLabel">Einddatum</label>
             <input type="date" id="planEnd" />
           </div>
           <div class="field">
-            <label>Notities</label>
+            <label id="planNotesLabel">Notities</label>
             <textarea id="planNotes" style="min-height:70px;" placeholder="Bijv. ranking punten, verwachtingen..."></textarea>
           </div>
           <button class="btn-accent" id="planSubmitBtn">Toernooi opslaan</button>
@@ -985,11 +985,11 @@
 
       <section class="screen" id="screen-video">
         <div class="card" style="margin-bottom:20px;">
-          <h3 style="margin-bottom:6px;">Video insturen</h3>
-          <p class="muted" style="font-size:0.85rem;margin-bottom:16px;">Upload een video van je training of wedstrijd direct vanuit je camera. Ik kijk ernaar en geef je persoonlijke feedback.</p>
+          <h3 style="margin-bottom:6px;" id="vidFormTitle">Video insturen</h3>
+          <p class="muted" style="font-size:0.85rem;margin-bottom:16px;" id="vidFormDesc">Upload een video van je training of wedstrijd direct vanuit je camera. Ik kijk ernaar en geef je persoonlijke feedback.</p>
 
           <div class="field">
-            <label>Video *</label>
+            <label id="vidFileLabel">Video *</label>
             <label class="vid-pick-label" id="vidPickLabel">
               <input type="file" id="vidFile" accept="video/*" style="display:none;" />
               <div class="vid-pick-area" id="vidPickArea">
@@ -997,7 +997,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
                 </div>
                 <div class="vid-pick-name" id="vidPickName">Tik om video te kiezen</div>
-                <div class="vid-pick-sub">Vanuit je camera of fotoalbum</div>
+                <div class="vid-pick-sub" id="vidPickSub">Vanuit je camera of fotoalbum</div>
               </div>
             </label>
             <div class="vid-upload-bar-wrap" id="vidBarWrap" style="display:none;">
@@ -1006,18 +1006,18 @@
           </div>
 
           <div class="field">
-            <label>Titel *</label>
+            <label id="vidTitleLabel">Titel *</label>
             <input type="text" id="vidTitle" placeholder="bijv. Training 1 juli" />
           </div>
           <div class="field">
-            <label>Type</label>
+            <label id="vidTypeLabel">Type</label>
             <select id="vidType">
-              <option value="training">Training</option>
-              <option value="wedstrijd">Wedstrijd</option>
+              <option value="training" id="vidOptTraining">Training</option>
+              <option value="wedstrijd" id="vidOptWedstrijd">Wedstrijd</option>
             </select>
           </div>
           <div class="field">
-            <label>Context / Waar moet ik op letten?</label>
+            <label id="vidDescLabel">Context / Waar moet ik op letten?</label>
             <textarea id="vidDesc" style="min-height:80px;" placeholder="Beschrijf wat je graag wil dat ik analyseer..."></textarea>
           </div>
           <button class="btn-accent" id="vidSubmitBtn">Video insturen</button>
@@ -1213,6 +1213,53 @@
         ciChallengingShort: 'Uitdagend',
         ciFocusShort: 'Focus volgende week',
         watchHighlights: 'Bekijk highlights',
+        monthNames: ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'],
+        monthShort: ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'],
+        calDayNames: ['Ma','Di','Wo','Do','Vr','Za','Zo'],
+        planTo: ' t/m ',
+        voedingTitle: 'Voeding voor sporters',
+        voedingSubtitle: 'Alles wat je moet weten over eten als atleet.',
+        voedingCta: 'Daarom heb ik hier recepten uitgeschreven die specifiek goed zijn om te eten als sporter — afgestemd op timing, herstel en prestatie. Klik op een categorie om de recepten te zien.',
+        recipeTabOntbijt: 'Ontbijt',
+        recipeTabLunch: 'Lunch',
+        recipeTabDiner: 'Diner',
+        recipeTabSnacks: 'Snacks',
+        recipeIngredients: 'Ingrediënten',
+        recipePrep: 'Bereiding',
+        recipeMacros: (k, p, c, f) => `${k} kcal · ${p}g eiwit · ${c}g KH · ${f}g vet`,
+        opdrachtOf: 'van',
+        opdrachtAllDone: 'Alle opdrachten voltooid',
+        opdrachtAllDoneMsg: 'Goed gedaan — je hebt alle 12 opdrachten ingevuld. Gebruik deze reflecties als basis voor je sessies.',
+        opdrachtDoneHeader: 'Voltooide opdrachten',
+        opdrachtPlaceholder: 'Schrijf hier je antwoord…',
+        opdrachtSend: 'Opdracht insturen',
+        opdrachtSaving: 'Opslaan…',
+        opdrachtTooShort: 'Schrijf iets meer — de opdracht vraagt om echte reflectie.',
+        opdrachtFail: 'Opslaan mislukt: ',
+        vidFormTitle: 'Video insturen',
+        vidFormDesc: 'Upload een video van je training of wedstrijd direct vanuit je camera. Ik kijk ernaar en geef je persoonlijke feedback.',
+        vidFileLabel: 'Video *',
+        vidPickName: 'Tik om video te kiezen',
+        vidPickSub: 'Vanuit je camera of fotoalbum',
+        vidTitleLabel: 'Titel *',
+        vidTitlePlaceholder: 'bijv. Training 1 juli',
+        vidTypeLabel: 'Type',
+        vidOptTraining: 'Training',
+        vidOptWedstrijd: 'Wedstrijd',
+        vidDescLabel: 'Context / Waar moet ik op letten?',
+        vidDescPlaceholder: 'Beschrijf wat je graag wil dat ik analyseer...',
+        vidTypeLabels: { training: 'Training', wedstrijd: 'Wedstrijd' },
+        planNameLabel: 'Naam toernooi *',
+        planLocationLabel: 'Locatie',
+        planSurfaceLabel: 'Ondergrond',
+        planSurfaceDefault: 'Selecteer...',
+        planSurfaceGrass: 'Gras',
+        planStartLabel: 'Startdatum *',
+        planEndLabel: 'Einddatum',
+        planNotesLabel: 'Notities',
+        planNotesPlaceholder: 'Bijv. ranking punten, verwachtingen...',
+        planNamePlaceholder: 'bijv. ITS Rotterdam',
+        planLocationPlaceholder: 'bijv. Rotterdam',
         navOpdrachten: 'Opdrachten',
         navPlanning: 'Planning',
         navVideo: 'Video',
@@ -1296,6 +1343,53 @@
         ciChallengingShort: 'Challenging',
         ciFocusShort: 'Focus next week',
         watchHighlights: 'Watch highlights',
+        monthNames: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+        monthShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        calDayNames: ['Mo','Tu','We','Th','Fr','Sa','Su'],
+        planTo: ' to ',
+        voedingTitle: 'Nutrition for athletes',
+        voedingSubtitle: 'Everything you need to know about eating as an athlete.',
+        voedingCta: 'That\'s why I\'ve written out recipes that are specifically good to eat as an athlete — tailored to timing, recovery and performance. Tap a category to see the recipes.',
+        recipeTabOntbijt: 'Breakfast',
+        recipeTabLunch: 'Lunch',
+        recipeTabDiner: 'Dinner',
+        recipeTabSnacks: 'Snacks',
+        recipeIngredients: 'Ingredients',
+        recipePrep: 'Preparation',
+        recipeMacros: (k, p, c, f) => `${k} kcal · ${p}g protein · ${c}g carbs · ${f}g fat`,
+        opdrachtOf: 'of',
+        opdrachtAllDone: 'All assignments completed',
+        opdrachtAllDoneMsg: 'Well done — you\'ve completed all 12 assignments. Use these reflections as a basis for your sessions.',
+        opdrachtDoneHeader: 'Completed assignments',
+        opdrachtPlaceholder: 'Write your answer here…',
+        opdrachtSend: 'Submit assignment',
+        opdrachtSaving: 'Saving…',
+        opdrachtTooShort: 'Write a bit more — the assignment asks for genuine reflection.',
+        opdrachtFail: 'Save failed: ',
+        vidFormTitle: 'Submit video',
+        vidFormDesc: 'Upload a video of your training or match directly from your camera. I\'ll watch it and give you personal feedback.',
+        vidFileLabel: 'Video *',
+        vidPickName: 'Tap to choose a video',
+        vidPickSub: 'From your camera or photo library',
+        vidTitleLabel: 'Title *',
+        vidTitlePlaceholder: 'e.g. Training July 1',
+        vidTypeLabel: 'Type',
+        vidOptTraining: 'Training',
+        vidOptWedstrijd: 'Match',
+        vidDescLabel: 'Context / What should I focus on?',
+        vidDescPlaceholder: 'Describe what you\'d like me to analyse...',
+        vidTypeLabels: { training: 'Training', wedstrijd: 'Match' },
+        planNameLabel: 'Tournament name *',
+        planLocationLabel: 'Location',
+        planSurfaceLabel: 'Surface',
+        planSurfaceDefault: 'Select...',
+        planSurfaceGrass: 'Grass',
+        planStartLabel: 'Start date *',
+        planEndLabel: 'End date',
+        planNotesLabel: 'Notes',
+        planNotesPlaceholder: 'e.g. ranking points, expectations...',
+        planNamePlaceholder: 'e.g. ITS Rotterdam',
+        planLocationPlaceholder: 'e.g. Rotterdam',
         navOpdrachten: 'Assignments',
         navPlanning: 'Planning',
         navVideo: 'Video',
@@ -1380,6 +1474,19 @@
       }
       if (document.getElementById('screen-checkin').classList.contains('active')) {
         loadCheckin();
+      }
+      if (document.getElementById('screen-highlights').classList.contains('active')) {
+        loadHighlights();
+      }
+      if (document.getElementById('screen-opdrachten').classList.contains('active')) {
+        loadOpdrachten();
+      }
+      if (document.getElementById('screen-planning').classList.contains('active')) {
+        planLoaded = false;
+        loadPlanning();
+      }
+      if (document.getElementById('screen-video').classList.contains('active')) {
+        loadVideoAnalyse();
       }
     }
 
@@ -1742,66 +1849,103 @@
       ],
     };
 
+    const voedingMacroContent = {
+      nl: [
+        { color: '#ef4444', title: 'Eiwitten', lines: [
+          'Eiwitten zijn de bouwstenen van je lichaam — onmisbaar voor spieropbouw, herstel en het aanmaken van enzymen en hormonen.',
+          '<strong>Hoeveel:</strong> 1.6–2.2g per kg lichaamsgewicht per dag. Bij 70kg = 112–154g eiwit.',
+          '<strong>Wanneer:</strong> Verspreid over 4–5 maaltijden (20–40g per keer). Na training binnen 60 min een eiwitbron eten is cruciaal.',
+          '<strong>Bronnen:</strong> Kip, zalm, tonijn, eieren, Griekse yoghurt, kwark, cottage cheese, peulvruchten.',
+          '<strong>Let op:</strong> Meer dan 40g per maaltijd wordt niet beter benut. Verspreid is altijd beter dan alles in één keer.',
+        ]},
+        { color: '#f59e0b', title: 'Koolhydraten', lines: [
+          'Koolhydraten zijn jouw primaire brandstof. Ze slaan op als glycogeen in spieren en lever — je energiereserve voor training en wedstrijden.',
+          '<strong>Hoeveel:</strong> 3–7g per kg lichaamsgewicht, afhankelijk van trainingsintensiteit.',
+          '<strong>Wanneer:</strong> Vóór training (2–3 uur van tevoren, of 30–60 min licht). Na training voor herstel. Avond voor wedstrijd: koolhydraten laden.',
+          '<strong>Kies:</strong> Complex (havermout, rijst, zoete aardappel, volkoren pasta) voor langdurige energie. Simpel (fruit, wit brood) direct voor of na training.',
+          '<strong>Let op:</strong> Schrap koolhydraten nooit volledig. Sporters die te weinig eten presteren slechter, herstellen trager en raken sneller geblesseerd.',
+        ]},
+        { color: '#3b82f6', title: 'Vetten', lines: [
+          'Vetten zijn essentieel voor hormoonproductie, de opname van vitamine A, D, E en K, en de bescherming van gewrichten.',
+          '<strong>Hoeveel:</strong> 0.8–1.2g per kg lichaamsgewicht per dag.',
+          '<strong>Wanneer:</strong> Niet vlak voor training — vetten vertragen de vertering. Wel bij ontbijt, lunch en diner.',
+          '<strong>Bronnen:</strong> Olijfolie, avocado, noten, vette vis (zalm, makreel), eieren.',
+          '<strong>Let op:</strong> Vermijd transvetten (bewerkt eten, frituur). Omega-3 is essentieel voor herstel en het remmen van ontsteking.',
+        ]},
+        { color: '#06b6d4', title: 'Hydratatie', lines: [
+          'Al 2% vochtverlies verlaagt je prestatievermogen met 10–20%. Een van de meest onderschatte factoren bij sporters.',
+          '<strong>Norm:</strong> 2.5–3.5 liter water per dag als sporter. Meer bij hitte en lange inspanning.',
+          '<strong>Wanneer:</strong> Begin elke dag met een groot glas water. Drink regelmatig — niet alleen als je dorst hebt. Goede hydratatie begint de dag vóór een wedstrijd.',
+          '<strong>Elektrolyten:</strong> Bij inspanning langer dan 60–90 minuten verlies je ook natrium, kalium en magnesium. Aanvullen via voeding of sportdrank.',
+        ]},
+        { color: '#C8F135', title: 'Timing', lines: [
+          '<strong>2–3 uur voor training:</strong> Uitgebalanceerde maaltijd — koolhydraten, eiwit, weinig vet.',
+          '<strong>30–60 min voor training:</strong> Klein en licht — banaan, rijstwafels met pindakaas.',
+          '<strong>Na training (binnen 60 min):</strong> Eiwit + koolhydraten. Dit herstelvenster is cruciaal.',
+          '<strong>Avond voor wedstrijd:</strong> Hoog in koolhydraten, matig eiwit, weinig vet. Vroeg eten.',
+          '<strong>Wedstrijddag zelf:</strong> Vertrouwde maaltijden. Experimenteer nooit op wedstrijddag.',
+        ]},
+      ],
+      en: [
+        { color: '#ef4444', title: 'Protein', lines: [
+          'Protein is the building block of your body — essential for muscle building, recovery and the production of enzymes and hormones.',
+          '<strong>How much:</strong> 1.6–2.2g per kg of bodyweight per day. At 70kg = 112–154g protein.',
+          '<strong>When:</strong> Spread across 4–5 meals (20–40g each). Eating a protein source within 60 min after training is crucial.',
+          '<strong>Sources:</strong> Chicken, salmon, tuna, eggs, Greek yoghurt, cottage cheese, legumes.',
+          '<strong>Note:</strong> More than 40g per meal is not better absorbed. Spreading throughout the day is always more effective.',
+        ]},
+        { color: '#f59e0b', title: 'Carbohydrates', lines: [
+          'Carbohydrates are your primary fuel. They are stored as glycogen in muscles and liver — your energy reserve for training and matches.',
+          '<strong>How much:</strong> 3–7g per kg of bodyweight, depending on training intensity.',
+          '<strong>When:</strong> Before training (2–3 hours, or 30–60 min light). After training for recovery. Night before a match: carbohydrate loading.',
+          '<strong>Choose:</strong> Complex carbs (oats, rice, sweet potato, whole-grain pasta) for sustained energy. Simple (fruit, white bread) directly before or after training.',
+          '<strong>Note:</strong> Never cut carbs completely. Athletes who under-fuel perform worse, recover slower and get injured more easily.',
+        ]},
+        { color: '#3b82f6', title: 'Fats', lines: [
+          'Fats are essential for hormone production, absorption of vitamins A, D, E and K, and joint protection.',
+          '<strong>How much:</strong> 0.8–1.2g per kg of bodyweight per day.',
+          '<strong>When:</strong> Not right before training — fats slow digestion. Fine at breakfast, lunch and dinner.',
+          '<strong>Sources:</strong> Olive oil, avocado, nuts, fatty fish (salmon, mackerel), eggs.',
+          '<strong>Note:</strong> Avoid trans fats (processed food, fried food). Omega-3 is essential for recovery and reducing inflammation.',
+        ]},
+        { color: '#06b6d4', title: 'Hydration', lines: [
+          'As little as 2% fluid loss reduces your performance by 10–20%. One of the most underestimated factors in sport.',
+          '<strong>Guideline:</strong> 2.5–3.5 litres of water per day as an athlete. More in heat and long sessions.',
+          '<strong>When:</strong> Start every day with a large glass of water. Drink regularly — not only when thirsty. Good hydration starts the day before a match.',
+          '<strong>Electrolytes:</strong> During exercise lasting more than 60–90 minutes you also lose sodium, potassium and magnesium. Replenish through food or a sports drink.',
+        ]},
+        { color: '#C8F135', title: 'Timing', lines: [
+          '<strong>2–3 hours before training:</strong> Balanced meal — carbohydrates, protein, low fat.',
+          '<strong>30–60 min before training:</strong> Small and light — banana, rice cakes with peanut butter.',
+          '<strong>After training (within 60 min):</strong> Protein + carbohydrates. This recovery window is critical.',
+          '<strong>Night before a match:</strong> High in carbs, moderate protein, low fat. Eat early.',
+          '<strong>Match day itself:</strong> Familiar foods only. Never experiment on match day.',
+        ]},
+      ],
+    };
+
     function loadVoedingSection(list) {
+      const T = i18n[lang];
+      const macros = voedingMacroContent[lang];
+      const macrosHtml = macros.map((m) => `
+        <div class="macro-block" style="border-color:${m.color};">
+          <h4 style="color:${m.color};">${m.title}</h4>
+          ${m.lines.map((l) => `<p>${l}</p>`).join('')}
+        </div>`).join('');
+
       list.innerHTML = `
         <div class="card" style="margin-bottom:16px;">
-          <h3 style="margin-bottom:4px;">Voeding voor sporters</h3>
-          <p class="muted" style="font-size:0.82rem;margin-bottom:16px;">Alles wat je moet weten over eten als atleet.</p>
-
-          <div class="macro-block" style="border-color:#ef4444;">
-            <h4 style="color:#ef4444;">Eiwitten</h4>
-            <p>Eiwitten zijn de bouwstenen van je lichaam — onmisbaar voor spieropbouw, herstel en het aanmaken van enzymen en hormonen.</p>
-            <p><strong>Hoeveel:</strong> 1.6–2.2g per kg lichaamsgewicht per dag. Bij 70kg = 112–154g eiwit.</p>
-            <p><strong>Wanneer:</strong> Verspreid over 4–5 maaltijden (20–40g per keer). Na training binnen 60 min een eiwitbron eten is cruciaal.</p>
-            <p><strong>Bronnen:</strong> Kip, zalm, tonijn, eieren, Griekse yoghurt, kwark, cottage cheese, peulvruchten.</p>
-            <p><strong>Let op:</strong> Meer dan 40g per maaltijd wordt niet beter benut. Verspreid is altijd beter dan alles in één keer.</p>
-          </div>
-
-          <div class="macro-block" style="border-color:#f59e0b;">
-            <h4 style="color:#f59e0b;">Koolhydraten</h4>
-            <p>Koolhydraten zijn jouw primaire brandstof. Ze slaan op als glycogeen in spieren en lever — je energiereserve voor training en wedstrijden.</p>
-            <p><strong>Hoeveel:</strong> 3–7g per kg lichaamsgewicht, afhankelijk van trainingsintensiteit.</p>
-            <p><strong>Wanneer:</strong> Vóór training (2–3 uur van tevoren, of 30–60 min licht). Na training voor herstel. Avond voor wedstrijd: koolhydraten laden.</p>
-            <p><strong>Kies:</strong> Complex (havermout, rijst, zoete aardappel, volkoren pasta) voor langdurige energie. Simpel (fruit, wit brood) direct voor of na training.</p>
-            <p><strong>Let op:</strong> Schrap koolhydraten nooit volledig. Sporters die te weinig eten presteren slechter, herstellen trager en raken sneller geblesseerd.</p>
-          </div>
-
-          <div class="macro-block" style="border-color:#3b82f6;">
-            <h4 style="color:#3b82f6;">Vetten</h4>
-            <p>Vetten zijn essentieel voor hormoonproductie, de opname van vitamine A, D, E en K, en de bescherming van gewrichten.</p>
-            <p><strong>Hoeveel:</strong> 0.8–1.2g per kg lichaamsgewicht per dag.</p>
-            <p><strong>Wanneer:</strong> Niet vlak voor training — vetten vertragen de vertering. Wel bij ontbijt, lunch en diner.</p>
-            <p><strong>Bronnen:</strong> Olijfolie, avocado, noten, vette vis (zalm, makreel), eieren.</p>
-            <p><strong>Let op:</strong> Vermijd transvetten (bewerkt eten, frituur). Omega-3 is essentieel voor herstel en het remmen van ontsteking.</p>
-          </div>
-
-          <div class="macro-block" style="border-color:#06b6d4;">
-            <h4 style="color:#06b6d4;">Hydratatie</h4>
-            <p>Al 2% vochtverlies verlaagt je prestatievermogen met 10–20%. Een van de meest onderschatte factoren bij sporters.</p>
-            <p><strong>Norm:</strong> 2.5–3.5 liter water per dag als sporter. Meer bij hitte en lange inspanning.</p>
-            <p><strong>Wanneer:</strong> Begin elke dag met een groot glas water. Drink regelmatig — niet alleen als je dorst hebt. Goede hydratatie begint de dag vóór een wedstrijd.</p>
-            <p><strong>Elektrolyten:</strong> Bij inspanning langer dan 60–90 minuten verlies je ook natrium, kalium en magnesium. Aanvullen via voeding of sportdrank.</p>
-          </div>
-
-          <div class="macro-block" style="border-color:#C8F135;">
-            <h4 style="color:#C8F135;">Timing</h4>
-            <p><strong>2–3 uur voor training:</strong> Uitgebalanceerde maaltijd — koolhydraten, eiwit, weinig vet.</p>
-            <p><strong>30–60 min voor training:</strong> Klein en licht — banaan, rijstwafels met pindakaas.</p>
-            <p><strong>Na training (binnen 60 min):</strong> Eiwit + koolhydraten. Dit herstelvenster is cruciaal.</p>
-            <p><strong>Avond voor wedstrijd:</strong> Hoog in koolhydraten, matig eiwit, weinig vet. Vroeg eten.</p>
-            <p><strong>Wedstrijddag zelf:</strong> Vertrouwde maaltijden. Experimenteer nooit op wedstrijddag.</p>
-          </div>
-
-          <div class="voeding-cta">
-            Daarom heb ik hier recepten uitgeschreven die specifiek goed zijn om te eten als sporter — afgestemd op timing, herstel en prestatie. Klik op een categorie om de recepten te zien.
-          </div>
+          <h3 style="margin-bottom:4px;">${T.voedingTitle}</h3>
+          <p class="muted" style="font-size:0.82rem;margin-bottom:16px;">${T.voedingSubtitle}</p>
+          ${macrosHtml}
+          <div class="voeding-cta">${T.voedingCta}</div>
         </div>
 
         <div class="recipe-tabs" id="recipeTabs">
-          <button class="recipe-tab active" data-recipe="ontbijt">Ontbijt</button>
-          <button class="recipe-tab" data-recipe="lunch">Lunch</button>
-          <button class="recipe-tab" data-recipe="diner">Diner</button>
-          <button class="recipe-tab" data-recipe="snacks">Snacks</button>
+          <button class="recipe-tab active" data-recipe="ontbijt">${T.recipeTabOntbijt}</button>
+          <button class="recipe-tab" data-recipe="lunch">${T.recipeTabLunch}</button>
+          <button class="recipe-tab" data-recipe="diner">${T.recipeTabDiner}</button>
+          <button class="recipe-tab" data-recipe="snacks">${T.recipeTabSnacks}</button>
         </div>
 
         <div id="recipeList"></div>
@@ -1819,6 +1963,7 @@
     }
 
     function renderRecipes(cat) {
+      const T = i18n[lang];
       const list = document.getElementById('recipeList');
       const recipes = recipeData[cat];
       list.innerHTML = recipes.map((r) => `
@@ -1828,19 +1973,19 @@
             <div class="recipe-tags">${r.tags.map((t) => `<span class="recipe-tag">${escapeHtml(t)}</span>`).join('')}</div>
 
             <div class="recipe-section">
-              <span class="rs-label">Ingrediënten</span>
+              <span class="rs-label">${T.recipeIngredients}</span>
               <ul>${r.ingredients.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
             </div>
 
             <div class="recipe-section">
-              <span class="rs-label">Bereiding</span>
+              <span class="rs-label">${T.recipePrep}</span>
               <p>${escapeHtml(r.prep)}</p>
             </div>
 
             <div class="recipe-tip">${escapeHtml(r.tip)}</div>
 
             <div class="recipe-macros">
-              ${r.macros.kcal} kcal &nbsp;·&nbsp; ${r.macros.protein}g eiwit &nbsp;·&nbsp; ${r.macros.carbs}g KH &nbsp;·&nbsp; ${r.macros.fat}g vet
+              ${T.recipeMacros(r.macros.kcal, r.macros.protein, r.macros.carbs, r.macros.fat)}
             </div>
           </div>
         </div>
@@ -1924,9 +2069,89 @@
       },
     ];
 
+    const assignmentsEN = [
+      {
+        num: 1,
+        title: 'Who are you as an athlete?',
+        intro: 'The foundation of mental performance begins with self-knowledge.',
+        question: 'Describe in 3 to 5 sentences who you are as a tennis player — not your results or ranking, but your character on court. How would your coach describe you? What makes you unique as a player?',
+      },
+      {
+        num: 2,
+        title: 'Your best moment',
+        intro: 'We learn the most from our own peak performances.',
+        question: 'Think of a match or training session where you felt at your absolute best. When was that? What was different about that day? How did you feel on the inside — in your body, your thoughts, your energy?',
+      },
+      {
+        num: 3,
+        title: 'What drains your energy?',
+        intro: 'Every athlete has situations that drain mental energy.',
+        question: 'What situations cost you the most mental energy on court? Think of: an error at a key moment, an annoying opponent, a poor start.\n\nWhat do you notice about yourself in those moments — in your thoughts and your body?',
+      },
+      {
+        num: 4,
+        title: 'How do you talk to yourself?',
+        intro: 'Your inner voice is the most consistent coach you have.',
+        question: 'Write down 3 things you say to yourself when things are going well on court.\nThen write 3 things you say when things go wrong.\n\nWhat do you notice about the difference?',
+      },
+      {
+        num: 5,
+        title: 'Dealing with mistakes',
+        intro: 'How you respond after an error determines what happens next.',
+        question: 'Describe a specific situation where you made an error at an important moment. What did you do in the 20 seconds afterward? What did you think? What did you feel?\n\nHow did that reaction affect the rest of the point or game?',
+      },
+      {
+        num: 6,
+        title: 'Pressure and nerves',
+        intro: 'Pressure is a privilege — it means it matters.',
+        question: 'Think of a moment where you felt pressure during a match. What happened in your body (heart rate, breathing, muscles)? What did your thoughts do?\n\nHow did you react — did you play differently, make different decisions?',
+      },
+      {
+        num: 7,
+        title: 'Your preparation',
+        intro: 'Matches are won before the first ball is struck.',
+        question: 'Describe what you normally do in the lead-up to a match: the morning, the warm-up, the minutes before the first point.\n\nWhat do you already do consciously? What do you do on autopilot? What would you like to change or add?',
+      },
+      {
+        num: 8,
+        title: 'Your strengths',
+        intro: 'Confidence is built on evidence, not on feeling.',
+        question: 'What are your 3 biggest strengths as a tennis player — mentally, tactically or technically?\n\nWhat qualities can you rely on when it really matters? Give a concrete example of when you showed each strength.',
+      },
+      {
+        num: 9,
+        title: 'Concentration',
+        intro: 'Focus is a muscle — you can train it.',
+        question: 'When do you most easily lose your concentration? (Think of: long rallies, background noise, a line call, a badly played game.)\n\nWhat do you already do to refocus? What works, and what doesn\'t?',
+      },
+      {
+        num: 10,
+        title: 'Setting goals',
+        intro: 'The right goals give the right energy.',
+        question: 'Write down one goal for each level:\n\n• Result goal — what do you want to achieve? (e.g. top 100 nationally)\n• Performance goal — what specific performance do you want to improve? (e.g. first serve %)\n• Process goal — what will you do in every training or match? (e.g. three breaths after every error)\n\nWhy are these goals important to you?',
+      },
+      {
+        num: 11,
+        title: 'Your ideal mindset',
+        intro: 'When you are at your best — what does that look like on the inside?',
+        question: 'Describe as concretely as possible how you feel when you play at your very best.\n\nWhat are your thoughts? What is your energy level? How is your body language? How do you see your opponent? How do you respond to errors?\n\nThis is your blueprint for peak performance.',
+      },
+      {
+        num: 12,
+        title: 'A letter to yourself',
+        intro: 'The final assignment — and perhaps the most powerful one.',
+        question: 'Write a short letter to yourself for the next tough match.\n\nWhat do you want to remind yourself of? What do you need to watch out for? What do you need to perform at your best?\n\nWrite it as if you are your own best coach.',
+      },
+    ];
+
+    function getAssignments() {
+      return lang === 'en' ? assignmentsEN : assignments;
+    }
+
     async function loadOpdrachten() {
+      const T = i18n[lang];
       const container = document.getElementById('opdrachtContent');
-      container.innerHTML = `<div class="empty-state">Laden…</div>`;
+      container.innerHTML = `<div class="empty-state">${T.loading}</div>`;
 
       const { data: completions } = await supabaseClient
         .from('assignment_completions')
@@ -1935,9 +2160,9 @@
         .order('assignment_num', { ascending: true });
 
       const done = completions || [];
-      const doneNums = new Set(done.map((c) => c.assignment_num));
       const currentNum = done.length + 1;
-      const total = assignments.length;
+      const asData = getAssignments();
+      const total = asData.length;
       const allDone = done.length >= total;
       const pct = Math.round((done.length / total) * 100);
 
@@ -1951,35 +2176,35 @@
       if (allDone) {
         html += `
           <div class="opr-all-done">
-            <h3>Alle opdrachten voltooid</h3>
-            <p>Goed gedaan — je hebt alle 12 opdrachten ingevuld. Gebruik deze reflecties als basis voor je sessies.</p>
+            <h3>${T.opdrachtAllDone}</h3>
+            <p>${T.opdrachtAllDoneMsg}</p>
           </div>
         `;
       } else {
-        const a = assignments[currentNum - 1];
+        const a = asData[currentNum - 1];
         html += `
           <div class="opr-card">
             <div class="opr-ghost">${a.num}</div>
-            <div class="opr-num-label">Opdracht ${a.num} van ${total}</div>
+            <div class="opr-num-label">${lang === 'en' ? 'Assignment' : 'Opdracht'} ${a.num} ${T.opdrachtOf} ${total}</div>
             <div class="opr-title">${escapeHtml(a.title)}</div>
             <div class="opr-intro">${escapeHtml(a.intro)}</div>
             <div class="opr-question">${escapeHtml(a.question)}</div>
             <div class="field">
-              <textarea id="opdrachtResponse" style="min-height:120px;" placeholder="Schrijf hier je antwoord…"></textarea>
+              <textarea id="opdrachtResponse" style="min-height:120px;" placeholder="${T.opdrachtPlaceholder}"></textarea>
             </div>
-            <button class="btn-accent" id="opdrachtSubmitBtn">Opdracht insturen</button>
+            <button class="btn-accent" id="opdrachtSubmitBtn">${T.opdrachtSend}</button>
             <p id="opdrachtMessage" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
           </div>
         `;
       }
 
       if (done.length > 0) {
-        html += `<h4 style="font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#444;font-size:1rem;margin:0 0 10px;">Voltooide opdrachten</h4>`;
+        html += `<h4 style="font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#444;font-size:1rem;margin:0 0 10px;">${T.opdrachtDoneHeader}</h4>`;
         html += `<div class="opr-done-list">`;
         done.slice().reverse().forEach((c) => {
-          const a = assignments.find((x) => x.num === c.assignment_num);
+          const a = asData.find((x) => x.num === c.assignment_num);
           if (!a) return;
-          const dateStr = new Date(c.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+          const dateStr = new Date(c.created_at).toLocaleDateString(lang === 'en' ? 'en-GB' : 'nl-NL', { day: 'numeric', month: 'short' });
           html += `
             <div class="opr-done-item" data-id="${escapeAttr(c.id)}">
               <div class="opr-done-header">
@@ -2010,6 +2235,7 @@
     }
 
     async function submitAssignment(num) {
+      const T = i18n[lang];
       const response = document.getElementById('opdrachtResponse').value.trim();
       const msg = document.getElementById('opdrachtMessage');
       const btn = document.getElementById('opdrachtSubmitBtn');
@@ -2017,12 +2243,12 @@
       if (response.length < 20) {
         msg.classList.remove('hidden');
         msg.className = 'error-msg';
-        msg.textContent = 'Schrijf iets meer — de opdracht vraagt om echte reflectie.';
+        msg.textContent = T.opdrachtTooShort;
         return;
       }
 
       btn.disabled = true;
-      btn.textContent = 'Opslaan…';
+      btn.textContent = T.opdrachtSaving;
 
       const { error } = await supabaseClient.from('assignment_completions').insert({
         user_id: currentUser.id,
@@ -2032,10 +2258,10 @@
 
       if (error) {
         btn.disabled = false;
-        btn.textContent = 'Opdracht insturen';
+        btn.textContent = T.opdrachtSend;
         msg.classList.remove('hidden');
         msg.className = 'error-msg';
-        msg.textContent = 'Opslaan mislukt: ' + error.message;
+        msg.textContent = T.opdrachtFail + error.message;
         return;
       }
 
@@ -2058,6 +2284,19 @@
       const T = i18n[lang];
       document.getElementById('planYearLabel').textContent = planYear;
       document.getElementById('planAddBtn').textContent = T.planAddBtn;
+      document.getElementById('planSubmitBtn').textContent = T.planSave;
+      document.getElementById('planCancelBtn').textContent = T.planCancel;
+      document.getElementById('planNameLabel').textContent = T.planNameLabel;
+      document.getElementById('planLocationLabel').textContent = T.planLocationLabel;
+      document.getElementById('planSurfaceLabel').textContent = T.planSurfaceLabel;
+      document.getElementById('planSurfaceDefault').textContent = T.planSurfaceDefault;
+      document.getElementById('planSurfaceGrass').textContent = T.planSurfaceGrass;
+      document.getElementById('planStartLabel').textContent = T.planStartLabel;
+      document.getElementById('planEndLabel').textContent = T.planEndLabel;
+      document.getElementById('planNotesLabel').textContent = T.planNotesLabel;
+      document.getElementById('planNotes').placeholder = T.planNotesPlaceholder;
+      document.getElementById('planName').placeholder = T.planNamePlaceholder;
+      document.getElementById('planLocation').placeholder = T.planLocationPlaceholder;
       renderMonthTabsPlanning();
       if (!planLoaded) {
         planLoaded = true;
@@ -2070,7 +2309,7 @@
 
     function renderMonthTabsPlanning() {
       const tabs = document.getElementById('planMonthTabs');
-      tabs.innerHTML = MONTH_SHORT_NL.map((m, i) => `
+      tabs.innerHTML = i18n[lang].monthShort.map((m, i) => `
         <button class="plan-month-tab${i === planMonth ? ' active' : ''}" data-month="${i}">${m}</button>
       `).join('');
       tabs.querySelectorAll('.plan-month-tab').forEach((btn) => {
@@ -2114,9 +2353,9 @@
       });
 
       const today = new Date();
-      const dayNames = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+      const dayNames = i18n[lang].calDayNames;
       cal.innerHTML = `
-        <div class="plan-cal-header">${MONTH_NAMES_NL[month]} ${year}</div>
+        <div class="plan-cal-header">${i18n[lang].monthNames[month]} ${year}</div>
         <div class="plan-cal-grid">
           ${dayNames.map((d) => `<div class="plan-cal-dayname">${d}</div>`).join('')}
           ${Array(startOffset).fill('<div class="plan-cal-day empty"></div>').join('')}
@@ -2160,7 +2399,7 @@
                 ${t.location ? `<span class="muted" style="font-size:0.82rem;"> · ${escapeHtml(t.location)}</span>` : ''}
                 <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:7px;">
                   ${t.surface ? `<span class="plan-surface-badge" style="background:${surfColor};">${escapeHtml(surfLabel)}</span>` : ''}
-                  <span class="muted" style="font-size:0.78rem;">${escapeHtml(t.start_date)}${t.end_date ? ' t/m ' + escapeHtml(t.end_date) : ''}</span>
+                  <span class="muted" style="font-size:0.78rem;">${escapeHtml(t.start_date)}${t.end_date ? T.planTo + escapeHtml(t.end_date) : ''}</span>
                 </div>
                 ${t.notes ? `<p class="muted" style="font-size:0.82rem;margin-top:6px;">${escapeHtml(t.notes)}</p>` : ''}
               </div>
@@ -2249,6 +2488,18 @@
 
     async function loadVideoAnalyse() {
       const T = i18n[lang];
+      document.getElementById('vidFormTitle').textContent = T.vidFormTitle;
+      document.getElementById('vidFormDesc').textContent = T.vidFormDesc;
+      document.getElementById('vidFileLabel').textContent = T.vidFileLabel;
+      document.getElementById('vidPickName').textContent = T.vidPickName;
+      document.getElementById('vidPickSub').textContent = T.vidPickSub;
+      document.getElementById('vidTitleLabel').textContent = T.vidTitleLabel;
+      document.getElementById('vidTitle').placeholder = T.vidTitlePlaceholder;
+      document.getElementById('vidTypeLabel').textContent = T.vidTypeLabel;
+      document.getElementById('vidOptTraining').textContent = T.vidOptTraining;
+      document.getElementById('vidOptWedstrijd').textContent = T.vidOptWedstrijd;
+      document.getElementById('vidDescLabel').textContent = T.vidDescLabel;
+      document.getElementById('vidDesc').placeholder = T.vidDescPlaceholder;
       document.getElementById('vidHistoryTitle').textContent = T.vidHistoryTitle;
       document.getElementById('vidSubmitBtn').textContent = T.vidSubmit;
       await fetchVideos();
@@ -2273,7 +2524,7 @@
       }
 
       const typeColors = { training: '#3b82f6', wedstrijd: '#d97706' };
-      const typeLabels = { training: 'Training', wedstrijd: 'Wedstrijd' };
+      const typeLabels = T.vidTypeLabels;
 
       const withUrls = await Promise.all(videos.map(async (v) => {
         let viewUrl = null;
