@@ -327,13 +327,37 @@
       font-weight: 700;
       margin-top: 2px;
     }
-    .bottom-nav {
-      overflow-x: auto;
-      scrollbar-width: none;
-      flex-wrap: nowrap;
+    /* secondary sub-nav */
+    .sgn-bar {
+      display: flex; gap: 6px; padding: 0 0 14px;
     }
-    .bottom-nav::-webkit-scrollbar { display: none; }
-    .bottom-nav .nav-btn { min-width: 54px; flex-shrink: 0; }
+    .sgn-btn {
+      flex: 1; background: #1a1a1a; border: none; border-radius: 8px;
+      color: #888; font-family: 'Inter', sans-serif; font-size: 13px;
+      font-weight: 600; padding: 9px 6px; cursor: pointer; transition: all .15s;
+    }
+    .sgn-btn.active { background: #C8F135; color: #0A0A0A; }
+
+    /* home action cards */
+    .action-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .action-card {
+      background: #111; border: 1px solid #222; border-radius: 14px;
+      padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+      cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .action-card:hover { border-color: #333; background: #161616; }
+    .action-card-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .action-card-icon svg { flex-shrink: 0; }
+    .action-card-body { flex: 1; min-width: 0; }
+    .action-card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: #666; margin-bottom: 3px; }
+    .action-card-title { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .action-card-sub { font-size: 12px; color: #888; margin-top: 2px; }
+    .action-card-arrow { color: #444; flex-shrink: 0; }
+    .action-card.done .action-card-title { color: #888; }
+    .action-card.done .action-card-icon { background: #1a1a1a !important; }
 
     /* ── PLANNING ── */
     .plan-year-nav {
@@ -874,6 +898,8 @@
         <p class="greeting" id="homeGreeting">Hoi</p>
         <p class="subgreeting" id="subgreeting">Fijn dat je er bent.</p>
 
+        <div class="action-cards" id="homeActions"></div>
+
         <div class="card" id="tipCard">
           <h3 id="tipTitle">Tip van de dag</h3>
           <p class="muted" id="tipBody">Tip laden…</p>
@@ -891,6 +917,11 @@
       </section>
 
       <section class="screen" id="screen-wedstrijden">
+        <div class="sgn-bar" id="sgn-reflectie">
+          <button class="sgn-btn active" data-screen="wedstrijden" id="sgnWedstrijden">Wedstrijden</button>
+          <button class="sgn-btn" data-screen="checkin" id="sgnCheckin">Check-in</button>
+          <button class="sgn-btn" data-screen="highlights" id="sgnHighlights">Highlights</button>
+        </div>
         <div class="card">
           <h3 id="matchFormTitle">Wedstrijdreflectie</h3>
           <form id="matchForm">
@@ -927,6 +958,11 @@
         <div id="matchList"></div>
       </section>
       <section class="screen" id="screen-highlights">
+        <div class="sgn-bar">
+          <button class="sgn-btn" data-screen="wedstrijden">Wedstrijden</button>
+          <button class="sgn-btn" data-screen="checkin">Check-in</button>
+          <button class="sgn-btn active" data-screen="highlights">Highlights</button>
+        </div>
         <div id="highlightsList"></div>
       </section>
 
@@ -935,6 +971,10 @@
       </section>
 
       <section class="screen" id="screen-planning">
+        <div class="sgn-bar">
+          <button class="sgn-btn active" data-screen="planning">Planning</button>
+          <button class="sgn-btn" data-screen="video">Video</button>
+        </div>
         <div class="plan-year-nav">
           <button class="icon-btn" id="planPrevYear" style="font-size:1.4rem;padding:4px 10px;">‹</button>
           <span class="plan-year-label" id="planYearLabel">2026</span>
@@ -987,6 +1027,10 @@
       </section>
 
       <section class="screen" id="screen-video">
+        <div class="sgn-bar">
+          <button class="sgn-btn" data-screen="planning">Planning</button>
+          <button class="sgn-btn active" data-screen="video">Video</button>
+        </div>
         <div class="card" style="margin-bottom:20px;">
           <h3 style="margin-bottom:6px;" id="vidFormTitle">Video insturen</h3>
           <p class="muted" style="font-size:0.85rem;margin-bottom:16px;" id="vidFormDesc">Upload een video van je training of wedstrijd direct vanuit je camera. Ik kijk ernaar en geef je persoonlijke feedback.</p>
@@ -1032,6 +1076,11 @@
       </section>
 
       <section class="screen" id="screen-checkin">
+        <div class="sgn-bar">
+          <button class="sgn-btn" data-screen="wedstrijden">Wedstrijden</button>
+          <button class="sgn-btn active" data-screen="checkin">Check-in</button>
+          <button class="sgn-btn" data-screen="highlights">Highlights</button>
+        </div>
         <div class="card">
           <h3 id="ciTitle">Wekelijkse check-in</h3>
           <p class="muted" id="ciWeekLabel" style="margin: -4px 0 16px; font-size: 0.85rem;"></p>
@@ -1115,35 +1164,23 @@
     <nav class="bottom-nav">
       <button class="nav-btn active" data-screen="home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-        <span>Home</span>
+        <span id="navHome">Home</span>
       </button>
       <button class="nav-btn" data-screen="library">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M18 4v16"/></svg>
-        <span>Content</span>
-      </button>
-      <button class="nav-btn" data-screen="wedstrijden">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-        <span>Wedstrijden</span>
-      </button>
-      <button class="nav-btn" data-screen="highlights">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        <span>Highlights</span>
-      </button>
-      <button class="nav-btn" data-screen="checkin">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M14 2H18a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
-        <span>Check-in</span>
+        <span id="navContent">Content</span>
       </button>
       <button class="nav-btn" data-screen="opdrachten">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        <span>Opdrachten</span>
+        <span id="navOpdrachten">Opdrachten</span>
       </button>
-      <button class="nav-btn" data-screen="planning">
+      <button class="nav-btn" data-screen="wedstrijden" data-navgroup="reflectie">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        <span id="navReflectie">Reflectie</span>
+      </button>
+      <button class="nav-btn" data-screen="planning" data-navgroup="traject">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
-        <span>Planning</span>
-      </button>
-      <button class="nav-btn" data-screen="video">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
-        <span>Video</span>
+        <span id="navTraject">Traject</span>
       </button>
     </nav>
   </div>
@@ -1153,7 +1190,21 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Wedstrijden', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analyse', opdrachten: 'Opdrachten' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflectie', checkin: 'Reflectie', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten' },
+        navReflectie: 'Reflectie',
+        navTraject: 'Traject',
+        sgnWedstrijden: 'Wedstrijden',
+        sgnCheckin: 'Check-in',
+        sgnHighlights: 'Highlights',
+        sgnPlanning: 'Planning',
+        sgnVideo: 'Video',
+        homeNextAssignment: 'Volgende opdracht',
+        homeAllDone: 'Alle opdrachten klaar',
+        homeCheckinLabel: 'Wekelijkse check-in',
+        homeCheckinDone: 'Al ingevuld deze week ✓',
+        homeCheckinOpen: 'Staat nog open',
+        homeTournamentLabel: 'Aankomend toernooi',
+        homeNoTournament: 'Geen toernooien gepland',
         admin: 'Beheer',
         logout: 'Uitloggen',
         greeting: (n) => `Hoi ${n}`,
@@ -1283,7 +1334,21 @@
         vidPending: 'Wacht op feedback',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Matches', checkin: 'Check-in', highlights: 'Highlights', planning: 'Planning', video: 'Video Analysis', opdrachten: 'Assignments' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflect', checkin: 'Reflect', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments' },
+        navReflectie: 'Reflect',
+        navTraject: 'Journey',
+        sgnWedstrijden: 'Matches',
+        sgnCheckin: 'Check-in',
+        sgnHighlights: 'Highlights',
+        sgnPlanning: 'Planning',
+        sgnVideo: 'Video',
+        homeNextAssignment: 'Next assignment',
+        homeAllDone: 'All assignments done',
+        homeCheckinLabel: 'Weekly check-in',
+        homeCheckinDone: 'Done this week ✓',
+        homeCheckinOpen: 'Still open',
+        homeTournamentLabel: 'Upcoming tournament',
+        homeNoTournament: 'No tournaments planned',
         admin: 'Admin',
         logout: 'Log out',
         greeting: (n) => `Hey ${n}`,
@@ -1447,9 +1512,15 @@
       document.getElementById('matchSubmitBtn').textContent = T.save;
       document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
 
+      const navKeys = { home: 'navHome', library: 'navContent', opdrachten: 'navOpdrachten', wedstrijden: 'navReflectie', planning: 'navTraject' };
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
-        const key = { home: 'navHome', library: 'navContent', wedstrijden: 'navMatches', checkin: 'navCheckin', highlights: 'navHighlights', planning: 'navPlanning', video: 'navVideo', opdrachten: 'navOpdrachten' }[btn.dataset.screen];
+        const key = navKeys[btn.dataset.screen];
         if (key) btn.querySelector('span').textContent = T[key];
+      });
+      const sgnKeys = { wedstrijden: 'sgnWedstrijden', checkin: 'sgnCheckin', highlights: 'sgnHighlights', planning: 'sgnPlanning', video: 'sgnVideo' };
+      document.querySelectorAll('.sgn-btn').forEach((btn) => {
+        const key = sgnKeys[btn.dataset.screen];
+        if (key) btn.textContent = T[key];
       });
       document.getElementById('vidHistoryTitle').textContent = T.vidHistoryTitle;
 
@@ -1508,6 +1579,10 @@
       btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
     });
 
+    document.querySelectorAll('.sgn-btn').forEach((btn) => {
+      btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
+    });
+
     document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('#categoryTabs .tab').forEach((el) => el.classList.remove('active'));
@@ -1545,12 +1620,30 @@
       loadMatchReflections();
     });
 
+    const screenNavGroup = {
+      wedstrijden: 'reflectie', checkin: 'reflectie', highlights: 'reflectie',
+      planning: 'traject', video: 'traject',
+    };
+
     function switchScreen(name) {
       const T = i18n[lang];
       document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
       document.getElementById('screen-' + name).classList.add('active');
-      document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.screen === name));
-      document.getElementById('topbarTitle').textContent = T.screenTitles[name];
+
+      const group = screenNavGroup[name];
+      document.querySelectorAll('.nav-btn').forEach((b) => {
+        const match = group
+          ? b.dataset.navgroup === group
+          : b.dataset.screen === name;
+        b.classList.toggle('active', match);
+      });
+
+      document.getElementById('topbarTitle').textContent = T.screenTitles[name] || name;
+
+      // sync sgn-btn active states within the new screen
+      document.querySelectorAll('#screen-' + name + ' .sgn-btn').forEach((b) => {
+        b.classList.toggle('active', b.dataset.screen === name);
+      });
 
       if (name === 'library' && !libraryLoaded) {
         const activeCategory = document.querySelector('#categoryTabs .tab.active').dataset.category;
@@ -1647,6 +1740,68 @@
       document.getElementById('tipBody').innerHTML =
         `<em style="display:block;font-size:1rem;color:#DDD;line-height:1.75;margin-bottom:12px;">"${escapeHtml(q.text)}"</em>` +
         `<span style="color:#C8F135;font-size:0.82rem;font-weight:600;">— ${escapeHtml(q.author)}</span>`;
+
+      // ── action cards ──────────────────────────────────────
+      const [{ data: completions }, { data: checkins }, { data: tournaments }] = await Promise.all([
+        supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
+        supabaseClient.from('checkins').select('id').eq('user_id', currentUser.id).eq('week_start', getWeekStart()),
+        supabaseClient.from('tournaments').select('name,start_date').eq('user_id', currentUser.id)
+          .gte('start_date', new Date().toISOString().split('T')[0]).order('start_date').limit(1),
+      ]);
+
+      const asData = getAssignments();
+      const doneCount = (completions || []).length;
+      const allDone = doneCount >= asData.length;
+      const nextA = allDone ? null : asData[doneCount];
+      const checkinDone = (checkins || []).length > 0;
+      const nextTournament = (tournaments || [])[0] || null;
+
+      const cards = document.getElementById('homeActions');
+      cards.innerHTML = `
+        ${!allDone ? `
+        <div class="action-card" onclick="switchScreen('opdrachten')">
+          <div class="action-card-icon" style="background:#1a2e0a;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C8F135" stroke-width="2" width="22" height="22"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-card-label">${T.homeNextAssignment} ${doneCount + 1}/${asData.length}</div>
+            <div class="action-card-title">${escapeHtml(nextA.title)}</div>
+          </div>
+          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
+        </div>` : `
+        <div class="action-card done">
+          <div class="action-card-icon" style="background:#1a1a1a;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" width="22" height="22"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-card-label">${T.homeNextAssignment}</div>
+            <div class="action-card-title" style="color:#888;">${T.homeAllDone}</div>
+          </div>
+        </div>`}
+
+        <div class="action-card${checkinDone ? ' done' : ''}" onclick="switchScreen('checkin')">
+          <div class="action-card-icon" style="background:${checkinDone ? '#1a1a1a' : '#0a1a2e'};">
+            <svg viewBox="0 0 24 24" fill="none" stroke="${checkinDone ? '#888' : '#3b82f6'}" stroke-width="2" width="22" height="22"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M14 2H18a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-card-label">${T.homeCheckinLabel}</div>
+            <div class="action-card-title">${checkinDone ? T.homeCheckinDone : T.homeCheckinOpen}</div>
+          </div>
+          ${!checkinDone ? `<svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>` : ''}
+        </div>
+
+        <div class="action-card" onclick="switchScreen('planning')">
+          <div class="action-card-icon" style="background:#1a0a1a;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-card-label">${T.homeTournamentLabel}</div>
+            <div class="action-card-title">${nextTournament ? escapeHtml(nextTournament.name) : T.homeNoTournament}</div>
+            ${nextTournament ? `<div class="action-card-sub">${escapeHtml(nextTournament.start_date)}</div>` : ''}
+          </div>
+          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      `;
     }
 
     async function loadLibrary(category) {
