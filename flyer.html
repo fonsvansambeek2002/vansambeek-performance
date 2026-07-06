@@ -449,5 +449,166 @@
 
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     ACHTERKANT
+═══════════════════════════════════════════════════════════════ -->
+<div class="flyer flyer-back">
+
+  <!-- decoratieve glow links onder -->
+  <div class="back-glow-tl"></div>
+  <div class="back-glow-br"></div>
+
+  <!-- groot logo -->
+  <div class="back-logo-wrap">
+    <img src="assets/logo.png" alt="Van Sambeek Performance" class="back-logo" />
+  </div>
+
+  <!-- naam -->
+  <div class="back-brand">
+    <div class="back-brand-name">Van Sambeek</div>
+    <div class="back-brand-name back-brand-name--light">Performance</div>
+    <div class="back-tagline">Mentale coaching voor ambitieuze sporters</div>
+  </div>
+
+  <!-- divider -->
+  <div class="back-divider"></div>
+
+  <!-- QR-code blok -->
+  <div class="back-qr-wrap">
+    <div class="back-qr-label">Scan voor meer informatie</div>
+    <div class="back-qr-box">
+      <img
+        src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=svg&color=0B2C4A&bgcolor=6BCB2E&data=https%3A%2F%2Fvansambeek-performance.vercel.app"
+        alt="QR code vansambeek-performance.vercel.app"
+        class="back-qr-img"
+      />
+    </div>
+    <div class="back-qr-url">vansambeek-performance.vercel.app</div>
+  </div>
+
+</div>
+
+<style>
+  /* ── ACHTERKANT LAYOUT ── */
+  .flyer-back {
+    margin-top: 32px;
+    break-before: page;
+    page-break-before: always;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    padding: 48px 36px;
+  }
+
+  .back-glow-tl {
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 340px; height: 340px;
+    background: radial-gradient(ellipse, rgba(107,203,46,.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .back-glow-br {
+    position: absolute;
+    bottom: -80px; right: -80px;
+    width: 380px; height: 380px;
+    background: radial-gradient(ellipse, rgba(107,203,46,.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .back-logo-wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+
+  .back-logo {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 36px;
+    box-shadow: 0 16px 64px rgba(0,0,0,.45);
+  }
+
+  .back-brand {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .back-brand-name {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 52px;
+    line-height: 1.05;
+    color: #fff;
+    letter-spacing: .01em;
+  }
+
+  .back-brand-name--light {
+    color: #6BCB2E;
+  }
+
+  .back-tagline {
+    margin-top: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,.5);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .back-divider {
+    position: relative;
+    z-index: 1;
+    width: 60px;
+    height: 3px;
+    background: rgba(107,203,46,.5);
+    border-radius: 999px;
+    margin: 32px auto;
+  }
+
+  .back-qr-wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .back-qr-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+  }
+
+  .back-qr-box {
+    background: #6BCB2E;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 8px 40px rgba(107,203,46,.35);
+  }
+
+  .back-qr-img {
+    width: 180px;
+    height: 180px;
+    display: block;
+    border-radius: 6px;
+  }
+
+  .back-qr-url {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,.4);
+    letter-spacing: .04em;
+  }
+</style>
+
 </body>
 </html>
