@@ -295,10 +295,12 @@
       color: #AAA;
       border: 1px solid #333;
       border-radius: 6px;
-      padding: 6px 12px;
+      padding: 8px 14px;
+      min-height: 40px;
       font-size: 0.8rem;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
+      touch-action: manipulation;
     }
 
     .btn-ghost-sm:hover {
@@ -998,6 +1000,13 @@
 
         <div class="action-cards" id="homeActions"></div>
 
+        <div style="display:flex;justify-content:center;margin-bottom:16px;">
+          <button id="homeLangBtn" onclick="document.getElementById('langBtn').click()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:999px;padding:10px 20px;color:#888;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;touch-action:manipulation;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="homeLangLabel">Switch to English</span>
+          </button>
+        </div>
+
         <div class="card" id="tipCard">
           <h3 id="tipTitle">Tip van de dag</h3>
           <p class="muted" id="tipBody">Tip laden…</p>
@@ -1301,6 +1310,7 @@
         logout: 'Uitloggen',
         greeting: (n) => `Hoi ${n}`,
         subgreeting: 'Fijn dat je er bent.',
+        switchLang: 'Switch to English',
         tipTitle: 'Quote van de dag',
         noContent: 'Nog geen content beschikbaar.',
         tabs: { mentaal: 'Mentaal', mindfulness: 'Mindfulness', voeding: 'Voeding', fysiek: 'Fysiek', highlights: 'Highlights' },
@@ -1445,6 +1455,7 @@
         logout: 'Log out',
         greeting: (n) => `Hey ${n}`,
         subgreeting: 'Good to have you here.',
+        switchLang: 'Wissel naar Nederlands',
         tipTitle: 'Quote of the day',
         noContent: 'No content available yet.',
         tabs: { mentaal: 'Mental', mindfulness: 'Mindfulness', voeding: 'Nutrition', fysiek: 'Physical', highlights: 'Highlights' },
@@ -1586,6 +1597,7 @@
       document.getElementById('logoutBtn').title = T.logout;
 
       document.getElementById('subgreeting').textContent = T.subgreeting;
+      document.getElementById('homeLangLabel').textContent = T.switchLang;
       document.getElementById('tipTitle').textContent = T.tipTitle;
 
       document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
