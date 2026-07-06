@@ -105,27 +105,30 @@
 
     /* ── HERO ── */
     .f-hero {
-      padding: 18px 24px 16px;
+      padding: 22px 24px 20px;
       position: relative;
       z-index: 1;
-      flex-shrink: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .eyebrow {
       display: flex;
       align-items: center;
       gap: 7px;
-      font-size: 9px;
+      font-size: 9.5px;
       font-weight: 700;
       letter-spacing: .11em;
       text-transform: uppercase;
       color: #6BCB2E;
-      margin-bottom: 11px;
+      margin-bottom: 14px;
     }
 
     .eyebrow::before {
       content: '';
-      width: 18px;
+      width: 20px;
       height: 2px;
       background: #6BCB2E;
       flex-shrink: 0;
@@ -134,18 +137,18 @@
     .f-hero h1 {
       font-family: 'Sora', sans-serif;
       font-weight: 800;
-      font-size: 26px;
+      font-size: 30px;
       line-height: 1.15;
       color: #fff;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .f-hero h1 span { color: #6BCB2E; }
 
     .f-hero p {
-      font-size: 12px;
+      font-size: 13px;
       color: rgba(255,255,255,.7);
-      line-height: 1.65;
+      line-height: 1.7;
     }
 
     /* ── DIVIDER ── */
@@ -238,13 +241,14 @@
 
     /* ── PRICING ── */
     .pricing {
-      padding: 14px 24px;
+      padding: 10px 24px;
       display: flex;
       align-items: center;
-      gap: 22px;
+      gap: 18px;
       position: relative;
       z-index: 1;
-      flex: 1;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(255,255,255,.08);
     }
 
     .price-block { flex-shrink: 0; }
@@ -252,20 +256,20 @@
     .price-num {
       font-family: 'Sora', sans-serif;
       font-weight: 800;
-      font-size: 46px;
+      font-size: 34px;
       color: #fff;
       line-height: 1;
     }
 
     .price-sub {
-      font-size: 11px;
+      font-size: 9.5px;
       color: rgba(255,255,255,.45);
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     .price-sep {
       width: 1px;
-      height: 56px;
+      height: 40px;
       background: rgba(255,255,255,.15);
       flex-shrink: 0;
     }
@@ -274,17 +278,17 @@
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       flex: 1;
     }
 
     .includes li {
       display: flex;
       align-items: flex-start;
-      gap: 7px;
-      font-size: 11px;
-      color: rgba(255,255,255,.78);
-      line-height: 1.4;
+      gap: 6px;
+      font-size: 10px;
+      color: rgba(255,255,255,.72);
+      line-height: 1.35;
     }
 
     .includes li::before {
