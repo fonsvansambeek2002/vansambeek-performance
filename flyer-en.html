@@ -44,7 +44,7 @@
       content: '';
       position: absolute;
       top: -60px; right: -60px;
-      width: 280px; height: 280px;
+      width: 300px; height: 300px;
       background: radial-gradient(ellipse, rgba(107,203,46,.16) 0%, transparent 68%);
       pointer-events: none;
     }
@@ -53,45 +53,46 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 22px 14px;
+      padding: 18px 24px 16px;
       border-bottom: 1px solid rgba(255,255,255,.1);
       position: relative;
       z-index: 1;
+      flex-shrink: 0;
     }
 
     .logo-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .logo-row img {
-      width: 64px;
-      height: 64px;
+      width: 72px;
+      height: 72px;
       object-fit: contain;
-      border-radius: 12px;
+      border-radius: 14px;
     }
 
     .brand-name {
       font-family: 'Sora', sans-serif;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 14.5px;
       line-height: 1.2;
       color: #fff;
     }
 
     .brand-sub {
-      font-size: 9px;
+      font-size: 10px;
       color: rgba(255,255,255,.5);
-      margin-top: 2px;
+      margin-top: 3px;
       letter-spacing: .02em;
     }
 
     .badge {
       border: 1.5px solid rgba(107,203,46,.5);
       border-radius: 999px;
-      padding: 4px 11px;
-      font-size: 8.5px;
+      padding: 5px 13px;
+      font-size: 9px;
       font-weight: 700;
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -101,26 +102,27 @@
     }
 
     .f-hero {
-      padding: 16px 22px 14px;
+      padding: 18px 24px 16px;
       position: relative;
       z-index: 1;
+      flex-shrink: 0;
     }
 
     .eyebrow {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 8.5px;
+      gap: 7px;
+      font-size: 9px;
       font-weight: 700;
-      letter-spacing: .1em;
+      letter-spacing: .11em;
       text-transform: uppercase;
       color: #6BCB2E;
-      margin-bottom: 9px;
+      margin-bottom: 11px;
     }
 
     .eyebrow::before {
       content: '';
-      width: 16px;
+      width: 18px;
       height: 2px;
       background: #6BCB2E;
       flex-shrink: 0;
@@ -129,16 +131,16 @@
     .f-hero h1 {
       font-family: 'Sora', sans-serif;
       font-weight: 800;
-      font-size: 22px;
+      font-size: 26px;
       line-height: 1.15;
       color: #fff;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .f-hero h1 span { color: #6BCB2E; }
 
     .f-hero p {
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255,255,255,.7);
       line-height: 1.65;
     }
@@ -146,7 +148,7 @@
     .rule {
       height: 1px;
       background: rgba(255,255,255,.1);
-      margin: 0 22px;
+      margin: 0 24px;
       flex-shrink: 0;
     }
 
@@ -154,28 +156,29 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
-      padding: 12px 22px;
+      padding: 14px 24px;
       position: relative;
       z-index: 1;
+      flex-shrink: 0;
     }
 
     .pillar {
       background: rgba(255,255,255,.055);
       border: 1px solid rgba(255,255,255,.1);
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 11px 13px;
     }
 
     .pillar h3 {
       font-family: 'Sora', sans-serif;
-      font-size: 10px;
+      font-size: 11.5px;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     .pillar p {
-      font-size: 9.5px;
+      font-size: 10.5px;
       color: rgba(255,255,255,.58);
       line-height: 1.5;
     }
@@ -184,9 +187,9 @@
       background: rgba(107,203,46,.07);
       border-top: 1px solid rgba(107,203,46,.2);
       border-bottom: 1px solid rgba(107,203,46,.2);
-      padding: 12px 22px;
+      padding: 14px 24px;
       display: flex;
-      gap: 16px;
+      gap: 18px;
       align-items: center;
       position: relative;
       z-index: 1;
@@ -197,14 +200,14 @@
 
     .about-copy h3 {
       font-family: 'Sora', sans-serif;
-      font-size: 10.5px;
+      font-size: 12px;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
 
     .about-copy p {
-      font-size: 9.5px;
+      font-size: 11px;
       color: rgba(255,255,255,.68);
       line-height: 1.55;
     }
@@ -212,26 +215,26 @@
     .creds {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
     .cred {
       background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.13);
-      border-radius: 6px;
-      padding: 4px 9px;
-      font-size: 9px;
+      border-radius: 7px;
+      padding: 5px 11px;
+      font-size: 10px;
       font-weight: 600;
       color: rgba(255,255,255,.85);
       white-space: nowrap;
     }
 
     .pricing {
-      padding: 12px 22px;
+      padding: 14px 24px;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 22px;
       position: relative;
       z-index: 1;
       flex-shrink: 0;
@@ -242,20 +245,20 @@
     .price-num {
       font-family: 'Sora', sans-serif;
       font-weight: 800;
-      font-size: 40px;
+      font-size: 46px;
       color: #fff;
       line-height: 1;
     }
 
     .price-sub {
-      font-size: 10px;
+      font-size: 11px;
       color: rgba(255,255,255,.45);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .price-sep {
       width: 1px;
-      height: 50px;
+      height: 56px;
       background: rgba(255,255,255,.15);
       flex-shrink: 0;
     }
@@ -264,15 +267,15 @@
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       flex: 1;
     }
 
     .includes li {
       display: flex;
       align-items: flex-start;
-      gap: 6px;
-      font-size: 10px;
+      gap: 7px;
+      font-size: 11px;
       color: rgba(255,255,255,.78);
       line-height: 1.4;
     }
@@ -288,7 +291,7 @@
       margin-top: auto;
       background: rgba(0,0,0,.22);
       border-top: 1px solid rgba(255,255,255,.1);
-      padding: 12px 22px;
+      padding: 14px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -301,14 +304,14 @@
     .contact-list {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
     }
 
     .contact-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 9.5px;
+      gap: 7px;
+      font-size: 11px;
       color: rgba(255,255,255,.7);
     }
 
@@ -317,10 +320,10 @@
     .cta-pill {
       background: #6BCB2E;
       color: #0B2C4A;
-      border-radius: 10px;
-      padding: 10px 16px;
+      border-radius: 11px;
+      padding: 11px 18px;
       font-family: 'Sora', sans-serif;
-      font-size: 10.5px;
+      font-size: 12px;
       font-weight: 800;
       text-align: center;
       line-height: 1.3;
@@ -329,10 +332,10 @@
 
     .cta-pill small {
       display: block;
-      font-size: 8.5px;
+      font-size: 9px;
       font-weight: 600;
       opacity: .7;
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     /* ── BACK SIDE ── */
