@@ -79,15 +79,21 @@
       color: #888;
     }
 
+    * { -webkit-tap-highlight-color: transparent; }
+    button, .action-card, .nav-btn, .tab, .sgn-btn { touch-action: manipulation; }
+
     .tabs {
       display: flex;
       gap: 0;
       border-bottom: 1px solid #1A1A1A;
-      background: transparent;
+      background: #0A0A0A;
       margin-bottom: 16px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      z-index: 5;
     }
     .tabs::-webkit-scrollbar { display: none; }
 
@@ -109,6 +115,25 @@
       color: #C8F135;
       border-bottom-color: #C8F135;
     }
+
+    /* skeleton loader */
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    .skeleton {
+      background: linear-gradient(90deg, #1a1a1a 25%, #252525 50%, #1a1a1a 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.2s infinite linear;
+      border-radius: 10px;
+    }
+    .skeleton-card { height: 80px; margin-bottom: 12px; border-radius: 12px; }
+
+    /* bigger nav tap area */
+    .nav-btn { min-height: 52px; padding: 8px 0; }
+
+    /* active press states */
+    .tab:active { opacity: .7; }
+    .sgn-btn:active { opacity: .8; }
+    .btn-accent:active { transform: scale(.97); }
+    .btn-ghost:active { opacity: .8; }
 
     .video-embed {
       width: 100%;
@@ -206,13 +231,14 @@
       color: #FFF;
       border: 1px solid #333;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       font-family: 'Inter', sans-serif;
-      font-size: 0.9rem;
+      font-size: 16px; /* prevent iOS zoom on focus */
     }
 
     .field textarea {
-      resize: vertical;
+      resize: none;
+      min-height: 110px;
     }
 
     .field input::placeholder,
@@ -1646,6 +1672,33 @@
       btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
     });
 
+    // swipe left/right between sgn-bar sub-screens
+    const sgnGroups = [
+      ['wedstrijden', 'checkin'],
+      ['planning', 'video'],
+    ];
+    (function initSwipe() {
+      let tx = 0, ty = 0;
+      const appMain = document.querySelector('.app-main');
+      appMain.addEventListener('touchstart', (e) => {
+        tx = e.touches[0].clientX;
+        ty = e.touches[0].clientY;
+      }, { passive: true });
+      appMain.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - tx;
+        const dy = e.changedTouches[0].clientY - ty;
+        if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+        const active = document.querySelector('.screen.active');
+        if (!active) return;
+        const current = active.id.replace('screen-', '');
+        const group = sgnGroups.find((g) => g.includes(current));
+        if (!group) return;
+        const idx = group.indexOf(current);
+        const target = dx < 0 ? group[idx + 1] : group[idx - 1];
+        if (target) switchScreen(target);
+      }, { passive: true });
+    })();
+
     document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('#categoryTabs .tab').forEach((el) => el.classList.remove('active'));
@@ -1880,7 +1933,7 @@
         return;
       }
 
-      list.innerHTML = `<div class="empty-state">${T.loading}</div>`;
+      list.innerHTML = [1,2,3].map(() => `<div class="skeleton skeleton-card"></div>`).join('');
 
       const { data, error } = await supabaseClient
         .from('content_items')
