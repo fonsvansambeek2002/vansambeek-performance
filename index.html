@@ -305,6 +305,8 @@
       .nav-links { display: none; }
       .hamburger { display: flex; }
       .nav-portal-btn { display: inline-flex; align-items: center; }
+      .nav-lang-switch { display: none; } /* move lang to mobile menu */
+      .brand span { display: none; }      /* logo only, no text */
       .hero { padding: 64px 0 52px; }
       .hero h1 { font-size: 34px; }
       .hero-sub { font-size: 15px; }
@@ -322,7 +324,6 @@
       .price-card { padding: 28px 18px; }
       .traj-controls { flex-direction: column; }
       .traj-controls .btn { width: 100%; }
-      .brand { font-size: 14px; }
       .nav-inner { padding: 12px 0; }
     }
   </style>
@@ -345,7 +346,7 @@
       <a id="navPortal"    href="/login.html">Portal</a>
     </div>
     <div class="nav-right">
-      <div class="lang-switch" role="group" aria-label="Taal kiezen">
+      <div class="lang-switch nav-lang-switch" role="group" aria-label="Taal kiezen">
         <button id="btnNL" class="active" type="button" onclick="setLang('nl')">NL</button>
         <div class="lang-divider"></div>
         <button id="btnEN" type="button" onclick="setLang('en')">EN</button>
@@ -367,6 +368,14 @@
   <a id="mNavPrijzen"   href="#prijzen"   onclick="closeMenu()">Prijzen</a>
   <a id="mNavPortal"    href="/login.html" onclick="closeMenu()">Portal</a>
   <a id="mNavContact"   href="#contact"   onclick="closeMenu()" class="btn btn-green">Plan kennismaking</a>
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;margin-top:4px;">
+    <span style="font-size:14px;font-weight:600;color:var(--muted);" id="mNavLangLabel">Taal:</span>
+    <div class="lang-switch">
+      <button id="mBtnNL" class="active" type="button" onclick="setLang('nl');closeMenu()">NL</button>
+      <div class="lang-divider"></div>
+      <button id="mBtnEN" type="button" onclick="setLang('en');closeMenu()">EN</button>
+    </div>
+  </div>
 </nav>
 
 <main id="top">
@@ -789,6 +798,8 @@ function applyLang(l) {
   document.documentElement.lang = l;
   document.getElementById('btnNL').classList.toggle('active', l==='nl');
   document.getElementById('btnEN').classList.toggle('active', l==='en');
+  document.getElementById('mBtnNL').classList.toggle('active', l==='nl');
+  document.getElementById('mBtnEN').classList.toggle('active', l==='en');
   localStorage.setItem('vsp-lang', l);
   const d = t[l];
   Object.keys(d).forEach(id => {
