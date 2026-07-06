@@ -8,6 +8,10 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="assets/logo.png" />
   <link rel="icon" href="assets/logo.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="VSP Coaching" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/app.css" />
   <style>
@@ -879,6 +883,16 @@
   </style>
 </head>
 <body>
+
+  <div id="installBanner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;z-index:9999;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:14px 16px;display:none;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6);">
+    <img src="assets/logo.png" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;" />
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:13px;font-weight:700;color:#fff;">Installeer de app</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">Zet op je beginscherm voor snelle toegang</div>
+    </div>
+    <button id="installBtn" style="background:#C8F135;color:#0A0A0A;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">Installeer</button>
+    <button id="installDismiss" style="background:none;border:none;color:#555;font-size:20px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>
+  </div>
 
   <div id="app" class="hidden">
     <header class="app-topbar">
@@ -3215,6 +3229,30 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
+
+    let _installPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      _installPrompt = e;
+      const banner = document.getElementById('installBanner');
+      banner.style.display = 'flex';
+    });
+
+    document.getElementById('installBtn').addEventListener('click', async () => {
+      if (!_installPrompt) return;
+      _installPrompt.prompt();
+      const { outcome } = await _installPrompt.userChoice;
+      _installPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+
+    document.getElementById('installDismiss').addEventListener('click', () => {
+      document.getElementById('installBanner').style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('installBanner').style.display = 'none';
+    });
   </script>
 </body>
 </html>

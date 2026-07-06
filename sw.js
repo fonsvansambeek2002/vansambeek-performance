@@ -1,12 +1,15 @@
-const CACHE_NAME = 'vsp-portal-v2';
+const CACHE_NAME = 'vsp-portal-v3';
 const PRECACHE_URLS = [
+  '/',
+  'index.html',
   'login.html',
   'portal.html',
-  'admin.html',
+  'offline.html',
   'manifest.json',
   'assets/app.css',
   'assets/supabase-config.js',
   'assets/logo.png',
+  'assets/fons.jpg',
 ];
 
 self.addEventListener('install', (event) => {
@@ -30,7 +33,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-  if (url.hostname.includes('supabase.co')) return;
+  if (url.hostname.includes('supabase.co') || url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com')) return;
 
   event.respondWith(
     caches.match(request).then((cached) => {
@@ -42,7 +45,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => cached);
+        .catch(() => cached || caches.match('offline.html'));
       return cached || network;
     })
   );

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Geen verbinding · Van Sambeek Performance</title>
+  <meta name="theme-color" content="#0A0A0A" />
+  <link rel="apple-touch-icon" href="assets/logo.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0A0A0A; color: #fff;
+      font-family: Inter, system-ui, sans-serif;
+      min-height: 100dvh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 20px;
+      padding: 32px 24px; text-align: center;
+    }
+    img { width: 100px; height: 100px; border-radius: 20px; opacity: .85; }
+    h1 { font-size: 1.4rem; font-weight: 700; }
+    p { color: #888; font-size: 0.95rem; line-height: 1.6; max-width: 300px; }
+    button {
+      margin-top: 8px; padding: 14px 28px;
+      background: #C8F135; color: #0A0A0A;
+      border: none; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <img src="assets/logo.png" alt="VSP" />
+  <h1>Geen internetverbinding</h1>
+  <p>Controleer je verbinding en probeer het opnieuw.</p>
+  <button onclick="location.reload()">Opnieuw proberen</button>
+</body>
+</html>
