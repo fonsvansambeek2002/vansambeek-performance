@@ -85,7 +85,11 @@
       border-bottom: 1px solid #1A1A1A;
       background: transparent;
       margin-bottom: 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .tabs::-webkit-scrollbar { display: none; }
 
     .tab {
       background: transparent;
@@ -96,12 +100,23 @@
       font-size: 0.85rem;
       padding: 10px 16px;
       cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: color 0.15s, border-color 0.15s;
     }
 
     .tab.active {
       color: #C8F135;
       border-bottom-color: #C8F135;
+    }
+
+    .video-embed {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 10px;
+      border: none;
+      margin-top: 12px;
+      background: #000;
     }
 
     .bottom-nav {
@@ -1888,7 +1903,7 @@
               <span class="muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.07em;">${escapeHtml(item.category)}</span>
               <strong style="display:block;margin-top:4px;">${escapeHtml(title)}</strong>
               ${desc ? `<p class="muted" style="margin-top:6px;">${escapeHtml(desc)}</p>` : ''}
-              ${item.video_url ? `<p style="margin-top:12px;"><a href="${escapeAttr(item.video_url)}" target="_blank" rel="noopener">${T.watchVideo}</a></p>` : ''}
+              ${item.video_url ? renderVideoUrl(item.video_url, T) : ''}
             </div>
           </div>
         `;
@@ -3253,6 +3268,20 @@
 
     function escapeAttr(str) {
       return (str ?? '').replace(/"/g, '&quot;');
+    }
+
+    function youtubeEmbedId(url) {
+      if (!url) return null;
+      const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    function renderVideoUrl(url, T) {
+      const ytId = youtubeEmbedId(url);
+      if (ytId) {
+        return `<iframe class="video-embed" src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy"></iframe>`;
+      }
+      return `<p style="margin-top:12px;"><a href="${escapeAttr(url)}" target="_blank" rel="noopener">${T.watchVideo}</a></p>`;
     }
 
     (async function init() {
