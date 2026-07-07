@@ -36,6 +36,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       box-shadow: 0 16px 48px rgba(0,0,0,.35);
       flex-shrink: 0;
     }
@@ -105,10 +106,7 @@
       padding: 22px 24px 20px;
       position: relative;
       z-index: 1;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      flex-shrink: 0;
     }
 
     .eyebrow {
@@ -295,51 +293,26 @@
       background: rgba(0,0,0,.22);
       border-top: 1px solid rgba(255,255,255,.1);
       padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
       position: relative;
       z-index: 1;
       flex-shrink: 0;
     }
 
     .contact-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 20px;
     }
 
     .contact-row {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       font-size: 11px;
       color: rgba(255,255,255,.7);
     }
 
     .contact-row strong { color: #fff; }
-
-    .cta-pill {
-      background: #6BCB2E;
-      color: #0B2C4A;
-      border-radius: 11px;
-      padding: 11px 18px;
-      font-family: 'Sora', sans-serif;
-      font-size: 12px;
-      font-weight: 800;
-      text-align: center;
-      line-height: 1.3;
-      flex-shrink: 0;
-    }
-
-    .cta-pill small {
-      display: block;
-      font-size: 9px;
-      font-weight: 600;
-      opacity: .7;
-      margin-top: 3px;
-    }
 
     /* ── BACK SIDE ── */
     .flyer-back {
@@ -514,12 +487,8 @@
     <div class="contact-list">
       <div class="contact-row"><strong>fonsvansambeek2002@gmail.com</strong></div>
       <div class="contact-row"><strong>+31 6 20 32 03 75</strong></div>
-      <div class="contact-row">LinkedIn: <strong>Fons van Sambeek</strong></div>
+      <div class="contact-row"><strong>vansambeek-performance.nl</strong></div>
       <div class="contact-row"><strong>Dutch & English · Online or in person</strong></div>
-    </div>
-    <div class="cta-pill">
-      Book an<br>intro call
-      <small>Free intro session</small>
     </div>
   </div>
 
