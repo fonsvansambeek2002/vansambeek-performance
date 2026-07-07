@@ -326,55 +326,23 @@
     .flyer-back {
       break-before: page;
       page-break-before: always;
-      justify-content: center;
+      justify-content: space-between !important;
       align-items: center;
-      padding: 32px 24px;
+      padding: 36px 28px;
     }
 
-    .back-glow-tl {
-      position: absolute;
-      top: -50px; left: -50px;
-      width: 260px; height: 260px;
-      background: radial-gradient(ellipse, rgba(107,203,46,.18) 0%, transparent 65%);
-      pointer-events: none;
-    }
-
-    .back-glow-br {
-      position: absolute;
-      bottom: -60px; right: -60px;
-      width: 280px; height: 280px;
-      background: radial-gradient(ellipse, rgba(107,203,46,.12) 0%, transparent 65%);
-      pointer-events: none;
-    }
-
-    .back-logo-wrap {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      justify-content: center;
-      margin-bottom: 24px;
-    }
-
-    .back-logo {
-      width: 130px;
-      height: 130px;
-      object-fit: contain;
-      border-radius: 28px;
-      box-shadow: 0 12px 48px rgba(0,0,0,.45);
-    }
-
-    .back-brand {
-      position: relative;
-      z-index: 1;
+    .back-header {
       text-align: center;
-      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+      width: 100%;
     }
 
     .back-brand-name {
       font-family: 'Sora', sans-serif;
       font-weight: 800;
-      font-size: 36px;
-      line-height: 1.1;
+      font-size: 38px;
+      line-height: 1.05;
       color: #fff;
       letter-spacing: .01em;
     }
@@ -383,21 +351,25 @@
 
     .back-tagline {
       margin-top: 10px;
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 500;
       color: rgba(255,255,255,.5);
-      letter-spacing: .06em;
+      letter-spacing: .07em;
       text-transform: uppercase;
     }
 
-    .back-divider {
+    .back-logo-wrap {
       position: relative;
       z-index: 1;
-      width: 48px;
-      height: 3px;
-      background: rgba(107,203,46,.5);
-      border-radius: 999px;
-      margin: 20px auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    .back-logo {
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+      border-radius: 32px;
     }
 
     .back-qr-wrap {
@@ -406,11 +378,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      width: 100%;
     }
 
     .back-qr-label {
-      font-size: 9px;
+      font-size: 9.5px;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -418,23 +391,21 @@
     }
 
     .back-qr-box {
-      background: #6BCB2E;
-      border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 6px 30px rgba(107,203,46,.35);
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px;
     }
 
     .back-qr-img {
-      width: 130px;
-      height: 130px;
+      width: 148px;
+      height: 148px;
       display: block;
-      border-radius: 4px;
     }
 
     .back-qr-url {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      color: rgba(255,255,255,.4);
+      color: rgba(255,255,255,.45);
       letter-spacing: .04em;
     }
 
@@ -535,26 +506,21 @@
 <!-- ACHTERKANT -->
 <div class="flyer flyer-back">
 
-  <div class="back-glow-tl"></div>
-  <div class="back-glow-br"></div>
-
-  <div class="back-logo-wrap">
-    <img src="assets/logo.png" alt="Van Sambeek Performance" class="back-logo" />
-  </div>
-
-  <div class="back-brand">
+  <div class="back-header">
     <div class="back-brand-name">Van Sambeek</div>
     <div class="back-brand-name back-brand-name--light">Performance</div>
     <div class="back-tagline">Mentale coaching voor ambitieuze sporters</div>
   </div>
 
-  <div class="back-divider"></div>
+  <div class="back-logo-wrap">
+    <img src="assets/logo.png" alt="Van Sambeek Performance" class="back-logo" />
+  </div>
 
   <div class="back-qr-wrap">
     <div class="back-qr-label">Scan voor meer informatie</div>
     <div class="back-qr-box">
       <img
-        src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=svg&color=0B2C4A&bgcolor=6BCB2E&data=https%3A%2F%2Fvansambeek-performance.nl"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=svg&color=000000&bgcolor=ffffff&data=https%3A%2F%2Fvansambeek-performance.nl"
         alt="QR code vansambeek-performance.nl"
         class="back-qr-img"
       />
