@@ -305,7 +305,7 @@
       .nav-links { display: none; }
       .hamburger { display: flex; }
       .nav-portal-btn { display: inline-flex; align-items: center; }
-      .nav-lang-switch { display: none; } /* move lang to mobile menu */
+      .nav-lang-switch { display: flex; }
       .brand span { display: none; }      /* logo only, no text */
       .hero { padding: 64px 0 52px; }
       .hero h1 { font-size: 34px; }
@@ -790,7 +790,7 @@ const t = {
 };
 
 // ── LANGUAGE ──────────────────────────────────────────────
-let lang = localStorage.getItem('vsp-lang') || 'nl';
+let lang = localStorage.getItem('lang') || 'nl';
 const htmlFields = ['aboutText1','aboutText2','aboutText3'];
 
 function applyLang(l) {
@@ -800,7 +800,7 @@ function applyLang(l) {
   document.getElementById('btnEN').classList.toggle('active', l==='en');
   document.getElementById('mBtnNL').classList.toggle('active', l==='nl');
   document.getElementById('mBtnEN').classList.toggle('active', l==='en');
-  localStorage.setItem('vsp-lang', l);
+  localStorage.setItem('lang', l);
   const d = t[l];
   Object.keys(d).forEach(id => {
     const el = document.getElementById(id);
