@@ -1586,6 +1586,7 @@
 
     let lang = localStorage.getItem('lang') || 'nl';
     let currentUser = null;
+    let isAdmin = false;
     let libraryLoaded = false;
 
     function applyTranslations() {
@@ -1802,7 +1803,8 @@
       document.getElementById('app').classList.remove('hidden');
 
       const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', user.id).single();
-      document.getElementById('adminBtn').classList.toggle('hidden', !(profile && profile.is_admin));
+      isAdmin = !!(profile && profile.is_admin);
+      document.getElementById('adminBtn').classList.toggle('hidden', !isAdmin);
 
       applyTranslations();
       setTimeout(showInstallPromptOnce, 2000);
@@ -2595,9 +2597,26 @@
         .order('assignment_num', { ascending: true });
 
       const done = completions || [];
-      const currentNum = done.length + 1;
       const asData = getAssignments();
       const total = asData.length;
+
+      if (isAdmin) {
+        let html = `<p style="font-size:0.78rem;color:#666;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;">Beheerdersmodus — overzicht alle opdrachten</p>`;
+        asData.forEach((a) => {
+          html += `
+            <div class="opr-card" style="margin-bottom:14px;opacity:1;">
+              <div class="opr-num-label">${lang === 'en' ? 'Assignment' : 'Opdracht'} ${a.num} ${T.opdrachtOf} ${total}</div>
+              <div class="opr-title">${escapeHtml(a.title)}</div>
+              <div class="opr-intro">${escapeHtml(a.intro)}</div>
+              <div class="opr-question">${escapeHtml(a.question)}</div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        return;
+      }
+
+      const currentNum = done.length + 1;
       const allDone = done.length >= total;
       const pct = Math.round((done.length / total) * 100);
 
