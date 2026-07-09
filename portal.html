@@ -387,6 +387,16 @@
     }
     .sgn-btn.active { background: #C8F135; color: #0A0A0A; }
 
+    /* welcome card */
+    .welcome-card {
+      background: linear-gradient(135deg, #0d1f0d 0%, #0a1a0a 100%);
+      border: 1px solid rgba(200,241,53,.2);
+      border-radius: 18px; padding: 20px; margin-bottom: 16px;
+    }
+    .welcome-card h3 { font-size: 1rem; color: #C8F135; margin-bottom: 8px; }
+    .welcome-card p { font-size: 0.85rem; color: #888; line-height: 1.65; margin-bottom: 14px; }
+    .welcome-card .btn-accent { width: 100%; }
+
     /* home action cards */
     .action-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
     .action-card {
@@ -1000,6 +1010,11 @@
         <p class="greeting" id="homeGreeting">Hoi</p>
         <p class="subgreeting" id="subgreeting">Fijn dat je er bent.</p>
 
+        <div id="welcomeCard" class="welcome-card hidden">
+          <h3 id="welcomeTitle">Welkom bij je coaching portal</h3>
+          <p id="welcomeBody">Hier vind je alles voor je mentale ontwikkeling als sporter. Begin met je eerste opdracht, doe je wekelijkse check-in en bekijk de content in de bibliotheek.</p>
+          <button class="btn-accent" onclick="switchScreen('opdrachten')" id="welcomeBtn">Start met opdracht 1 →</button>
+        </div>
         <div class="action-cards" id="homeActions"></div>
 
         <div style="display:flex;justify-content:center;margin-bottom:16px;">
@@ -1301,6 +1316,9 @@
         sgnHighlights: 'Highlights',
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
+        welcomeTitle: 'Welkom bij je coaching portal',
+        welcomeBody: 'Hier vind je alles voor je mentale ontwikkeling als sporter. Begin met je eerste opdracht, doe je wekelijkse check-in en bekijk de content in de bibliotheek.',
+        welcomeBtn: 'Start met opdracht 1 →',
         homeNextAssignment: 'Volgende opdracht',
         homeAllDone: 'Alle opdrachten klaar',
         homeCheckinLabel: 'Wekelijkse check-in',
@@ -1446,6 +1464,9 @@
         sgnHighlights: 'Highlights',
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
+        welcomeTitle: 'Welcome to your coaching portal',
+        welcomeBody: 'Here you\'ll find everything for your mental development as an athlete. Start with your first assignment, do your weekly check-in and explore the content library.',
+        welcomeBtn: 'Start assignment 1 →',
         homeNextAssignment: 'Next assignment',
         homeAllDone: 'All assignments done',
         homeCheckinLabel: 'Weekly check-in',
@@ -1882,6 +1903,16 @@
       const asData = getAssignments();
       const doneCount = (completions || []).length;
       const allDone = doneCount >= asData.length;
+
+      const welcomeCard = document.getElementById('welcomeCard');
+      if (doneCount === 0 && !isAdmin) {
+        document.getElementById('welcomeTitle').textContent = T.welcomeTitle;
+        document.getElementById('welcomeBody').textContent = T.welcomeBody;
+        document.getElementById('welcomeBtn').textContent = T.welcomeBtn;
+        welcomeCard.classList.remove('hidden');
+      } else {
+        welcomeCard.classList.add('hidden');
+      }
       const nextA = allDone ? null : asData[doneCount];
       const checkinDone = (checkins || []).length > 0;
       const nextTournament = (tournaments || [])[0] || null;
