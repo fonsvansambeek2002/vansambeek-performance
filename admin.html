@@ -331,53 +331,142 @@
       const overview = document.getElementById('checkinsOverview');
       overview.innerHTML = '<div class="empty-state">Laden…</div>';
 
+      function getWeekStart() {
+        const d = new Date();
+        const day = d.getDay();
+        d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+        return d.toISOString().split('T')[0];
+      }
+
+      const thisWeek = getWeekStart();
+      const weekLabel = new Date(thisWeek + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+
       const [{ data: checkins, error: cErr }, { data: profiles, error: pErr }] = await Promise.all([
         supabaseClient.from('weekly_checkins').select('*').order('week_start', { ascending: false }),
-        supabaseClient.from('profiles').select('id, full_name'),
+        supabaseClient.from('profiles').select('id, full_name, is_admin'),
       ]);
 
-      if (cErr || pErr || !checkins) {
+      if (cErr || pErr) {
         overview.innerHTML = '<div class="empty-state">Kon check-ins niet laden.</div>';
         return;
       }
 
-      if (!checkins.length) {
-        overview.innerHTML = '<div class="empty-state">Nog geen check-ins ingediend.</div>';
-        return;
-      }
-
+      const athletes = (profiles || []).filter((p) => !p.is_admin);
       const profileMap = {};
       (profiles || []).forEach((p) => { profileMap[p.id] = p.full_name || p.id; });
 
       const grouped = {};
-      checkins.forEach((c) => {
+      (checkins || []).forEach((c) => {
         if (!grouped[c.user_id]) grouped[c.user_id] = [];
         grouped[c.user_id].push(c);
       });
 
-      overview.innerHTML = Object.entries(grouped).map(([userId, records]) => `
-        <div class="card" style="margin-bottom: 20px;">
-          <h3 style="margin-bottom: 16px;">${escapeHtml(profileMap[userId] || userId)}</h3>
-          ${records.map((c) => `
-            <div class="content-item" style="margin-bottom: 12px;">
-              <div style="padding: 14px 16px;">
-                <strong>Week van ${escapeHtml(c.week_start)}</strong>
-                <span class="muted" style="font-size:0.8rem;"> · ${c.training_sessions ?? 0} trainingen</span>
-                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px;">
-                  ${adminRating('Overall', c.overall_rating)}
-                  ${adminRating('Mentaal training', c.mental_training)}
-                  ${adminRating('Mentaal wedstrijden', c.mental_matches)}
-                  ${adminRating('Energie', c.energy_level)}
-                  ${adminRating('Slaap', c.sleep_recovery)}
-                </div>
-                ${c.went_well ? `<p class="muted" style="margin-top:10px;font-size:0.85rem;"><strong style="color:#555;">Goed:</strong> ${escapeHtml(c.went_well)}</p>` : ''}
-                ${c.was_challenging ? `<p class="muted" style="margin-top:4px;font-size:0.85rem;"><strong style="color:#555;">Uitdagend:</strong> ${escapeHtml(c.was_challenging)}</p>` : ''}
-                ${c.focus_next_week ? `<p class="muted" style="margin-top:4px;font-size:0.85rem;"><strong style="color:#555;">Focus:</strong> ${escapeHtml(c.focus_next_week)}</p>` : ''}
-              </div>
+      if (!athletes.length && !Object.keys(grouped).length) {
+        overview.innerHTML = '<div class="empty-state">Nog geen check-ins ingediend.</div>';
+        return;
+      }
+
+      function ciCard(c, name, showName) {
+        return `
+          <div class="card" style="border-left:3px solid #C8F135;">
+            ${showName ? `<h3 style="margin-bottom:10px;">${escapeHtml(name)}</h3>` : ''}
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;">
+              ${adminRating('Overall', c.overall_rating)}
+              ${adminRating('Ment. T', c.mental_training)}
+              ${adminRating('Ment. W', c.mental_matches)}
+              ${adminRating('Energie', c.energy_level)}
+              ${adminRating('Slaap', c.sleep_recovery)}
             </div>
-          `).join('')}
-        </div>
-      `).join('');
+            <div style="font-size:0.75rem;color:#555;margin-bottom:6px;">${c.training_sessions ?? 0} trainingen</div>
+            ${c.went_well ? `<p style="margin-top:6px;font-size:0.82rem;color:#888;line-height:1.5;"><span style="color:#666;font-weight:600;">Goed: </span>${escapeHtml(c.went_well)}</p>` : ''}
+            ${c.was_challenging ? `<p style="margin-top:4px;font-size:0.82rem;color:#888;line-height:1.5;"><span style="color:#666;font-weight:600;">Uitdagend: </span>${escapeHtml(c.was_challenging)}</p>` : ''}
+            ${c.focus_next_week ? `<p style="margin-top:4px;font-size:0.82rem;color:#888;line-height:1.5;"><span style="color:#666;font-weight:600;">Focus: </span>${escapeHtml(c.focus_next_week)}</p>` : ''}
+          </div>
+        `;
+      }
+
+      // ── DEZE WEEK ─────────────────────────────────────────
+      let html = `<p style="font-size:0.75rem;color:#555;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 12px;">Deze week — ${weekLabel}</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:28px;">`;
+
+      // Show all known athletes (submitted or not)
+      const shownThisWeek = new Set();
+      athletes.forEach((athlete) => {
+        const ci = (grouped[athlete.id] || []).find((c) => c.week_start === thisWeek);
+        shownThisWeek.add(athlete.id);
+        if (ci) {
+          html += ciCard(ci, athlete.full_name || athlete.id, true);
+        } else {
+          html += `
+            <div class="card" style="border-left:3px solid #1E1E1E;opacity:.5;">
+              <h3 style="margin-bottom:6px;">${escapeHtml(athlete.full_name || athlete.id)}</h3>
+              <p style="font-size:0.82rem;color:#555;">Nog niet ingediend</p>
+            </div>`;
+        }
+      });
+
+      // Any check-in from users not in profiles list
+      Object.entries(grouped).forEach(([userId, recs]) => {
+        if (shownThisWeek.has(userId)) return;
+        const ci = recs.find((c) => c.week_start === thisWeek);
+        if (ci) html += ciCard(ci, profileMap[userId] || userId, true);
+      });
+
+      html += `</div>`;
+
+      // ── GESCHIEDENIS ──────────────────────────────────────
+      const historyUsers = Object.entries(grouped).filter(([, recs]) =>
+        recs.some((c) => c.week_start !== thisWeek)
+      );
+
+      if (historyUsers.length) {
+        html += `<p style="font-size:0.75rem;color:#555;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 12px;">Geschiedenis</p>`;
+
+        historyUsers.forEach(([userId, records]) => {
+          const history = records.filter((c) => c.week_start !== thisWeek);
+          const name = profileMap[userId] || userId;
+          const safeId = 'h' + userId.replace(/[^a-z0-9]/gi, '');
+
+          html += `
+            <div style="border:1px solid #1A1A1A;border-radius:12px;overflow:hidden;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;background:#0D0D0D;user-select:none;"
+                   onclick="var el=document.getElementById('${safeId}');el.classList.toggle('hidden');">
+                <strong style="font-size:0.9rem;">${escapeHtml(name)}</strong>
+                <span style="font-size:0.75rem;color:#555;">${history.length} ${history.length === 1 ? 'week' : 'weken'} &nbsp;▾</span>
+              </div>
+              <div id="${safeId}" class="hidden">`;
+
+          history.forEach((c) => {
+            const dateStr = new Date(c.week_start + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+            const detId = safeId + c.week_start.replace(/-/g, '');
+            html += `
+              <div style="border-top:1px solid #1A1A1A;">
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;user-select:none;"
+                     onclick="document.getElementById('${detId}').classList.toggle('hidden')">
+                  <span style="font-size:0.82rem;color:#888;flex:1;">Week van ${dateStr}</span>
+                  <span style="font-size:0.75rem;color:#555;">${c.overall_rating != null ? c.overall_rating + ' overall' : '—'} &nbsp;▾</span>
+                </div>
+                <div id="${detId}" class="hidden" style="padding:0 16px 14px;">
+                  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;">
+                    ${adminRating('Overall', c.overall_rating)}
+                    ${adminRating('Ment. T', c.mental_training)}
+                    ${adminRating('Ment. W', c.mental_matches)}
+                    ${adminRating('Energie', c.energy_level)}
+                    ${adminRating('Slaap', c.sleep_recovery)}
+                  </div>
+                  <div style="font-size:0.75rem;color:#555;margin-bottom:6px;">${c.training_sessions ?? 0} trainingen</div>
+                  ${c.went_well ? `<p style="font-size:0.82rem;color:#888;margin-top:4px;line-height:1.5;"><span style="color:#666;font-weight:600;">Goed: </span>${escapeHtml(c.went_well)}</p>` : ''}
+                  ${c.was_challenging ? `<p style="font-size:0.82rem;color:#888;margin-top:4px;line-height:1.5;"><span style="color:#666;font-weight:600;">Uitdagend: </span>${escapeHtml(c.was_challenging)}</p>` : ''}
+                  ${c.focus_next_week ? `<p style="font-size:0.82rem;color:#888;margin-top:4px;line-height:1.5;"><span style="color:#666;font-weight:600;">Focus: </span>${escapeHtml(c.focus_next_week)}</p>` : ''}
+                </div>
+              </div>`;
+          });
+
+          html += `</div></div>`;
+        });
+      }
+
+      overview.innerHTML = html;
     }
 
     const ASSIGNMENTS_ADMIN = [
