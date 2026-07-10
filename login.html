@@ -26,13 +26,17 @@
           <label>Naam</label>
           <input type="text" id="signupName" autocomplete="name" />
         </div>
-        <div class="field">
+        <div class="field" id="emailField">
           <label>E-mailadres</label>
           <input type="email" id="loginEmail" autocomplete="email" required />
         </div>
-        <div class="field">
+        <div class="field" id="passwordField">
           <label>Wachtwoord</label>
           <input type="password" id="loginPassword" autocomplete="current-password" minlength="6" required />
+        </div>
+        <div class="field hidden" id="newPasswordField">
+          <label>Nieuw wachtwoord</label>
+          <input type="password" id="newPassword" autocomplete="new-password" minlength="6" />
         </div>
         <button type="submit" class="btn btn-accent btn-block" id="loginSubmit">Inloggen</button>
         <p id="loginError" class="error-msg hidden"></p>
@@ -40,6 +44,9 @@
       </form>
       <p class="muted" id="toggleModeText" style="text-align: center; margin-top: 18px;">
         Nog geen account? <a href="#" id="toggleModeLink">Account aanmaken</a>
+      </p>
+      <p id="forgotLink" style="text-align: center; margin-top: 10px;">
+        <a href="#" id="forgotBtn" style="font-size: 0.85rem; color: #888;">Wachtwoord vergeten?</a>
       </p>
     </div>
   </div>
@@ -51,19 +58,37 @@
 
     function setMode(newMode) {
       mode = newMode;
-      const isSignup = mode === 'signup';
-
-      document.getElementById('nameField').classList.toggle('hidden', !isSignup);
-      document.getElementById('authTitle').textContent = isSignup ? 'Account aanmaken' : 'Welkom terug';
-      document.getElementById('authSubtitle').textContent = isSignup ? 'Maak een account aan om te starten.' : 'Log in om verder te gaan.';
-      document.getElementById('loginSubmit').textContent = isSignup ? 'Account aanmaken' : 'Inloggen';
       document.getElementById('loginError').classList.add('hidden');
       document.getElementById('loginInfo').classList.add('hidden');
+
+      const isSignup = mode === 'signup';
+      const isForgot = mode === 'forgot';
+      const isReset  = mode === 'reset';
+
+      document.getElementById('nameField').classList.toggle('hidden', !isSignup);
+      document.getElementById('emailField').classList.toggle('hidden', isReset);
+      document.getElementById('passwordField').classList.toggle('hidden', isForgot || isReset);
+      document.getElementById('newPasswordField').classList.toggle('hidden', !isReset);
+      document.getElementById('forgotLink').classList.toggle('hidden', isSignup || isForgot || isReset);
+      document.getElementById('toggleModeText').classList.toggle('hidden', isForgot || isReset);
+
+      const titles = {
+        login:  ['Welkom terug',              'Log in om verder te gaan.'],
+        signup: ['Account aanmaken',           'Maak een account aan om te starten.'],
+        forgot: ['Wachtwoord vergeten?',       'Vul je e-mailadres in en we sturen je een resetlink.'],
+        reset:  ['Nieuw wachtwoord instellen', 'Kies een nieuw wachtwoord voor je account.'],
+      };
+      document.getElementById('authTitle').textContent    = titles[mode][0];
+      document.getElementById('authSubtitle').textContent = titles[mode][1];
+
+      const btnLabels = { login: 'Inloggen', signup: 'Account aanmaken', forgot: 'Stuur resetlink', reset: 'Wachtwoord opslaan' };
+      document.getElementById('loginSubmit').textContent = btnLabels[mode];
+      document.getElementById('loginSubmit').disabled = false;
 
       document.getElementById('toggleModeText').innerHTML = isSignup
         ? 'Heb je al een account? <a href="#" id="toggleModeLink">Inloggen</a>'
         : 'Nog geen account? <a href="#" id="toggleModeLink">Account aanmaken</a>';
-      document.getElementById('toggleModeLink').addEventListener('click', (e) => {
+      document.getElementById('toggleModeLink')?.addEventListener('click', (e) => {
         e.preventDefault();
         setMode(isSignup ? 'login' : 'signup');
       });
@@ -71,13 +96,18 @@
 
     setMode('login');
 
+    document.getElementById('forgotBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      setMode('forgot');
+    });
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      const name = document.getElementById('signupName').value.trim();
-      const errorEl = document.getElementById('loginError');
-      const infoEl = document.getElementById('loginInfo');
+      const email     = document.getElementById('loginEmail').value.trim();
+      const password  = document.getElementById('loginPassword').value;
+      const name      = document.getElementById('signupName').value.trim();
+      const errorEl   = document.getElementById('loginError');
+      const infoEl    = document.getElementById('loginInfo');
       const submitBtn = document.getElementById('loginSubmit');
       errorEl.classList.add('hidden');
       infoEl.classList.add('hidden');
@@ -85,40 +115,65 @@
 
       if (mode === 'signup') {
         const { data, error } = await supabaseClient.auth.signUp({
-          email,
-          password,
-          options: { data: { full_name: name } },
+          email, password, options: { data: { full_name: name } },
         });
-
         if (error) {
           submitBtn.disabled = false;
           errorEl.textContent = 'Account aanmaken mislukt: ' + error.message;
           errorEl.classList.remove('hidden');
           return;
         }
-
         if (!data.session) {
           submitBtn.disabled = false;
-          infoEl.textContent = 'Account aangemaakt. Check je e-mail om je account te bevestigen en log daarna in.';
+          infoEl.textContent = 'Account aangemaakt. Je kunt nu inloggen.';
           infoEl.classList.remove('hidden');
           setMode('login');
           return;
         }
-
         location.href = 'portal.html';
         return;
       }
 
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (mode === 'forgot') {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://vansambeek-performance.nl/login.html',
+        });
+        submitBtn.disabled = false;
+        if (error) {
+          errorEl.textContent = 'Versturen mislukt: ' + error.message;
+          errorEl.classList.remove('hidden');
+        } else {
+          infoEl.textContent = 'Resetlink verstuurd — check je e-mail.';
+          infoEl.classList.remove('hidden');
+        }
+        return;
+      }
 
+      if (mode === 'reset') {
+        const newPw = document.getElementById('newPassword').value;
+        const { error } = await supabaseClient.auth.updateUser({ password: newPw });
+        submitBtn.disabled = false;
+        if (error) {
+          errorEl.textContent = 'Opslaan mislukt: ' + error.message;
+          errorEl.classList.remove('hidden');
+        } else {
+          location.href = 'portal.html';
+        }
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) {
         submitBtn.disabled = false;
         errorEl.textContent = 'Inloggen mislukt: controleer je e-mailadres en wachtwoord.';
         errorEl.classList.remove('hidden');
         return;
       }
-
       location.href = 'portal.html';
+    });
+
+    supabaseClient.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setMode('reset');
     });
 
     (async function init() {
