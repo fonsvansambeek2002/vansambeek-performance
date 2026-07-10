@@ -2638,6 +2638,80 @@
       return lang === 'en' ? assignmentsEN : assignments;
     }
 
+    async function loadAdminOpdrachten(container, asData, total, T) {
+      const [{ data: profiles }, { data: allCompletions }] = await Promise.all([
+        supabaseClient.from('profiles').select('id, full_name, is_admin'),
+        supabaseClient.from('assignment_completions').select('*').order('assignment_num', { ascending: true }),
+      ]);
+
+      const athletes = (profiles || []).filter((p) => !p.is_admin);
+      const profileMap = {};
+      (profiles || []).forEach((p) => { profileMap[p.id] = p.full_name || p.id; });
+
+      if (!athletes.length) {
+        container.innerHTML = `<div class="empty-state">Nog geen klanten aangemeld.</div>`;
+        return;
+      }
+
+      const grouped = {};
+      (allCompletions || []).forEach((c) => {
+        if (!grouped[c.user_id]) grouped[c.user_id] = [];
+        grouped[c.user_id].push(c);
+      });
+
+      let html = `<p style="font-size:0.75rem;color:#555;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 14px;">Klantoverzicht opdrachten</p>`;
+
+      athletes.forEach((athlete) => {
+        const recs = grouped[athlete.id] || [];
+        const pct = Math.round((recs.length / total) * 100);
+        const name = athlete.full_name || athlete.id;
+        const safeId = 'adm' + athlete.id.replace(/[^a-z0-9]/gi, '');
+
+        html += `
+          <div style="border:1px solid #1A1A1A;border-radius:14px;overflow:hidden;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;background:#0D0D0D;user-select:none;"
+                 onclick="document.getElementById('${safeId}').classList.toggle('hidden')">
+              <div>
+                <strong style="font-size:0.95rem;">${escapeHtml(name)}</strong>
+                <div style="font-size:0.75rem;color:#555;margin-top:3px;">${recs.length} / ${total} voltooid</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="background:#1A1A1A;border-radius:999px;width:60px;height:5px;overflow:hidden;">
+                  <div style="height:100%;background:#C8F135;border-radius:999px;width:${pct}%;"></div>
+                </div>
+                <span style="font-size:0.75rem;color:#555;">▾</span>
+              </div>
+            </div>
+            <div id="${safeId}" class="hidden">`;
+
+        asData.forEach((a) => {
+          const done = recs.find((r) => r.assignment_num === a.num);
+          const dateStr = done ? new Date(done.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : null;
+          const detId = safeId + 'a' + a.num;
+          html += `
+            <div style="border-top:1px solid #1A1A1A;">
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;${done ? 'cursor:pointer;' : ''}user-select:none;"
+                   ${done ? `onclick="document.getElementById('${detId}').classList.toggle('hidden')"` : ''}>
+                <span style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;
+                  ${done ? 'background:rgba(200,241,53,.1);border:1px solid rgba(200,241,53,.25);color:#C8F135;' : 'background:#1A1A1A;border:1px solid #2A2A2A;color:#444;'}">
+                  ${done ? '✓' : a.num}
+                </span>
+                <span style="flex:1;font-size:0.86rem;color:${done ? '#CCC' : '#444'};">${escapeHtml(a.title)}</span>
+                ${dateStr ? `<span style="font-size:0.72rem;color:#444;">${dateStr}</span>` : '<span style="font-size:0.72rem;color:#333;">Nog niet ingevuld</span>'}
+              </div>
+              ${done ? `
+                <div id="${detId}" class="hidden" style="padding:0 16px 14px 46px;">
+                  <p style="font-size:0.82rem;color:#666;line-height:1.7;white-space:pre-line;">${escapeHtml(done.response)}</p>
+                </div>` : ''}
+            </div>`;
+        });
+
+        html += `</div></div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
     async function loadOpdrachten() {
       const T = i18n[lang];
       const container = document.getElementById('opdrachtContent');
@@ -2654,18 +2728,7 @@
       const total = asData.length;
 
       if (isAdmin) {
-        let html = `<p style="font-size:0.78rem;color:#666;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;">Beheerdersmodus — overzicht alle opdrachten</p>`;
-        asData.forEach((a) => {
-          html += `
-            <div class="opr-card" style="margin-bottom:14px;opacity:1;">
-              <div class="opr-num-label">${lang === 'en' ? 'Assignment' : 'Opdracht'} ${a.num} ${T.opdrachtOf} ${total}</div>
-              <div class="opr-title">${escapeHtml(a.title)}</div>
-              <div class="opr-intro">${escapeHtml(a.intro)}</div>
-              <div class="opr-question">${escapeHtml(a.question)}</div>
-            </div>
-          `;
-        });
-        container.innerHTML = html;
+        await loadAdminOpdrachten(container, asData, total, T);
         return;
       }
 
