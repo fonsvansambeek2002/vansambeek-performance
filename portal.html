@@ -1041,6 +1041,7 @@
           <button class="tab" data-category="voeding">Voeding</button>
           <button class="tab" data-category="fysiek">Fysiek</button>
           <button class="tab" data-category="highlights">Highlights</button>
+          <button class="tab" data-category="podcasts">Podcasts</button>
         </div>
         <div id="libraryList"></div>
       </section>
@@ -1988,6 +1989,11 @@
 
       if (category === 'highlights') {
         loadHighlights(list);
+        return;
+      }
+
+      if (category === 'podcasts') {
+        loadPodcasts(list);
         return;
       }
 
@@ -3153,6 +3159,51 @@
       fetchVideos();
     });
 
+    // ── PODCASTS ──────────────────────────────────────────
+
+    async function loadPodcasts(container) {
+      const T = i18n[lang];
+      container.innerHTML = `<div class="empty-state">${T.loading}</div>`;
+
+      const { data, error } = await supabaseClient
+        .from('content_items')
+        .select('*')
+        .eq('category', 'podcasts')
+        .eq('published', true)
+        .order('sort_order', { ascending: true });
+
+      if (error || !data || !data.length) {
+        container.innerHTML = `<div class="empty-state">${T.emptyLibrary}</div>`;
+        return;
+      }
+
+      container.innerHTML = data.map((item) => {
+        const title = (lang === 'en' && item.title_en) ? item.title_en : item.title;
+        const desc  = (lang === 'en' && item.description_en) ? item.description_en : (item.description || '');
+        const spotifyUrl = item.video_url || '';
+        const embedUrl = spotifyUrl.replace('open.spotify.com/', 'open.spotify.com/embed/');
+
+        return `
+          <div class="card" style="margin-bottom:14px;padding:0;overflow:hidden;">
+            ${embedUrl ? `
+              <iframe
+                src="${escapeHtml(embedUrl)}"
+                width="100%" height="152" frameborder="0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                style="display:block;">
+              </iframe>` : ''}
+            <div style="padding:14px 16px;">
+              <strong style="font-size:0.95rem;">${escapeHtml(title)}</strong>
+              ${desc ? `<p class="muted" style="margin-top:6px;font-size:0.85rem;line-height:1.6;">${escapeHtml(desc)}</p>` : ''}
+              ${spotifyUrl ? `<a href="${escapeHtml(spotifyUrl)}" target="_blank" rel="noopener" style="color:#1DB954;font-size:0.85rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-top:10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                Openen in Spotify
+              </a>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
     // ── HIGHLIGHTS ────────────────────────────────────────
 
     const highlightMatches = [
@@ -3162,6 +3213,7 @@
         year: '2008',
         gradient: 'linear-gradient(135deg, #14532d, #065f46)',
         desc: 'Widely regarded as the greatest tennis match ever played. Five extraordinary sets in near-total darkness — Nadal ends Federer\'s five-year Wimbledon reign after 4 hours and 48 minutes of breathtaking tennis.',
+        desc_nl: 'Algemeen beschouwd als de grootste tenniswedstrijd ooit. Vijf buitengewone sets in bijna totale duisternis — Nadal maakt na 4 uur en 48 minuten een einde aan Federers vijfjarig Wimbledon-koningschap.',
         search: 'Federer Nadal Wimbledon 2008 Final highlights',
       },
       {
@@ -3170,6 +3222,7 @@
         year: '2019',
         gradient: 'linear-gradient(135deg, #14532d, #065f46)',
         desc: 'Federer serves for the match twice and holds two championship points — Djokovic saves them both and wins in the first-ever Wimbledon final tie-break. The most dramatic conclusion in Grand Slam history.',
+        desc_nl: 'Federer serveert tweemaal voor de wedstrijd en heeft twee matchpoints — Djokovic redt ze beide en wint in de eerste Wimbledon-finale ooit met tiebreak. De meest dramatische afloop in de Grand Slam-geschiedenis.',
         search: 'Djokovic Federer Wimbledon 2019 Final highlights',
       },
       {
@@ -3178,6 +3231,7 @@
         year: '2023',
         gradient: 'linear-gradient(135deg, #14532d, #065f46)',
         desc: 'The next generation announces itself. Alcaraz defeats the 4-time defending champion in a stunning 5-set battle, becoming the youngest Wimbledon men\'s champion since Boris Becker.',
+        desc_nl: 'De nieuwe generatie kondigt zichzelf aan. Alcaraz verslaat de viervoudig titelhouder in een verbluffende 5-sets strijd en wordt de jongste Wimbledon-kampioen bij de mannen sinds Boris Becker.',
         search: 'Alcaraz Djokovic Wimbledon 2023 Final highlights',
       },
       {
@@ -3186,6 +3240,7 @@
         year: '2012',
         gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
         desc: 'The longest Grand Slam final ever: 5 hours and 53 minutes. An extraordinary physical and mental battle settled only in the fifth set. Djokovic wins 7-5 to claim his 5th Slam title.',
+        desc_nl: 'De langste Grand Slam-finale ooit: 5 uur en 53 minuten. Een buitengewone fysieke en mentale strijd die pas in de vijfde set beslist werd. Djokovic wint 7-5 en verovert zijn 5e Slam-titel.',
         search: 'Djokovic Nadal Australian Open 2012 Final highlights',
       },
       {
@@ -3194,6 +3249,7 @@
         year: '2009',
         gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
         desc: 'Five gruelling sets over 5 hours 14 minutes in the Melbourne heat. Fernando Verdasco pushes Nadal to the absolute limit in one of the most physically brutal and thrilling semifinals ever played.',
+        desc_nl: 'Vijf zware sets in 5 uur en 14 minuten in de Melbournse hitte. Fernando Verdasco duwt Nadal tot het absolute uiterste in een van de meest fysiek brutale en meeslepende halve finales ooit.',
         search: 'Nadal Verdasco Australian Open 2009 semifinal highlights',
       },
       {
@@ -3202,6 +3258,7 @@
         year: '2009',
         gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
         desc: 'An emotional masterpiece. Nadal defeats Federer in five sets and as Federer breaks down in tears during the trophy ceremony, the world witnesses one of the most human moments in the history of sport.',
+        desc_nl: 'Een emotioneel meesterwerk. Nadal verslaat Federer in vijf sets en terwijl Federer in tranen uitbarst tijdens de prijsuitreiking, getuigt de wereld van een van de meest menselijke momenten in de sportgeschiedenis.',
         search: 'Federer Nadal Australian Open 2009 Final highlights',
       },
       {
@@ -3210,6 +3267,7 @@
         year: '2010',
         gradient: 'linear-gradient(135deg, #1a237e, #283593)',
         desc: 'Federer leads two sets to love and holds two match points at 5-3 in the fifth. Djokovic hits two impossible passing shots to survive — then completes one of the greatest comebacks in tennis history.',
+        desc_nl: 'Federer leidt met twee sets en heeft twee matchpoints bij 5-3 in de vijfde set. Djokovic slaat twee onmogelijke passeershots om te overleven — en voltooit daarna een van de grootste comebacks in tennisgeschiedenis.',
         search: 'Djokovic Federer US Open 2010 semifinal highlights',
       },
       {
@@ -3218,6 +3276,7 @@
         year: '2022',
         gradient: 'linear-gradient(135deg, #1a237e, #283593)',
         desc: 'Two 21-year-olds play a five-set thriller past midnight in New York City. The match that announced the next era of tennis had officially begun — raw power, elegance and unstoppable will from both sides.',
+        desc_nl: 'Twee 21-jarigen spelen een vijfsets thriller na middernacht in New York. De wedstrijd die aankondigde dat het nieuwe tijdperk van het tennis officieel was begonnen — rauwe kracht, elegantie en onstopbaar doorzettingsvermogen.',
         search: 'Alcaraz Sinner US Open 2022 quarterfinal highlights',
       },
       {
@@ -3226,6 +3285,7 @@
         year: '2022',
         gradient: 'linear-gradient(135deg, #7c2d12, #c2410c)',
         desc: 'Their final great rivalry match at Roland Garros. Nadal, carrying injuries, fights back from a set down to defeat Djokovic in four sets — a display of mental courage that defines his legend on clay.',
+        desc_nl: 'Hun laatste grote rivaliteitswedstrijd op Roland Garros. Nadal, geblesseerd, vecht terug van een set achterstand en wint van Djokovic in vier sets — een vertoning van mentale moed die zijn legende op gravel definieert.',
         search: 'Nadal Djokovic Roland Garros 2022 semifinal highlights',
       },
       {
@@ -3234,6 +3294,7 @@
         year: '2020',
         gradient: 'linear-gradient(135deg, #1e3a5f, #0369a1)',
         desc: 'Thiem leads two sets to love and is two points from the title. Djokovic somehow turns it around to win in five — a staggering display of mental resilience that defines what it means to never give up.',
+        desc_nl: 'Thiem leidt met twee sets en is twee punten van de titel. Djokovic draait het op ongelooflijke wijze om en wint in vijf sets — een verbijsterende vertoning van mentale veerkracht die definieert wat het betekent om nooit op te geven.',
         search: 'Djokovic Thiem Australian Open 2020 Final highlights',
       },
     ];
@@ -3251,7 +3312,7 @@
               <div class="hl-event">${h.event} &middot; ${h.year}</div>
             </div>
             <div class="highlight-body">
-              <p class="highlight-desc">${h.desc}</p>
+              <p class="highlight-desc">${lang === 'nl' && h.desc_nl ? h.desc_nl : h.desc}</p>
               <a href="${url}" target="_blank" rel="noopener" class="highlight-watch">${T.watchHighlights} →</a>
             </div>
           </div>`;
