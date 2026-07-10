@@ -1885,6 +1885,15 @@
       { text: "We are what we repeatedly do. Excellence, then, is not an act but a habit.", author: "Aristotle" },
     ];
 
+    function formatTournamentDate(t, l) {
+      const locale = l === 'en' ? 'en-GB' : 'nl-NL';
+      const opts = { day: 'numeric', month: 'short' };
+      const start = new Date(t.start_date + 'T00:00:00').toLocaleDateString(locale, opts);
+      if (!t.end_date) return start;
+      const end = new Date(t.end_date + 'T00:00:00').toLocaleDateString(locale, opts);
+      return `${start} – ${end}`;
+    }
+
     async function loadHome() {
       const T = i18n[lang];
       const name = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'sporter';
@@ -1902,8 +1911,9 @@
       const [{ data: completions }, { data: checkins }, { data: tournaments }] = await Promise.all([
         supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
         supabaseClient.from('checkins').select('id').eq('user_id', currentUser.id).eq('week_start', getWeekStart()),
-        supabaseClient.from('tournaments').select('name,start_date').eq('user_id', currentUser.id)
-          .gte('start_date', new Date().toISOString().split('T')[0]).order('start_date').limit(1),
+        supabaseClient.from('tournaments').select('name,start_date,end_date').eq('user_id', currentUser.id)
+          .or(`end_date.gte.${new Date().toISOString().split('T')[0]},start_date.gte.${new Date().toISOString().split('T')[0]}`)
+          .order('start_date').limit(1),
       ]);
 
       const asData = getAssignments();
@@ -1964,7 +1974,7 @@
           <div class="action-card-body">
             <div class="action-card-label">${T.homeTournamentLabel}</div>
             <div class="action-card-title">${nextTournament ? escapeHtml(nextTournament.name) : T.homeNoTournament}</div>
-            ${nextTournament ? `<div class="action-card-sub">${escapeHtml(nextTournament.start_date)}</div>` : ''}
+            ${nextTournament ? `<div class="action-card-sub">${formatTournamentDate(nextTournament, lang)}</div>` : ''}
           </div>
           <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
         </div>
