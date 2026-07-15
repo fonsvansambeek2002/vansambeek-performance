@@ -1094,6 +1094,10 @@
         <div id="opdrachtContent"></div>
       </section>
 
+      <section class="screen" id="screen-klanten">
+        <div id="klantenContent"></div>
+      </section>
+
       <section class="screen" id="screen-planning">
         <div class="sgn-bar">
           <button class="sgn-btn active" data-screen="planning">Planning</button>
@@ -1305,6 +1309,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
         <span id="navTraject">Traject</span>
       </button>
+      <button class="nav-btn hidden" id="navKlantenBtn" data-screen="klanten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+        <span id="navKlanten">Klanten</span>
+      </button>
     </nav>
   </div>
 
@@ -1313,7 +1321,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflectie', checkin: 'Reflectie', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflectie', checkin: 'Reflectie', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
         sgnWedstrijden: 'Wedstrijden',
@@ -1442,6 +1450,7 @@
         planNamePlaceholder: 'bijv. ITS Rotterdam',
         planLocationPlaceholder: 'bijv. Rotterdam',
         navOpdrachten: 'Opdrachten',
+        navKlanten: 'Klanten',
         navPlanning: 'Planning',
         navVideo: 'Video',
         planAddBtn: '+ Toernooi',
@@ -1461,7 +1470,7 @@
         vidPending: 'Wacht op feedback',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflect', checkin: 'Reflect', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflect', checkin: 'Reflect', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
         sgnWedstrijden: 'Matches',
@@ -1590,6 +1599,7 @@
         planNamePlaceholder: 'e.g. ITS Rotterdam',
         planLocationPlaceholder: 'e.g. Rotterdam',
         navOpdrachten: 'Assignments',
+        navKlanten: 'Clients',
         navPlanning: 'Planning',
         navVideo: 'Video',
         planAddBtn: '+ Tournament',
@@ -1645,7 +1655,7 @@
       document.getElementById('matchSubmitBtn').textContent = T.save;
       document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
 
-      const navKeys = { home: 'navHome', library: 'navContent', opdrachten: 'navOpdrachten', wedstrijden: 'navReflectie', planning: 'navTraject' };
+      const navKeys = { home: 'navHome', library: 'navContent', opdrachten: 'navOpdrachten', wedstrijden: 'navReflectie', planning: 'navTraject', klanten: 'navKlanten' };
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
         const key = navKeys[btn.dataset.screen];
         if (key) btn.querySelector('span').textContent = T[key];
@@ -1817,6 +1827,9 @@
       if (name === 'opdrachten') {
         loadOpdrachten();
       }
+      if (name === 'klanten') {
+        loadKlanten();
+      }
       if (name === 'planning') {
         loadPlanning();
       }
@@ -1833,6 +1846,7 @@
       const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', user.id).single();
       isAdmin = !!(profile && profile.is_admin);
       document.getElementById('adminBtn').classList.toggle('hidden', !isAdmin);
+      document.getElementById('navKlantenBtn').classList.toggle('hidden', !isAdmin);
 
       applyTranslations();
       setTimeout(showInstallPromptOnce, 2000);
@@ -2636,6 +2650,183 @@
 
     function getAssignments() {
       return lang === 'en' ? assignmentsEN : assignments;
+    }
+
+    // ── KLANTEN ───────────────────────────────────────────
+
+    async function loadKlanten() {
+      const container = document.getElementById('klantenContent');
+      container.innerHTML = `<div class="empty-state">Laden…</div>`;
+
+      const [{ data: profiles }, { data: completions }, { data: checkins }] = await Promise.all([
+        supabaseClient.from('profiles').select('id, full_name, is_admin'),
+        supabaseClient.from('assignment_completions').select('user_id'),
+        supabaseClient.from('weekly_checkins').select('user_id, week_start').eq('week_start', getWeekStart()),
+      ]);
+
+      const athletes = (profiles || []).filter((p) => !p.is_admin);
+      if (!athletes.length) {
+        container.innerHTML = `<div class="empty-state">Nog geen klanten aangemeld.</div>`;
+        return;
+      }
+
+      const doneMap = {};
+      (completions || []).forEach((c) => { doneMap[c.user_id] = (doneMap[c.user_id] || 0) + 1; });
+      const checkinSet = new Set((checkins || []).map((c) => c.user_id));
+      const total = getAssignments().length;
+
+      container.innerHTML = athletes.map((a) => {
+        const done = doneMap[a.id] || 0;
+        const pct = Math.round((done / total) * 100);
+        const hasCheckin = checkinSet.has(a.id);
+        return `
+          <div class="action-card" style="margin-bottom:12px;" onclick="loadKlantDetail('${escapeAttr(a.id)}', '${escapeAttr(a.full_name || a.id)}')">
+            <div class="action-card-icon" style="background:#0d1a2e;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C8F135" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </div>
+            <div class="action-card-body">
+              <div class="action-card-title">${escapeHtml(a.full_name || a.id)}</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+                <div style="flex:1;background:#1A1A1A;border-radius:999px;height:4px;overflow:hidden;">
+                  <div style="height:100%;background:#C8F135;border-radius:999px;width:${pct}%;"></div>
+                </div>
+                <span style="font-size:0.72rem;color:#555;white-space:nowrap;">${done}/${total} opdrachten</span>
+                <span style="font-size:0.72rem;font-weight:600;${hasCheckin ? 'color:#C8F135;' : 'color:#333;'}">${hasCheckin ? '✓ check-in' : '— check-in'}</span>
+              </div>
+            </div>
+            <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadKlantDetail(userId, name) {
+      const container = document.getElementById('klantenContent');
+      container.innerHTML = `<div class="empty-state">Laden…</div>`;
+
+      const asData = getAssignments();
+      const today = new Date().toISOString().split('T')[0];
+
+      const [
+        { data: completions },
+        { data: checkins },
+        { data: reflections },
+        { data: tournaments },
+      ] = await Promise.all([
+        supabaseClient.from('assignment_completions').select('*').eq('user_id', userId).order('assignment_num'),
+        supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(5),
+        supabaseClient.from('match_reflections').select('*').eq('user_id', userId).order('datum', { ascending: false }).limit(5),
+        supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date').gte('start_date', today).limit(5),
+      ]);
+
+      const doneMap = {};
+      (completions || []).forEach((c) => { doneMap[c.assignment_num] = c; });
+      const doneCount = Object.keys(doneMap).length;
+      const pct = Math.round((doneCount / asData.length) * 100);
+
+      let html = `
+        <button onclick="loadKlanten()" style="background:none;border:none;color:#C8F135;font-size:0.85rem;font-weight:600;cursor:pointer;padding:0 0 16px;display:flex;align-items:center;gap:6px;">
+          ← Alle klanten
+        </button>
+        <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">${escapeHtml(name)}</h2>
+
+        <!-- OPDRACHTEN -->
+        <div style="margin:20px 0 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;">Opdrachten</h4>
+            <span style="font-size:0.78rem;color:#555;">${doneCount} / ${asData.length}</span>
+          </div>
+          <div style="background:#1A1A1A;border-radius:999px;height:5px;overflow:hidden;margin-bottom:14px;">
+            <div style="height:100%;background:#C8F135;border-radius:999px;width:${pct}%;"></div>
+          </div>`;
+
+      asData.forEach((a) => {
+        const done = doneMap[a.num];
+        const detId = 'kd' + userId.replace(/[^a-z0-9]/gi,'') + 'a' + a.num;
+        html += `
+          <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${done ? 'cursor:pointer;' : ''}user-select:none;"
+                 ${done ? `onclick="document.getElementById('${detId}').classList.toggle('hidden')"` : ''}>
+              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;
+                ${done ? 'background:rgba(200,241,53,.12);border:1px solid rgba(200,241,53,.3);color:#C8F135;' : 'background:#111;border:1px solid #222;color:#333;'}">
+                ${done ? '✓' : a.num}
+              </span>
+              <span style="flex:1;font-size:0.86rem;color:${done ? '#DDD' : '#444'};">${escapeHtml(a.title)}</span>
+              ${done ? `<span style="font-size:0.7rem;color:#444;">${new Date(done.created_at).toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</span>` : '<span style="font-size:0.7rem;color:#2A2A2A;">niet ingevuld</span>'}
+            </div>
+            ${done ? `<div id="${detId}" class="hidden" style="padding:0 14px 12px 46px;font-size:0.83rem;color:#666;line-height:1.7;white-space:pre-line;border-top:1px solid #111;">${escapeHtml(done.response)}</div>` : ''}
+          </div>`;
+      });
+
+      html += `</div>`;
+
+      // CHECK-INS
+      if (checkins && checkins.length) {
+        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Recente check-ins</h4>`;
+        checkins.forEach((c) => {
+          const detId = 'kci' + userId.replace(/[^a-z0-9]/gi,'') + c.week_start.replace(/-/g,'');
+          const dateStr = new Date(c.week_start+'T00:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
+          const ratingColor = (v) => v >= 8 ? '#6BCB2E' : v >= 6 ? '#AACC44' : v >= 4 ? '#EEAA33' : '#EE4444';
+          html += `
+            <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;"
+                   onclick="document.getElementById('${detId}').classList.toggle('hidden')">
+                <span style="flex:1;font-size:0.85rem;color:#CCC;">Week van ${dateStr}</span>
+                <span style="font-size:1rem;font-weight:700;color:${ratingColor(c.overall_rating)}">${c.overall_rating ?? '—'}</span>
+                <span style="font-size:0.7rem;color:#555;">overall ▾</span>
+              </div>
+              <div id="${detId}" class="hidden" style="padding:0 14px 12px;border-top:1px solid #111;">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 8px;">
+                  ${[['Ment. T',c.mental_training],['Ment. W',c.mental_matches],['Energie',c.energy_level],['Slaap',c.sleep_recovery]].map(([l,v])=>`
+                    <div style="background:#0D0D0D;border:1px solid #1A1A1A;border-radius:6px;padding:6px;text-align:center;">
+                      <div style="font-size:0.62rem;color:#444;">${l}</div>
+                      <div style="font-size:1rem;font-weight:700;color:${v!=null?ratingColor(v):'#333'};margin-top:2px;">${v??'—'}</div>
+                    </div>`).join('')}
+                </div>
+                <div style="font-size:0.75rem;color:#444;margin-bottom:6px;">${c.training_sessions??0} trainingen</div>
+                ${c.went_well?`<p style="font-size:0.82rem;color:#666;margin-top:5px;line-height:1.6;"><span style="color:#555;font-weight:600;">Goed: </span>${escapeHtml(c.went_well)}</p>`:''}
+                ${c.was_challenging?`<p style="font-size:0.82rem;color:#666;margin-top:4px;line-height:1.6;"><span style="color:#555;font-weight:600;">Uitdagend: </span>${escapeHtml(c.was_challenging)}</p>`:''}
+                ${c.focus_next_week?`<p style="font-size:0.82rem;color:#666;margin-top:4px;line-height:1.6;"><span style="color:#555;font-weight:600;">Focus: </span>${escapeHtml(c.focus_next_week)}</p>`:''}
+              </div>
+            </div>`;
+        });
+      }
+
+      // REFLECTIES
+      if (reflections && reflections.length) {
+        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Wedstrijdreflecties</h4>`;
+        reflections.forEach((r) => {
+          const detId = 'kr' + userId.replace(/[^a-z0-9]/gi,'') + r.id.replace(/[^a-z0-9]/gi,'');
+          html += `
+            <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;"
+                   onclick="document.getElementById('${detId}').classList.toggle('hidden')">
+                <span style="flex:1;font-size:0.85rem;color:#CCC;">${escapeHtml(r.tegenstander)}</span>
+                <span style="font-size:0.72rem;color:#555;">${escapeHtml(r.datum)}${r.score?' · '+escapeHtml(r.score):''} ▾</span>
+              </div>
+              <div id="${detId}" class="hidden" style="padding:0 14px 12px;border-top:1px solid #111;">
+                ${r.vraag1?`<p style="font-size:0.82rem;color:#666;margin-top:8px;line-height:1.6;"><span style="color:#555;font-weight:600;">Wat ging goed: </span>${escapeHtml(r.vraag1)}</p>`:''}
+                ${r.vraag2?`<p style="font-size:0.82rem;color:#666;margin-top:5px;line-height:1.6;"><span style="color:#555;font-weight:600;">Verbeteren: </span>${escapeHtml(r.vraag2)}</p>`:''}
+                ${r.vraag3?`<p style="font-size:0.82rem;color:#666;margin-top:5px;line-height:1.6;"><span style="color:#555;font-weight:600;">Aanpak: </span>${escapeHtml(r.vraag3)}</p>`:''}
+              </div>
+            </div>`;
+        });
+      }
+
+      // TOERNOOIEN
+      if (tournaments && tournaments.length) {
+        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Aankomende toernooien</h4>`;
+        tournaments.forEach((t) => {
+          html += `
+            <div style="border:1px solid #1A1A1A;border-radius:10px;padding:10px 14px;margin-bottom:8px;">
+              <div style="font-size:0.88rem;font-weight:600;color:#DDD;">${escapeHtml(t.name)}</div>
+              <div style="font-size:0.75rem;color:#555;margin-top:3px;">${formatTournamentDate(t,'nl')}${t.location?' · '+escapeHtml(t.location):''}</div>
+              ${t.notes?`<p style="font-size:0.8rem;color:#555;margin-top:5px;">${escapeHtml(t.notes)}</p>`:''}
+            </div>`;
+        });
+      }
+
+      html += `<div style="height:20px;"></div>`;
+      container.innerHTML = html;
     }
 
     async function loadAdminOpdrachten(container, asData, total, T) {
