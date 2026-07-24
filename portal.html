@@ -2715,7 +2715,7 @@
         supabaseClient.from('assignment_completions').select('*').eq('user_id', userId).order('assignment_num'),
         supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(5),
         supabaseClient.from('match_reflections').select('*').eq('user_id', userId).order('datum', { ascending: false }).limit(5),
-        supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date').gte('start_date', today).limit(5),
+        supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date', { ascending: false }).limit(10),
       ]);
 
       const doneMap = {};
@@ -2814,12 +2814,18 @@
 
       // TOERNOOIEN
       if (tournaments && tournaments.length) {
-        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Aankomende toernooien</h4>`;
+        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Toernooi planning</h4>`;
+        const todayStr = new Date().toISOString().split('T')[0];
         tournaments.forEach((t) => {
+          const isPast = (t.end_date || t.start_date) < todayStr;
           html += `
-            <div style="border:1px solid #1A1A1A;border-radius:10px;padding:10px 14px;margin-bottom:8px;">
-              <div style="font-size:0.88rem;font-weight:600;color:#DDD;">${escapeHtml(t.name)}</div>
+            <div style="border:1px solid #1A1A1A;border-radius:10px;padding:10px 14px;margin-bottom:8px;${isPast ? 'opacity:0.45;' : ''}">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="font-size:0.88rem;font-weight:600;color:${isPast ? '#888' : '#DDD'};flex:1;">${escapeHtml(t.name)}</div>
+                ${!isPast ? `<span style="font-size:0.65rem;font-weight:700;background:rgba(200,241,53,.12);color:#C8F135;border:1px solid rgba(200,241,53,.25);border-radius:999px;padding:2px 8px;">aankomend</span>` : ''}
+              </div>
               <div style="font-size:0.75rem;color:#555;margin-top:3px;">${formatTournamentDate(t,'nl')}${t.location?' · '+escapeHtml(t.location):''}</div>
+              ${t.surface?`<div style="font-size:0.72rem;color:#444;margin-top:2px;">${escapeHtml(t.surface)}</div>`:''}
               ${t.notes?`<p style="font-size:0.8rem;color:#555;margin-top:5px;">${escapeHtml(t.notes)}</p>`:''}
             </div>`;
         });
