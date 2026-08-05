@@ -2016,6 +2016,11 @@
         return;
       }
 
+      if (category === 'fysiek') {
+        loadFysiekSection(list);
+        return;
+      }
+
       list.innerHTML = [1,2,3].map(() => `<div class="skeleton skeleton-card"></div>`).join('');
 
       const { data, error } = await supabaseClient
@@ -2427,6 +2432,157 @@
         ]},
       ],
     };
+
+    async function loadFysiekSection(list) {
+      const T = i18n[lang];
+
+      const workouts = {
+        nl: [
+          {
+            id: 'A',
+            title: 'Workout A — Onderbeen & Explosiviteit',
+            subtitle: '2× per week · ~45 min · Focus: kracht + snelheid',
+            color: '#C8F135',
+            exercises: [
+              { name: 'Goblet Squat', sets: '4 sets × 8 herhalingen', rest: '90 sec rust', tip: 'Houd je rug recht en knieën in lijn met je tenen. Ideaal voor balans en quadriceps.' },
+              { name: 'Roemeense Deadlift', sets: '3 sets × 10 herhalingen', rest: '90 sec rust', tip: 'Langzaam naar beneden, voel de rek in je hamstrings. Essentieel voor blessurepreventie.' },
+              { name: 'Zijwaartse Uitval', sets: '3 sets × 10 per been', rest: '60 sec rust', tip: 'Stap breed opzij, zak door het standbeen. Traint de laterale beweging die je bij elke sprint maakt.' },
+              { name: 'Box Jump', sets: '4 sets × 5 herhalingen', rest: '90 sec rust', tip: 'Land zacht met gebogen knieën. Rust volledig tussen sets — dit is explosiefkracht, geen conditie.' },
+              { name: 'Kuit Ophalen (staand)', sets: '3 sets × 15 herhalingen', rest: '45 sec rust', tip: 'Langzaam omhoog, langzamer omlaag. Sterke kuiten = minder enkelblessures.' },
+              { name: 'Glutebrug met band', sets: '3 sets × 12 herhalingen', rest: '60 sec rust', tip: 'Band net boven de knieën. Druk je heupen volledig omhoog en houd 1 sec vast bovenin.' },
+            ],
+          },
+          {
+            id: 'B',
+            title: 'Workout B — Bovenbeen, Core & Rotatie',
+            subtitle: '2× per week · ~45 min · Focus: stabiliteit + slagkracht',
+            color: '#3b82f6',
+            exercises: [
+              { name: 'Dumbbell Rij (eenarmig)', sets: '4 sets × 10 per kant', rest: '75 sec rust', tip: 'Rug recht, elleboog langs je lichaam omhoog trekken. Sterke rug = stabielere forehand en service.' },
+              { name: 'Push-up (schouderbreed)', sets: '3 sets × 12 herhalingen', rest: '60 sec rust', tip: 'Ga langzaam naar beneden (3 sec). Te makkelijk? Doe ze met voeten op een bank.' },
+              { name: 'Schouderrotatie met band', sets: '3 sets × 15 per kant', rest: '45 sec rust', tip: 'Elleboog 90° gebogen, roteer alleen de onderarm. Beschermt je rotator cuff — de #1 blessure bij tennissers.' },
+              { name: 'Pallof Press', sets: '3 sets × 12 per kant', rest: '60 sec rust', tip: 'Kabelmachine of band op borsthoogte. Druk recht naar voren en houd 2 sec vast. Traint anti-rotatie — cruciaal voor je slagen.' },
+              { name: 'Medicine Ball Rotational Throw', sets: '4 sets × 8 per kant', rest: '75 sec rust', tip: 'Gooi tegen een muur of met een partner. Maximale snelheid, net als een forehand. Bouwt echte slagkracht.' },
+              { name: 'Dead Bug', sets: '3 sets × 10 per kant', rest: '45 sec rust', tip: 'Rug plat op de grond houden tijdens de beweging. Traint de diepe core die je rug beschermt tijdens lange wedstrijden.' },
+            ],
+          },
+        ],
+        en: [
+          {
+            id: 'A',
+            title: 'Workout A — Lower Body & Explosiveness',
+            subtitle: '2× per week · ~45 min · Focus: strength + speed',
+            color: '#C8F135',
+            exercises: [
+              { name: 'Goblet Squat', sets: '4 sets × 8 reps', rest: '90 sec rest', tip: 'Keep your back straight and knees in line with your toes. Great for balance and quadriceps.' },
+              { name: 'Romanian Deadlift', sets: '3 sets × 10 reps', rest: '90 sec rest', tip: 'Lower slowly, feel the stretch in your hamstrings. Essential for injury prevention.' },
+              { name: 'Lateral Lunge', sets: '3 sets × 10 per leg', rest: '60 sec rest', tip: 'Step wide to the side and sink through the standing leg. Trains the lateral movement you make with every sprint.' },
+              { name: 'Box Jump', sets: '4 sets × 5 reps', rest: '90 sec rest', tip: 'Land softly with bent knees. Rest fully between sets — this is explosive power, not conditioning.' },
+              { name: 'Standing Calf Raise', sets: '3 sets × 15 reps', rest: '45 sec rest', tip: 'Slow up, slower down. Strong calves = fewer ankle injuries.' },
+              { name: 'Glute Bridge with band', sets: '3 sets × 12 reps', rest: '60 sec rest', tip: 'Band just above the knees. Drive hips fully up and hold 1 sec at the top.' },
+            ],
+          },
+          {
+            id: 'B',
+            title: 'Workout B — Upper Body, Core & Rotation',
+            subtitle: '2× per week · ~45 min · Focus: stability + shot power',
+            color: '#3b82f6',
+            exercises: [
+              { name: 'Single-Arm Dumbbell Row', sets: '4 sets × 10 per side', rest: '75 sec rest', tip: 'Back flat, pull elbow close to your body. A strong back means a more stable forehand and serve.' },
+              { name: 'Push-up (shoulder-width)', sets: '3 sets × 12 reps', rest: '60 sec rest', tip: 'Lower slowly (3 sec). Too easy? Elevate your feet on a bench.' },
+              { name: 'Shoulder External Rotation with band', sets: '3 sets × 15 per side', rest: '45 sec rest', tip: 'Elbow at 90°, rotate only the forearm. Protects your rotator cuff — the #1 injury in tennis.' },
+              { name: 'Pallof Press', sets: '3 sets × 12 per side', rest: '60 sec rest', tip: 'Cable machine or band at chest height. Press straight out and hold 2 sec. Trains anti-rotation — crucial for your shots.' },
+              { name: 'Medicine Ball Rotational Throw', sets: '4 sets × 8 per side', rest: '75 sec rest', tip: 'Throw against a wall or with a partner. Maximum speed, just like a forehand. Builds real shot power.' },
+              { name: 'Dead Bug', sets: '3 sets × 10 per side', rest: '45 sec rest', tip: 'Keep lower back flat on the floor throughout. Trains the deep core that protects your back during long matches.' },
+            ],
+          },
+        ],
+      };
+
+      const ws = workouts[lang] || workouts.nl;
+      const activeW = { id: null };
+
+      let html = `
+        <div style="margin-bottom:20px;">
+          <h3 style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:.05em;color:#fff;margin-bottom:4px;">${lang==='en'?'Strength Program for Tennis Players':'Krachtprogramma voor Tennissers'}</h3>
+          <p style="font-size:0.85rem;color:#666;line-height:1.65;margin-bottom:16px;">${lang==='en'?'2 strength sessions per week. Do Workout A and Workout B with at least one rest day in between. Click an exercise for coaching tips.':'2 krachtsessies per week. Doe Workout A en Workout B met minimaal één rustdag ertussenin. Tik op een oefening voor coachingstips.'}</p>
+          <div style="display:flex;gap:8px;margin-bottom:20px;">`;
+
+      ws.forEach((w) => {
+        html += `
+          <button onclick="klFysiekTab('${w.id}')" id="fysiek-tab-${w.id}"
+            style="flex:1;background:${w.id==='A'?w.color:'#1A1A1A'};border:1px solid ${w.id==='A'?w.color:'#2A2A2A'};border-radius:10px;padding:12px 8px;cursor:pointer;transition:all .15s;">
+            <div style="font-size:1rem;font-weight:700;color:${w.id==='A'?'#0A0A0A':'#888'};font-family:'Bebas Neue',cursive;letter-spacing:.05em;">Workout ${w.id}</div>
+            <div style="font-size:0.7rem;color:${w.id==='A'?'rgba(0,0,0,.6)':'#555'};margin-top:2px;">${w.subtitle.split('·')[0].trim()}</div>
+          </button>`;
+      });
+
+      html += `</div>`;
+
+      ws.forEach((w) => {
+        html += `
+          <div id="fysiek-panel-${w.id}" ${w.id!=='A'?'class="hidden"':''}>
+            <div style="border-left:3px solid ${w.color};padding-left:14px;margin-bottom:16px;">
+              <div style="font-size:1.1rem;font-weight:700;color:#fff;font-family:'Bebas Neue',cursive;letter-spacing:.04em;">${w.title}</div>
+              <div style="font-size:0.75rem;color:#555;margin-top:2px;">${w.subtitle}</div>
+            </div>`;
+
+        w.exercises.forEach((ex, i) => {
+          const exId = `fysiek-ex-${w.id}-${i}`;
+          html += `
+            <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;user-select:none;" onclick="document.getElementById('${exId}').classList.toggle('hidden')">
+                <div style="width:28px;height:28px;border-radius:8px;background:${w.color}18;border:1px solid ${w.color}33;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:${w.color};flex-shrink:0;">${i+1}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:0.88rem;font-weight:600;color:#DDD;">${escapeHtml(ex.name)}</div>
+                  <div style="font-size:0.75rem;color:#555;margin-top:2px;">${escapeHtml(ex.sets)} · ${escapeHtml(ex.rest)}</div>
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div id="${exId}" class="hidden" style="padding:10px 14px 12px 54px;border-top:1px solid #111;font-size:0.83rem;color:#888;line-height:1.65;">
+                <span style="color:${w.color};font-weight:600;">${lang==='en'?'Tip: ':'Tip: '}</span>${escapeHtml(ex.tip)}
+              </div>
+            </div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      html += `</div>`;
+
+      // Supabase videos below
+      const { data } = await supabaseClient.from('content_items').select('*').eq('category','fysiek').eq('published',true).order('sort_order',{ascending:true});
+      if (data && data.length) {
+        html += `<div style="border-top:1px solid #1A1A1A;padding-top:20px;margin-top:4px;">
+          <h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin-bottom:14px;">${lang==='en'?'Videos':'Video\'s'}</h4>`;
+        data.forEach((item) => {
+          const title = (lang==='en'&&item.title_en)?item.title_en:item.title;
+          const desc  = (lang==='en'&&item.description_en)?item.description_en:item.description;
+          html += `<div class="content-item"><div class="content-item-body">
+            <strong style="display:block;margin-bottom:4px;">${escapeHtml(title)}</strong>
+            ${desc?`<p class="muted" style="margin-top:4px;">${escapeHtml(desc)}</p>`:''}
+            ${item.video_url?renderVideoUrl(item.video_url,T):''}
+          </div></div>`;
+        });
+        html += `</div>`;
+      }
+
+      list.innerHTML = html;
+    }
+
+    function klFysiekTab(id) {
+      ['A','B'].forEach((w) => {
+        const panel = document.getElementById(`fysiek-panel-${w}`);
+        const tab   = document.getElementById(`fysiek-tab-${w}`);
+        if (!panel || !tab) return;
+        const active = w === id;
+        panel.classList.toggle('hidden', !active);
+        const color = w==='A'?'#C8F135':'#3b82f6';
+        tab.style.background   = active ? color : '#1A1A1A';
+        tab.style.borderColor  = active ? color : '#2A2A2A';
+        tab.querySelector('div').style.color = active ? (w==='A'?'#0A0A0A':'#fff') : '#888';
+      });
+    }
 
     function loadVoedingSection(list) {
       const T = i18n[lang];
