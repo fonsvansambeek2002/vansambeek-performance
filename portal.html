@@ -2704,7 +2704,7 @@
       container.innerHTML = `<div class="empty-state">Laden…</div>`;
 
       const asData = getAssignments();
-      const today = new Date().toISOString().split('T')[0];
+      const todayStr = new Date().toISOString().split('T')[0];
 
       const [
         { data: completions },
@@ -2713,65 +2713,76 @@
         { data: tournaments },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('*').eq('user_id', userId).order('assignment_num'),
-        supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(5),
-        supabaseClient.from('match_reflections').select('*').eq('user_id', userId).order('datum', { ascending: false }).limit(5),
-        supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date', { ascending: false }).limit(10),
+        supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(20),
+        supabaseClient.from('match_reflections').select('*').eq('user_id', userId).order('datum', { ascending: false }).limit(20),
+        supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date', { ascending: false }).limit(20),
       ]);
 
       const doneMap = {};
       (completions || []).forEach((c) => { doneMap[c.assignment_num] = c; });
       const doneCount = Object.keys(doneMap).length;
       const pct = Math.round((doneCount / asData.length) * 100);
+      const ratingColor = (v) => v >= 8 ? '#6BCB2E' : v >= 6 ? '#AACC44' : v >= 4 ? '#EEAA33' : '#EE4444';
+      const uid = userId.replace(/[^a-z0-9]/gi,'');
 
+      // ── STAT CARDS ────────────────────────────────────────
       let html = `
-        <button onclick="loadKlanten()" style="background:none;border:none;color:#C8F135;font-size:0.85rem;font-weight:600;cursor:pointer;padding:0 0 16px;display:flex;align-items:center;gap:6px;">
-          ← Alle klanten
-        </button>
-        <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">${escapeHtml(name)}</h2>
+        <button onclick="loadKlanten()" style="background:none;border:none;color:#C8F135;font-size:0.85rem;font-weight:600;cursor:pointer;padding:0 0 14px;display:flex;align-items:center;gap:6px;">← Alle klanten</button>
+        <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:16px;">${escapeHtml(name)}</h2>
 
-        <!-- OPDRACHTEN -->
-        <div style="margin:20px 0 0;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;">Opdrachten</h4>
-            <span style="font-size:0.78rem;color:#555;">${doneCount} / ${asData.length}</span>
-          </div>
-          <div style="background:#1A1A1A;border-radius:999px;height:5px;overflow:hidden;margin-bottom:14px;">
-            <div style="height:100%;background:#C8F135;border-radius:999px;width:${pct}%;"></div>
-          </div>`;
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;">
+          ${[
+            ['Opdrachten', `${doneCount}/${asData.length}`, '#C8F135'],
+            ['Check-ins', (checkins||[]).length, '#3b82f6'],
+            ['Reflecties', (reflections||[]).length, '#a855f7'],
+            ['Toernooien', (tournaments||[]).length, '#f59e0b'],
+          ].map(([label, val, color]) => `
+            <div style="background:#111;border:1px solid #1A1A1A;border-radius:10px;padding:10px 8px;text-align:center;">
+              <div style="font-size:1.1rem;font-weight:700;color:${color};">${val}</div>
+              <div style="font-size:0.62rem;color:#555;margin-top:3px;">${label}</div>
+            </div>`).join('')}
+        </div>
 
+        <!-- TABS -->
+        <div style="display:flex;gap:0;border-bottom:1px solid #1A1A1A;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;">
+          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-plan','Planning']].map(([id,label],i)=>`
+            <button id="${id}" onclick="klTab('${uid}','${id}')" style="flex-shrink:0;background:none;border:none;border-bottom:2px solid ${i===0?'#C8F135':'transparent'};color:${i===0?'#fff':'#555'};font-family:Inter,sans-serif;font-size:0.82rem;font-weight:600;padding:8px 14px;cursor:pointer;transition:all .15s;">${label}</button>`).join('')}
+        </div>`;
+
+      // ── TAB: OPDRACHTEN ───────────────────────────────────
+      html += `<div id="klpanel-opd-${uid}">
+        <div style="background:#1A1A1A;border-radius:999px;height:4px;overflow:hidden;margin-bottom:14px;">
+          <div style="height:100%;background:#C8F135;border-radius:999px;width:${pct}%;"></div>
+        </div>`;
       asData.forEach((a) => {
         const done = doneMap[a.num];
-        const detId = 'kd' + userId.replace(/[^a-z0-9]/gi,'') + 'a' + a.num;
+        const detId = `kd${uid}a${a.num}`;
         html += `
           <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${done ? 'cursor:pointer;' : ''}user-select:none;"
-                 ${done ? `onclick="document.getElementById('${detId}').classList.toggle('hidden')"` : ''}>
-              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;
-                ${done ? 'background:rgba(200,241,53,.12);border:1px solid rgba(200,241,53,.3);color:#C8F135;' : 'background:#111;border:1px solid #222;color:#333;'}">
-                ${done ? '✓' : a.num}
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${done?'cursor:pointer;':''}user-select:none;"
+                 ${done?`onclick="document.getElementById('${detId}').classList.toggle('hidden')"`:''}>
+              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;${done?'background:rgba(200,241,53,.12);border:1px solid rgba(200,241,53,.3);color:#C8F135;':'background:#111;border:1px solid #222;color:#333;'}">
+                ${done?'✓':a.num}
               </span>
-              <span style="flex:1;font-size:0.86rem;color:${done ? '#DDD' : '#444'};">${escapeHtml(a.title)}</span>
-              ${done ? `<span style="font-size:0.7rem;color:#444;">${new Date(done.created_at).toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</span>` : '<span style="font-size:0.7rem;color:#2A2A2A;">niet ingevuld</span>'}
+              <span style="flex:1;font-size:0.86rem;color:${done?'#DDD':'#444'};">${escapeHtml(a.title)}</span>
+              ${done?`<span style="font-size:0.7rem;color:#444;">${new Date(done.created_at).toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</span>`:'<span style="font-size:0.7rem;color:#2A2A2A;">niet ingevuld</span>'}
             </div>
-            ${done ? `<div id="${detId}" class="hidden" style="padding:0 14px 12px 46px;font-size:0.83rem;color:#666;line-height:1.7;white-space:pre-line;border-top:1px solid #111;">${escapeHtml(done.response)}</div>` : ''}
+            ${done?`<div id="${detId}" class="hidden" style="padding:0 14px 12px 46px;font-size:0.83rem;color:#666;line-height:1.7;white-space:pre-line;border-top:1px solid #111;">${escapeHtml(done.response)}</div>`:''}
           </div>`;
       });
-
       html += `</div>`;
 
-      // CHECK-INS
+      // ── TAB: CHECK-INS ────────────────────────────────────
+      html += `<div id="klpanel-ci-${uid}" class="hidden">`;
       if (checkins && checkins.length) {
-        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Recente check-ins</h4>`;
         checkins.forEach((c) => {
-          const detId = 'kci' + userId.replace(/[^a-z0-9]/gi,'') + c.week_start.replace(/-/g,'');
+          const detId = `kci${uid}${c.week_start.replace(/-/g,'')}`;
           const dateStr = new Date(c.week_start+'T00:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
-          const ratingColor = (v) => v >= 8 ? '#6BCB2E' : v >= 6 ? '#AACC44' : v >= 4 ? '#EEAA33' : '#EE4444';
           html += `
             <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;"
-                   onclick="document.getElementById('${detId}').classList.toggle('hidden')">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;" onclick="document.getElementById('${detId}').classList.toggle('hidden')">
                 <span style="flex:1;font-size:0.85rem;color:#CCC;">Week van ${dateStr}</span>
-                <span style="font-size:1rem;font-weight:700;color:${ratingColor(c.overall_rating)}">${c.overall_rating ?? '—'}</span>
+                <span style="font-size:1rem;font-weight:700;color:${ratingColor(c.overall_rating)}">${c.overall_rating??'—'}</span>
                 <span style="font-size:0.7rem;color:#555;">overall ▾</span>
               </div>
               <div id="${detId}" class="hidden" style="padding:0 14px 12px;border-top:1px solid #111;">
@@ -2789,17 +2800,19 @@
               </div>
             </div>`;
         });
+      } else {
+        html += `<div class="empty-state">Nog geen check-ins ingediend.</div>`;
       }
+      html += `</div>`;
 
-      // REFLECTIES
+      // ── TAB: REFLECTIES ───────────────────────────────────
+      html += `<div id="klpanel-ref-${uid}" class="hidden">`;
       if (reflections && reflections.length) {
-        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Wedstrijdreflecties</h4>`;
         reflections.forEach((r) => {
-          const detId = 'kr' + userId.replace(/[^a-z0-9]/gi,'') + r.id.replace(/[^a-z0-9]/gi,'');
+          const detId = `kr${uid}${r.id.replace(/[^a-z0-9]/gi,'')}`;
           html += `
             <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;"
-                   onclick="document.getElementById('${detId}').classList.toggle('hidden')">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;" onclick="document.getElementById('${detId}').classList.toggle('hidden')">
                 <span style="flex:1;font-size:0.85rem;color:#CCC;">${escapeHtml(r.tegenstander)}</span>
                 <span style="font-size:0.72rem;color:#555;">${escapeHtml(r.datum)}${r.score?' · '+escapeHtml(r.score):''} ▾</span>
               </div>
@@ -2810,29 +2823,47 @@
               </div>
             </div>`;
         });
+      } else {
+        html += `<div class="empty-state">Nog geen wedstrijdreflecties.</div>`;
       }
+      html += `</div>`;
 
-      // TOERNOOIEN
+      // ── TAB: PLANNING ─────────────────────────────────────
+      html += `<div id="klpanel-plan-${uid}" class="hidden">`;
       if (tournaments && tournaments.length) {
-        html += `<h4 style="font-size:0.78rem;letter-spacing:.07em;text-transform:uppercase;color:#555;font-weight:700;margin:24px 0 10px;">Toernooi planning</h4>`;
-        const todayStr = new Date().toISOString().split('T')[0];
         tournaments.forEach((t) => {
           const isPast = (t.end_date || t.start_date) < todayStr;
           html += `
-            <div style="border:1px solid #1A1A1A;border-radius:10px;padding:10px 14px;margin-bottom:8px;${isPast ? 'opacity:0.45;' : ''}">
+            <div style="border:1px solid #1A1A1A;border-radius:10px;padding:10px 14px;margin-bottom:8px;${isPast?'opacity:0.45;':''}">
               <div style="display:flex;align-items:center;gap:8px;">
-                <div style="font-size:0.88rem;font-weight:600;color:${isPast ? '#888' : '#DDD'};flex:1;">${escapeHtml(t.name)}</div>
-                ${!isPast ? `<span style="font-size:0.65rem;font-weight:700;background:rgba(200,241,53,.12);color:#C8F135;border:1px solid rgba(200,241,53,.25);border-radius:999px;padding:2px 8px;">aankomend</span>` : ''}
+                <div style="font-size:0.88rem;font-weight:600;color:${isPast?'#888':'#DDD'};flex:1;">${escapeHtml(t.name)}</div>
+                ${!isPast?`<span style="font-size:0.65rem;font-weight:700;background:rgba(200,241,53,.12);color:#C8F135;border:1px solid rgba(200,241,53,.25);border-radius:999px;padding:2px 8px;">aankomend</span>`:''}
               </div>
               <div style="font-size:0.75rem;color:#555;margin-top:3px;">${formatTournamentDate(t,'nl')}${t.location?' · '+escapeHtml(t.location):''}</div>
               ${t.surface?`<div style="font-size:0.72rem;color:#444;margin-top:2px;">${escapeHtml(t.surface)}</div>`:''}
               ${t.notes?`<p style="font-size:0.8rem;color:#555;margin-top:5px;">${escapeHtml(t.notes)}</p>`:''}
             </div>`;
         });
+      } else {
+        html += `<div class="empty-state">Nog geen toernooien gepland.</div>`;
       }
+      html += `</div><div style="height:20px;"></div>`;
 
-      html += `<div style="height:20px;"></div>`;
       container.innerHTML = html;
+    }
+
+    function klTab(uid, activeId) {
+      const panels = ['opd','ci','ref','plan'];
+      panels.forEach((p) => {
+        const panel = document.getElementById(`klpanel-${p}-${uid}`);
+        const tab = document.getElementById(`kltab-${p}`);
+        const isActive = `kltab-${p}` === activeId;
+        if (panel) panel.classList.toggle('hidden', !isActive);
+        if (tab) {
+          tab.style.borderBottomColor = isActive ? '#C8F135' : 'transparent';
+          tab.style.color = isActive ? '#fff' : '#555';
+        }
+      });
     }
 
     async function loadAdminOpdrachten(container, asData, total, T) {
