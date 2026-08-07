@@ -1038,6 +1038,7 @@
         <div class="tabs" id="categoryTabs">
           <button class="tab active" data-category="mentaal">Mentaal</button>
           <button class="tab" data-category="mindfulness">Mindfulness</button>
+          <button class="tab" data-category="ademhaling">Ademhaling</button>
           <button class="tab" data-category="voeding">Voeding</button>
           <button class="tab" data-category="fysiek">Fysiek</button>
           <button class="tab" data-category="highlights">Highlights</button>
@@ -1346,7 +1347,7 @@
         switchLang: 'Switch to English',
         tipTitle: 'Quote van de dag',
         noContent: 'Nog geen content beschikbaar.',
-        tabs: { mentaal: 'Mentaal', mindfulness: 'Mindfulness', voeding: 'Voeding', fysiek: 'Fysiek', highlights: 'Highlights' },
+        tabs: { mentaal: 'Mentaal', mindfulness: 'Mindfulness', ademhaling: 'Ademhaling', voeding: 'Voeding', fysiek: 'Fysiek', highlights: 'Highlights' },
         loading: 'Laden…',
         noCategory: 'Nog geen content in deze categorie.',
         watchVideo: 'Bekijk video →',
@@ -1495,7 +1496,7 @@
         switchLang: 'Wissel naar Nederlands',
         tipTitle: 'Quote of the day',
         noContent: 'No content available yet.',
-        tabs: { mentaal: 'Mental', mindfulness: 'Mindfulness', voeding: 'Nutrition', fysiek: 'Physical', highlights: 'Highlights' },
+        tabs: { mentaal: 'Mental', mindfulness: 'Mindfulness', ademhaling: 'Breathing', voeding: 'Nutrition', fysiek: 'Physical', highlights: 'Highlights' },
         loading: 'Loading…',
         noCategory: 'No content in this category yet.',
         watchVideo: 'Watch video →',
@@ -2000,6 +2001,11 @@
       const T = i18n[lang];
       libraryLoaded = true;
       const list = document.getElementById('libraryList');
+
+      if (category === 'ademhaling') {
+        loadAdemhalingSection(list);
+        return;
+      }
 
       if (category === 'highlights') {
         loadHighlights(list);
@@ -2693,6 +2699,274 @@
     }
 
     function klFysiekTab(id) { fysiekTab(id); }
+
+    // ── ADEMHALING ────────────────────────────────────────
+
+    const breathState = {
+      running: false, phaseIdx: 0, countdown: 0,
+      round: 1, totalRounds: 0, interval: null, tech: null,
+    };
+
+    function loadAdemhalingSection(list) {
+      const isEN = lang === 'en';
+
+      const techniques = [
+        {
+          id: 'box',
+          name: 'Box Breathing',
+          tag:   isEN ? 'Focus & calm · 4-4-4-4' : 'Focus & rust · 4-4-4-4',
+          color: '#C8F135',
+          textColor: '#0A0A0A',
+          rounds: 4,
+          desc: isEN
+            ? 'Used by Navy SEALs and elite athletes to calm the nervous system under pressure. Ideal before a match, before an important point, or whenever stress spikes.'
+            : 'Gebruikt door Navy SEALs en topsporters om het zenuwstelsel te kalmeren onder druk. Ideaal vóór een wedstrijd, vóór een belangrijk punt, of wanneer stress oploopt.',
+          phases: isEN
+            ? [{label:'Inhale',     dur:4, scale:1.28},
+               {label:'Hold',       dur:4, scale:1.28},
+               {label:'Exhale',     dur:4, scale:0.82},
+               {label:'Hold',       dur:4, scale:0.82}]
+            : [{label:'Inademen',   dur:4, scale:1.28},
+               {label:'Vasthouden', dur:4, scale:1.28},
+               {label:'Uitademen',  dur:4, scale:0.82},
+               {label:'Vasthouden', dur:4, scale:0.82}],
+        },
+        {
+          id: '478',
+          name: '4-7-8',
+          tag:   isEN ? 'Stress release · 4-7-8' : 'Stressontlading · 4-7-8',
+          color: '#3b82f6',
+          textColor: '#fff',
+          rounds: 4,
+          desc: isEN
+            ? 'Developed by Dr. Andrew Weil. The 7-second hold and 8-second exhale activate your parasympathetic nervous system quickly. Best after a tough loss, before sleep, or when anger or anxiety build.'
+            : 'Ontwikkeld door Dr. Andrew Weil. De 7-seconden vasthouden en 8-seconden uitademing activeren snel je parasympathische zenuwstelsel. Ideaal na een zware verlies, voor het slapen, of wanneer boosheid of angst oplopen.',
+          phases: isEN
+            ? [{label:'Inhale',     dur:4, scale:1.28},
+               {label:'Hold',       dur:7, scale:1.28},
+               {label:'Exhale',     dur:8, scale:0.78}]
+            : [{label:'Inademen',   dur:4, scale:1.28},
+               {label:'Vasthouden', dur:7, scale:1.28},
+               {label:'Uitademen',  dur:8, scale:0.78}],
+        },
+        {
+          id: 'match',
+          name: isEN ? 'Between-point' : 'Tussenbal',
+          tag:   isEN ? 'On court · 4-6' : 'Op de baan · 4-6',
+          color: '#f59e0b',
+          textColor: '#0A0A0A',
+          rounds: 5,
+          desc: isEN
+            ? 'A simple 4-6 breath resets your heart rate in under 10 seconds between points. The longer exhale is key — it activates the vagus nerve. Use it every changeover and after every mistake or break of serve.'
+            : 'Een simpele 4-6 ademhaling verlaagt je hartslag in minder dan 10 seconden tussen punten. De langere uitademing is de sleutel — het activeert de nervus vagus. Gebruik het bij elke wissel en na elke fout of break.',
+          phases: isEN
+            ? [{label:'Inhale',   dur:4, scale:1.22},
+               {label:'Exhale',   dur:6, scale:0.82}]
+            : [{label:'Inademen', dur:4, scale:1.22},
+               {label:'Uitademen',dur:6, scale:0.82}],
+        },
+      ];
+
+      let activeTech = techniques[0];
+
+      function renderBreather() {
+        const t = activeTech;
+        const totalSec = t.phases.reduce((a,p) => a+p.dur, 0);
+        return `
+          <div style="text-align:center;">
+            <div style="position:relative;width:190px;height:190px;margin:20px auto 8px;">
+              <div id="breathRing" style="
+                position:absolute;inset:0;border-radius:50%;
+                background:radial-gradient(circle,${t.color}18 0%,transparent 70%);
+                border:2px solid ${t.color}66;
+                box-shadow:0 0 24px ${t.color}28;
+                transform:scale(1);
+                transition:transform 4s ease-in-out, box-shadow 4s ease-in-out;
+              "></div>
+              <div style="position:absolute;inset:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+                <div id="breathPhase" style="font-size:0.82rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#999;"></div>
+                <div id="breathCount" style="font-size:3rem;font-weight:800;line-height:1;color:${t.color};">—</div>
+                <div id="breathRoundLabel" style="font-size:0.72rem;color:#444;">${isEN?'round':'ronde'} <span id="breathRoundNum">1</span>/${t.rounds}</div>
+              </div>
+            </div>
+            <div id="breathStatusMsg" style="font-size:0.8rem;color:#555;min-height:20px;margin-bottom:16px;">${isEN?'Press start to begin':'Druk op start om te beginnen'}</div>
+            <div style="display:flex;gap:10px;justify-content:center;">
+              <button onclick="breathStart()" id="breathStartBtn"
+                style="background:${t.color};color:${t.textColor};border:none;border-radius:999px;padding:11px 28px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+                ${isEN?'Start':'Start'}
+              </button>
+              <button onclick="breathStop()" id="breathStopBtn"
+                style="background:#1A1A1A;color:#888;border:1px solid #2A2A2A;border-radius:999px;padding:11px 20px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+                ${isEN?'Pause':'Pauze'}
+              </button>
+              <button onclick="breathReset()"
+                style="background:transparent;color:#444;border:1px solid #1A1A1A;border-radius:999px;padding:11px 20px;font-size:0.9rem;cursor:pointer;">
+                ${isEN?'Reset':'Reset'}
+              </button>
+            </div>
+          </div>`;
+      }
+
+      function techniqueCard(t) {
+        const isActive = t.id === activeTech.id;
+        return `
+          <button onclick="breathSelectTech('${t.id}')" style="
+            display:flex;align-items:flex-start;gap:12px;width:100%;
+            background:${isActive ? t.color+'12' : 'transparent'};
+            border:1px solid ${isActive ? t.color+'44' : '#1A1A1A'};
+            border-radius:12px;padding:14px;cursor:pointer;text-align:left;margin-bottom:8px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:${t.color};flex-shrink:0;margin-top:4px;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.9rem;font-weight:700;color:${isActive?t.color:'#ccc'};">${escapeHtml(t.name)}</div>
+              <div style="font-size:0.72rem;color:#555;margin-top:2px;">${escapeHtml(t.tag)}</div>
+              ${isActive ? `<div style="font-size:0.8rem;color:#777;margin-top:8px;line-height:1.65;">${escapeHtml(t.desc)}</div>` : ''}
+            </div>
+          </button>`;
+      }
+
+      function buildHTML() {
+        return `
+          <h3 style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:.05em;color:#fff;margin-bottom:4px;">${isEN?'Breathing Exercises':'Ademhalingsoefeningen'}</h3>
+          <p style="font-size:0.82rem;color:#555;line-height:1.65;margin-bottom:18px;">${isEN?'Breathing is the fastest tool you have to influence your mental and physical state. Use these techniques before, during, and after training or competition.':'Ademhaling is het snelste hulpmiddel dat je hebt om je mentale en fysieke staat te beïnvloeden. Gebruik deze technieken voor, tijdens en na training of wedstrijd.'}</p>
+          <div id="breathTechList">${techniques.map(techniqueCard).join('')}</div>
+          <div style="border-top:1px solid #1A1A1A;padding-top:20px;margin-top:4px;" id="breatherWrap">
+            ${renderBreather()}
+          </div>
+          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:14px 16px;margin-top:20px;">
+            <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#555;margin-bottom:10px;">${isEN?'When to use what':'Wanneer wat gebruiken'}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${[
+                {c:'#C8F135', when: isEN?'Before warmup / pre-match':'Vóór warming-up / pre-wedstrijd', what:'Box Breathing · 4 rounds'},
+                {c:'#f59e0b', when: isEN?'Between points on court':'Tussen punten op de baan', what:'Between-point · 4-6'},
+                {c:'#3b82f6', when: isEN?'After a match / before sleep':'Na een wedstrijd / voor het slapen', what:'4-7-8 · 4 rounds'},
+              ].map(r=>`
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${r.c};flex-shrink:0;"></div>
+                  <div style="font-size:0.8rem;color:#999;flex:1;">${escapeHtml(r.when)}</div>
+                  <div style="font-size:0.75rem;color:#555;font-weight:600;">${escapeHtml(r.what)}</div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+      }
+
+      list.innerHTML = buildHTML();
+
+      window._breathTechniques = techniques;
+      window._breathIsEN = isEN;
+      window._breathBuildHTML = buildHTML;
+      window._breathActiveTechId = activeTech.id;
+
+      window.breathSelectTech = function(id) {
+        activeTech = techniques.find(t => t.id === id);
+        window._breathActiveTechId = id;
+        breathState.running = false;
+        clearInterval(breathState.interval);
+        breathState.interval = null;
+        list.innerHTML = buildHTML();
+        window._breathTechniques = techniques;
+        window.breathSelectTech = arguments.callee;
+      };
+
+      window.breathStart = function() {
+        if (breathState.running) return;
+        const t = activeTech;
+        breathState.tech = t;
+        breathState.totalRounds = t.rounds;
+        if (!breathState.interval) {
+          breathState.phaseIdx = 0;
+          breathState.round    = 1;
+          breathState.countdown = t.phases[0].dur;
+          _breathApplyPhase();
+        }
+        breathState.running = true;
+        document.getElementById('breathStartBtn').style.opacity = '0.4';
+        document.getElementById('breathStatusMsg').textContent = '';
+        breathState.interval = setInterval(_breathTick, 1000);
+      };
+
+      window.breathStop = function() {
+        breathState.running = false;
+        clearInterval(breathState.interval);
+        breathState.interval = null;
+        document.getElementById('breathStartBtn').style.opacity = '1';
+        const msg = document.getElementById('breathStatusMsg');
+        if (msg) msg.textContent = isEN ? 'Paused — press start to continue' : 'Gepauzeerd — druk start om door te gaan';
+      };
+
+      window.breathReset = function() {
+        breathState.running = false;
+        clearInterval(breathState.interval);
+        breathState.interval = null;
+        breathState.phaseIdx = 0;
+        breathState.round    = 1;
+        breathState.countdown = 0;
+        const ring  = document.getElementById('breathRing');
+        const phase = document.getElementById('breathPhase');
+        const count = document.getElementById('breathCount');
+        const rnum  = document.getElementById('breathRoundNum');
+        const msg   = document.getElementById('breathStatusMsg');
+        const btn   = document.getElementById('breathStartBtn');
+        if (ring)  { ring.style.transition='transform .5s ease'; ring.style.transform='scale(1)'; }
+        if (phase) phase.textContent = '';
+        if (count) count.textContent = '—';
+        if (rnum)  rnum.textContent  = '1';
+        if (msg)   msg.textContent   = isEN ? 'Press start to begin' : 'Druk op start om te beginnen';
+        if (btn)   btn.style.opacity = '1';
+      };
+
+      function _breathApplyPhase() {
+        const p    = breathState.tech.phases[breathState.phaseIdx];
+        const ring = document.getElementById('breathRing');
+        const col  = breathState.tech.color;
+        if (ring) {
+          ring.style.transition = `transform ${p.dur}s ease-in-out, box-shadow ${p.dur}s ease-in-out`;
+          ring.style.transform  = `scale(${p.scale})`;
+          const glow = p.scale > 1 ? '0 0 48px ' + col + '44' : '0 0 12px ' + col + '18';
+          ring.style.boxShadow  = glow;
+        }
+        const ph = document.getElementById('breathPhase');
+        if (ph) ph.textContent = p.label.toUpperCase();
+        const ct = document.getElementById('breathCount');
+        if (ct) ct.textContent = breathState.countdown;
+      }
+    }
+
+    function _breathTick() {
+      if (!breathState.running) return;
+      breathState.countdown--;
+      const ct = document.getElementById('breathCount');
+      if (ct) ct.textContent = breathState.countdown;
+      if (breathState.countdown <= 0) {
+        breathState.phaseIdx++;
+        if (breathState.phaseIdx >= breathState.tech.phases.length) {
+          breathState.phaseIdx = 0;
+          breathState.round++;
+          const rnum = document.getElementById('breathRoundNum');
+          if (rnum) rnum.textContent = Math.min(breathState.round, breathState.totalRounds);
+          if (breathState.round > breathState.totalRounds) {
+            clearInterval(breathState.interval);
+            breathState.interval = null;
+            breathState.running  = false;
+            const ring = document.getElementById('breathRing');
+            if (ring) { ring.style.transition='transform 1s ease'; ring.style.transform='scale(1)'; ring.style.boxShadow=''; }
+            const ph = document.getElementById('breathPhase');
+            if (ph) ph.textContent = '';
+            const c2 = document.getElementById('breathCount');
+            if (c2) c2.textContent = '✓';
+            const msg = document.getElementById('breathStatusMsg');
+            const isEN = window._breathIsEN;
+            if (msg) msg.textContent = isEN ? 'Session complete — well done!' : 'Sessie klaar — goed gedaan!';
+            const btn = document.getElementById('breathStartBtn');
+            if (btn) btn.style.opacity = '1';
+            return;
+          }
+        }
+        breathState.countdown = breathState.tech.phases[breathState.phaseIdx].dur;
+        _breathApplyPhase();
+        const ct2 = document.getElementById('breathCount');
+        if (ct2) ct2.textContent = breathState.countdown;
+      }
+    }
 
     function loadVoedingSection(list) {
       const T = i18n[lang];
