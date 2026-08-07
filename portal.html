@@ -3608,47 +3608,156 @@
 
     // ── PODCASTS ──────────────────────────────────────────
 
-    async function loadPodcasts(container) {
-      const T = i18n[lang];
-      container.innerHTML = `<div class="empty-state">${T.loading}</div>`;
+    function loadPodcasts(container) {
+      const spotify = (id) => `https://open.spotify.com/embed/episode/${id}`;
+      const spotifyLink = (id) => `https://open.spotify.com/episode/${id}`;
 
-      const { data, error } = await supabaseClient
-        .from('content_items')
-        .select('*')
-        .eq('category', 'podcasts')
-        .eq('published', true)
-        .order('sort_order', { ascending: true });
+      const categories = {
+        nl: [
+          {
+            id: 'legends',
+            label: '🎾 Tennis Legends',
+            episodes: [
+              { title: 'Djokovic: "I Never Felt I Was Enough"', show: 'On Purpose · Jay Shetty', desc: 'Djokovic over zelftwijfel, visualisatie en hoe hij twijfel omzet in brandstof voor succes.', id: '0J0UAUHv2H3gmI9cyyyAZF' },
+              { title: 'Djokovic: Become #1 In The World', show: 'On Purpose · Jay Shetty', desc: 'Hoe Djokovic een kampioensmindset opbouwde en wat iedereen daarvan kan leren.', id: '6n9mrSEhUFP3t7W4pPgDrf' },
+              { title: 'Djokovic: Greatest Comeback in History', show: 'On Purpose · Jay Shetty', desc: 'Mentale veerkracht na de moeilijkste periode in zijn carrière — hoe hij terugkwam als een kampioem.', id: '1uTnkbDKvdizPLuKBQmowv' },
+              { title: 'Maria Sharapova: Mental Performance & Rise to the Top', show: 'The Tim Ferriss Show', desc: 'Diepgaand gesprek over mentale training, druk, discipline en balans op het hoogste niveau.', id: '2hrJaGtgSLyqL7e08iwtkC' },
+            ],
+          },
+          {
+            id: 'wetenschap',
+            label: '🧠 Mentale Wetenschap',
+            episodes: [
+              { title: 'Dopamine voor Motivatie & Focus', show: 'Huberman Lab', desc: 'Hoe dopamine jouw motivatie, focus en doorzettingsvermogen stuurt — en hoe je dit systeem optimaliseert.', id: '42F7z6Z4CB8hJAstRqMCiV' },
+              { title: 'Focus Toolkit: Tools voor Concentratie', show: 'Huberman Lab', desc: 'Bewezen tools uit gedragswetenschap en neurologie om dieper en langer gefocust te presteren.', id: '0cfMpJd2lk9xtk3hyGy5FT' },
+              { title: 'Doelen Stellen & Bereiken', show: 'Huberman Lab', desc: 'De wetenschap achter effectieve doelen — waarom de meeste mensen het fout doen en hoe jij het goed doet.', id: '0sFYKmVjh2gEfBWfj25DNk' },
+              { title: 'Motivatie & Drive Verhogen', show: 'Huberman Lab', desc: 'Praktische protocollen voor meer intrinsieke motivatie, ook op de dagen dat het niet lukt.', id: '6r6dP5L1LuSY1MBO3zqobc' },
+            ],
+          },
+          {
+            id: 'mindset',
+            label: '💪 Mindset & Succes',
+            episodes: [
+              { title: 'Tim Grover: De Coach van Jordan & Kobe', show: 'Diary of a CEO · Steven Bartlett', desc: 'Wat maakt de absolute top anders? De personal trainer van Michael Jordan en Kobe Bryant vertelt het.', id: '4DHfthjb4EOLg0YFN4ExYw' },
+              { title: 'Steve Peters: De Mindset Doctor', show: 'Diary of a CEO · Steven Bartlett', desc: 'De psycholoog achter de successen van Olympische goudwinnaars over hoe de mentale chimp werkt.', id: '6G7iyHKDaxiKcDqJPlVyiA' },
+            ],
+          },
+        ],
+        en: [
+          {
+            id: 'legends',
+            label: '🎾 Tennis Legends',
+            episodes: [
+              { title: 'Djokovic: "I Never Felt I Was Enough"', show: 'On Purpose · Jay Shetty', desc: 'Djokovic on self-doubt, visualisation and how to turn uncertainty into fuel for success.', id: '0J0UAUHv2H3gmI9cyyyAZF' },
+              { title: 'Djokovic: Become #1 In The World', show: 'On Purpose · Jay Shetty', desc: 'How Djokovic built a champion mindset and what everyone can learn from it.', id: '6n9mrSEhUFP3t7W4pPgDrf' },
+              { title: 'Djokovic: Greatest Comeback in History', show: 'On Purpose · Jay Shetty', desc: 'Mental resilience after the hardest period of his career — how he came back as a champion.', id: '1uTnkbDKvdizPLuKBQmowv' },
+              { title: 'Maria Sharapova: Mental Performance & Rise to the Top', show: 'The Tim Ferriss Show', desc: 'An in-depth conversation about mental training, pressure, discipline and balance at the highest level.', id: '2hrJaGtgSLyqL7e08iwtkC' },
+            ],
+          },
+          {
+            id: 'wetenschap',
+            label: '🧠 Mental Science',
+            episodes: [
+              { title: 'Dopamine for Motivation & Focus', show: 'Huberman Lab', desc: 'How dopamine drives your motivation, focus and persistence — and how to optimise this system.', id: '42F7z6Z4CB8hJAstRqMCiV' },
+              { title: 'Focus Toolkit: Tools for Concentration', show: 'Huberman Lab', desc: 'Proven tools from behavioural science and neurology to perform with deeper, longer focus.', id: '0cfMpJd2lk9xtk3hyGy5FT' },
+              { title: 'Goals Toolkit: How to Set & Achieve Goals', show: 'Huberman Lab', desc: 'The science behind effective goals — why most people get it wrong and how you get it right.', id: '0sFYKmVjh2gEfBWfj25DNk' },
+              { title: 'How to Increase Motivation & Drive', show: 'Huberman Lab', desc: 'Practical protocols for more intrinsic motivation, even on the days when it is not flowing.', id: '6r6dP5L1LuSY1MBO3zqobc' },
+            ],
+          },
+          {
+            id: 'mindset',
+            label: '💪 Mindset & Success',
+            episodes: [
+              { title: 'Tim Grover: The Coach of Jordan & Kobe', show: 'Diary of a CEO · Steven Bartlett', desc: 'What makes the absolute top different? The personal trainer of Michael Jordan and Kobe Bryant tells all.', id: '4DHfthjb4EOLg0YFN4ExYw' },
+              { title: 'Steve Peters: The Mindset Doctor', show: 'Diary of a CEO · Steven Bartlett', desc: 'The psychologist behind Olympic gold medal success explains how the mental chimp really works.', id: '6G7iyHKDaxiKcDqJPlVyiA' },
+            ],
+          },
+        ],
+      };
 
-      if (error || !data || !data.length) {
-        container.innerHTML = `<div class="empty-state">${T.emptyLibrary}</div>`;
-        return;
+      const cats = categories[lang] || categories.nl;
+      let activeCat = cats[0].id;
+
+      const spotifySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`;
+
+      function renderPodcastList(catId) {
+        const cat = cats.find(c => c.id === catId);
+        if (!cat) return '';
+        return cat.episodes.map((ep, i) => {
+          const epId = `pod-${catId}-${i}`;
+          return `
+            <div style="border:1px solid #1A1A1A;border-radius:14px;overflow:hidden;margin-bottom:12px;">
+              <div style="padding:14px 16px;cursor:pointer;user-select:none;" onclick="podToggle('${epId}')">
+                <div style="display:flex;align-items:flex-start;gap:12px;">
+                  <div style="width:42px;height:42px;border-radius:10px;background:#1DB95418;border:1px solid #1DB95433;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    ${spotifySvg.replace('14','20').replace('14','20')}
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.9rem;font-weight:700;color:#DDD;line-height:1.35;">${escapeHtml(ep.title)}</div>
+                    <div style="font-size:0.72rem;color:#1DB954;font-weight:600;margin-top:3px;">${escapeHtml(ep.show)}</div>
+                    <div style="font-size:0.8rem;color:#666;margin-top:5px;line-height:1.55;">${escapeHtml(ep.desc)}</div>
+                  </div>
+                </div>
+                <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:0.78rem;color:#555;font-weight:600;">${lang==='en'?'Tap to play':'Tik om te spelen'}</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+              </div>
+              <div id="${epId}" class="hidden" style="border-top:1px solid #111;">
+                <iframe src="${spotify(ep.id)}" width="100%" height="152" frameborder="0"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  style="display:block;"></iframe>
+                <div style="padding:10px 16px;">
+                  <a href="${spotifyLink(ep.id)}" target="_blank" rel="noopener"
+                    style="color:#1DB954;font-size:0.82rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                    ${spotifySvg} ${lang==='en'?'Open in Spotify':'Openen in Spotify'}
+                  </a>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
       }
 
-      container.innerHTML = data.map((item) => {
-        const title = (lang === 'en' && item.title_en) ? item.title_en : item.title;
-        const desc  = (lang === 'en' && item.description_en) ? item.description_en : (item.description || '');
-        const spotifyUrl = item.video_url || '';
-        const embedUrl = spotifyUrl.replace('open.spotify.com/', 'open.spotify.com/embed/');
+      let html = `
+        <h3 style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:.05em;color:#fff;margin-bottom:4px;">${lang==='en'?'Curated Podcasts':'Gecureerde Podcasts'}</h3>
+        <p style="font-size:0.85rem;color:#666;line-height:1.65;margin-bottom:16px;">${lang==='en'?'Hand-picked episodes from the world\'s best sports psychology and mindset podcasts.':'Handgeselecteerde episodes van de beste sport­psychologie en mindset podcasts ter wereld.'}</p>
 
-        return `
-          <div class="card" style="margin-bottom:14px;padding:0;overflow:hidden;">
-            ${embedUrl ? `
-              <iframe
-                src="${escapeHtml(embedUrl)}"
-                width="100%" height="152" frameborder="0"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                style="display:block;">
-              </iframe>` : ''}
-            <div style="padding:14px 16px;">
-              <strong style="font-size:0.95rem;">${escapeHtml(title)}</strong>
-              ${desc ? `<p class="muted" style="margin-top:6px;font-size:0.85rem;line-height:1.6;">${escapeHtml(desc)}</p>` : ''}
-              ${spotifyUrl ? `<a href="${escapeHtml(spotifyUrl)}" target="_blank" rel="noopener" style="color:#1DB954;font-size:0.85rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-top:10px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-                Openen in Spotify
-              </a>` : ''}
-            </div>
-          </div>`;
-      }).join('');
+        <div style="display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;">
+          ${cats.map(c => `
+            <button id="podcat-${c.id}" onclick="podCat('${c.id}')"
+              style="flex-shrink:0;background:${c.id===activeCat?'#1A1A1A':'transparent'};border:1px solid ${c.id===activeCat?'#333':'#1A1A1A'};border-radius:999px;color:${c.id===activeCat?'#fff':'#555'};font-family:Inter,sans-serif;font-size:0.8rem;font-weight:600;padding:7px 14px;cursor:pointer;transition:all .15s;white-space:nowrap;">
+              ${escapeHtml(c.label)}
+            </button>`).join('')}
+        </div>
+
+        ${cats.map(c => `<div id="podpanel-${c.id}" ${c.id!==activeCat?'class="hidden"':''}>${renderPodcastList(c.id)}</div>`).join('')}
+      `;
+
+      container.innerHTML = html;
+
+      container._podCat = function(id) {
+        cats.forEach(c => {
+          const panel = document.getElementById(`podpanel-${c.id}`);
+          const btn   = document.getElementById(`podcat-${c.id}`);
+          const active = c.id === id;
+          if (panel) panel.classList.toggle('hidden', !active);
+          if (btn) {
+            btn.style.background   = active ? '#1A1A1A' : 'transparent';
+            btn.style.borderColor  = active ? '#333' : '#1A1A1A';
+            btn.style.color        = active ? '#fff' : '#555';
+          }
+        });
+      };
+    }
+
+    function podCat(id) {
+      const container = document.getElementById('libraryList');
+      if (container && container._podCat) container._podCat(id);
+    }
+
+    function podToggle(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden');
     }
 
     // ── HIGHLIGHTS ────────────────────────────────────────
