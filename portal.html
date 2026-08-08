@@ -2969,32 +2969,291 @@
     }
 
     function loadVoedingSection(list) {
-      const T = i18n[lang];
+      const T   = i18n[lang];
+      const isEN = lang === 'en';
       const macros = voedingMacroContent[lang];
-      const macrosHtml = macros.map((m) => `
-        <div class="macro-block" style="border-color:${m.color};">
-          <h4 style="color:${m.color};">${m.title}</h4>
-          ${m.lines.map((l) => `<p>${l}</p>`).join('')}
-        </div>`).join('');
+
+      // ── TAB: BASIS ────────────────────────────────────────
+      function basisPanel() {
+        const ratioRows = isEN ? [
+          { label: 'Rest day',     prot: 35, carb: 40, fat: 25 },
+          { label: 'Training day', prot: 25, carb: 50, fat: 25 },
+          { label: 'Match day',    prot: 20, carb: 60, fat: 20 },
+        ] : [
+          { label: 'Rustdag',      prot: 35, carb: 40, fat: 25 },
+          { label: 'Trainingsdag', prot: 25, carb: 50, fat: 25 },
+          { label: 'Wedstrijddag', prot: 20, carb: 60, fat: 20 },
+        ];
+        let h = `
+          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+            <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#555;margin-bottom:12px;">${isEN?'Macro ratios per day type':'Macro-verdeling per dagtype'}</div>
+            ${ratioRows.map(r=>`
+              <div style="margin-bottom:10px;">
+                <div style="font-size:0.75rem;color:#777;margin-bottom:5px;">${r.label}</div>
+                <div style="display:flex;gap:2px;border-radius:6px;overflow:hidden;height:22px;">
+                  <div style="flex:${r.prot};background:#ef4444;display:flex;align-items:center;justify-content:center;"><span style="font-size:0.62rem;font-weight:700;color:#fff;">${r.prot}%</span></div>
+                  <div style="flex:${r.carb};background:#f59e0b;display:flex;align-items:center;justify-content:center;"><span style="font-size:0.62rem;font-weight:700;color:#0A0A0A;">${r.carb}%</span></div>
+                  <div style="flex:${r.fat};background:#3b82f6;display:flex;align-items:center;justify-content:center;"><span style="font-size:0.62rem;font-weight:700;color:#fff;">${r.fat}%</span></div>
+                </div>
+              </div>`).join('')}
+            <div style="display:flex;gap:14px;margin-top:8px;">
+              ${[['#ef4444',isEN?'Protein':'Eiwit'],['#f59e0b',isEN?'Carbs':'Koolhydraten'],['#3b82f6',isEN?'Fat':'Vet']].map(([c,l])=>`
+                <div style="display:flex;align-items:center;gap:5px;"><div style="width:8px;height:8px;border-radius:50%;background:${c};"></div><span style="font-size:0.7rem;color:#555;">${l}</span></div>`).join('')}
+            </div>
+          </div>`;
+        macros.forEach(m => {
+          h += `
+            <div style="border-left:3px solid ${m.color};padding:12px 0 12px 14px;margin-bottom:8px;">
+              <h4 style="font-family:'Bebas Neue',cursive;font-size:1.1rem;color:${m.color};letter-spacing:.04em;margin-bottom:8px;">${m.title}</h4>
+              ${m.lines.map(l=>`<p style="font-size:0.83rem;color:#888;line-height:1.65;margin-bottom:4px;">${l}</p>`).join('')}
+            </div>`;
+        });
+        return h;
+      }
+
+      // ── TAB: BORD ─────────────────────────────────────────
+      function bordPanel() {
+        const scenarios = isEN ? [
+          { label:'Training day', prot:30, carb:50, veg:15, fat:5, note:'High carb to fuel glycogen stores' },
+          { label:'Rest day',     prot:40, carb:30, veg:20, fat:10, note:'More protein for muscle repair' },
+          { label:'Match day',    prot:25, carb:55, veg:15, fat:5, note:'Maximize available energy' },
+        ] : [
+          { label:'Trainingsdag', prot:30, carb:50, veg:15, fat:5, note:'Hoog in koolhydraten voor glycogeenopslag' },
+          { label:'Rustdag',      prot:40, carb:30, veg:20, fat:10, note:'Meer eiwit voor spierherstel' },
+          { label:'Wedstrijddag', prot:25, carb:55, veg:15, fat:5, note:'Maximale beschikbare energie' },
+        ];
+        function plate(s) {
+          const p1 = s.prot*3.6, p2 = p1+s.carb*3.6, p3 = p2+s.veg*3.6;
+          return `conic-gradient(#ef4444 0deg ${p1}deg,#f59e0b ${p1}deg ${p2}deg,#22c55e ${p2}deg ${p3}deg,#3b82f6 ${p3}deg 360deg)`;
+        }
+        let h = `<div style="font-size:0.82rem;color:#555;line-height:1.65;margin-bottom:16px;">${isEN?'Your plate composition changes based on the day. Use this as a guide for every main meal.':'De samenstelling van je bord verandert per dagtype. Gebruik dit als richtlijn voor elke hoofdmaaltijd.'}</div>`;
+        h += `<div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px;">`;
+        scenarios.forEach(s => {
+          h += `
+            <div style="flex-shrink:0;width:120px;text-align:center;">
+              <div style="font-size:0.72rem;font-weight:700;color:#aaa;margin-bottom:8px;">${s.label}</div>
+              <div style="width:90px;height:90px;border-radius:50%;background:${plate(s)};margin:0 auto 10px;box-shadow:0 0 0 3px #1A1A1A,0 0 0 5px #0A0A0A;"></div>
+              <div style="font-size:0.66rem;color:#555;line-height:1.55;">${s.note}</div>
+            </div>`;
+        });
+        h += `</div>`;
+        const legend = isEN
+          ? [['#ef4444','Protein'],['#f59e0b','Carbs'],['#22c55e','Veg'],['#3b82f6','Fat']]
+          : [['#ef4444','Eiwit'],['#f59e0b','Koolhydraten'],['#22c55e','Groente'],['#3b82f6','Vetten']];
+        h += `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;">${legend.map(([c,l])=>`<div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:50%;background:${c};"></div><span style="font-size:0.75rem;color:#666;">${l}</span></div>`).join('')}</div>`;
+
+        const portions = isEN ? [
+          { icon:'✊', label:'Fist = 1 serving carbs',    sub:'~80g cooked rice, pasta or oats' },
+          { icon:'🤚', label:'Palm = 1 serving protein',  sub:'~20–30g (chicken breast, fish fillet)' },
+          { icon:'👍', label:'Thumb = 1 serving fat',     sub:'~10g (1 tbsp olive oil, small handful of nuts)' },
+          { icon:'🖐️', label:'Full hand = vegetables',   sub:'No limit — fill the rest of the plate freely' },
+        ] : [
+          { icon:'✊', label:'Vuist = 1 portie koolhydraten', sub:'~80g gekookte rijst, pasta of havermout' },
+          { icon:'🤚', label:'Handpalm = 1 portie eiwit',    sub:'~20–30g (kipfilet, visfilet)' },
+          { icon:'👍', label:'Duim = 1 portie vet',          sub:'~10g (1 el olijfolie, klein handje noten)' },
+          { icon:'🖐️', label:'Volle hand = groente',        sub:'Geen limiet — vul de rest van het bord vrij op' },
+        ];
+        h += `<div style="border-top:1px solid #1A1A1A;padding-top:16px;"><div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#555;margin-bottom:12px;">${isEN?'Portion guide — no scale needed':'Portie-richtlijn — geen weegschaal nodig'}</div>`;
+        portions.forEach(p => {
+          h += `<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;"><div style="font-size:1.6rem;flex-shrink:0;width:36px;text-align:center;">${p.icon}</div><div><div style="font-size:0.83rem;font-weight:600;color:#CCC;">${p.label}</div><div style="font-size:0.75rem;color:#555;margin-top:2px;">${p.sub}</div></div></div>`;
+        });
+        h += `</div>`;
+
+        // Hydration color scale
+        const urineColors = ['#fefce8','#fef9c3','#fef08a','#facc15','#d97706','#c2410c'];
+        h += `
+          <div style="border-top:1px solid #1A1A1A;padding-top:16px;margin-top:14px;">
+            <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#555;margin-bottom:10px;">${isEN?'Hydration check — urine color':'Hydratatie check — urinekleur'}</div>
+            <div style="display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:6px;height:24px;">
+              ${urineColors.map(c=>`<div style="flex:1;background:${c};"></div>`).join('')}
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="font-size:0.7rem;color:#555;">${isEN?'Well hydrated':'Goed gehydrateerd'}</span>
+              <span style="font-size:0.7rem;color:#555;">${isEN?'Drink more water →':'Meer water drinken →'}</span>
+            </div>
+          </div>`;
+        return h;
+      }
+
+      // ── TAB: TIMING ───────────────────────────────────────
+      function timingPanel() {
+        const matchSteps = isEN ? [
+          { time:'7:00',   icon:'🌅', label:'Wake up',              color:'#C8F135', food:'Large glass of water immediately. Oatmeal with banana and honey, 1–2 eggs. Coffee is fine — stop by 12:00 on match day.' },
+          { time:'10:00',  icon:'🍌', label:'2–3 hrs before match', color:'#f59e0b', food:'Light and familiar only: banana, rice cakes with honey, or a small bowl of oats. Nothing heavy or new.' },
+          { time:'12:00',  icon:'🎾', label:'Warm-up / start',      color:'#3b82f6', food:'Sip water regularly. Small sports drink if the match will exceed 90 min. No solid food within 90 min of play.' },
+          { time:'During', icon:'💧', label:'During the match',      color:'#22d3ee', food:'Water on every changeover. Banana or 2–3 dates on longer breaks. Keep it minimal — gut stress kills performance.' },
+          { time:'After',  icon:'🔄', label:'Within 60 min after',  color:'#a855f7', food:'Recovery: shake or chocolate milk immediately. Full meal within 2 hours — protein + carbs + vegetables.' },
+        ] : [
+          { time:'7:00',   icon:'🌅', label:'Opstaan',              color:'#C8F135', food:'Direct een groot glas water. Havermout met banaan en honing, 1–2 eieren. Koffie mag — stop met cafeïne voor 12:00 op wedstrijddag.' },
+          { time:'10:00',  icon:'🍌', label:'2–3 uur voor wedstrijd',color:'#f59e0b', food:'Alleen licht en vertrouwd: banaan, rijstwafels met honing, of een kleine kom havermout. Niets zwaar of nieuws.' },
+          { time:'12:00',  icon:'🎾', label:'Warming-up / start',   color:'#3b82f6', food:'Regelmatig slokjes water. Kleine sportdrank bij wedstrijd >90 min. Geen vast voedsel binnen 90 min voor spel.' },
+          { time:'Tijdens',icon:'💧', label:'Tijdens de wedstrijd', color:'#22d3ee', food:'Water bij elke wissel. Banaan of 2–3 dadels bij langere pauzes. Minimaal houden — maagstress kost prestatie.' },
+          { time:'Na',     icon:'🔄', label:'Binnen 60 min na',     color:'#a855f7', food:'Herstel: shake of chocolademelk direct daarna. Volledige maaltijd binnen 2 uur — eiwit + koolhydraten + groente.' },
+        ];
+        let h = `<div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#555;margin-bottom:14px;">${isEN?'Match day protocol':'Wedstrijddag protocol'}</div>`;
+        matchSteps.forEach((s,i) => {
+          h += `
+            <div style="display:flex;gap:12px;">
+              <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:44px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:${s.color}18;border:2px solid ${s.color}44;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">${s.icon}</div>
+                ${i<matchSteps.length-1?`<div style="width:2px;flex:1;background:linear-gradient(${s.color}44,transparent);min-height:16px;margin:3px 0;"></div>`:''}
+              </div>
+              <div style="padding-bottom:${i<matchSteps.length-1?'16':'0'}px;padding-top:6px;flex:1;">
+                <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                  <span style="font-size:0.7rem;font-weight:700;color:${s.color};font-family:'Bebas Neue',cursive;letter-spacing:.05em;">${s.time}</span>
+                  <span style="font-size:0.82rem;font-weight:600;color:#CCC;">${s.label}</span>
+                </div>
+                <div style="font-size:0.8rem;color:#888;line-height:1.65;">${s.food}</div>
+              </div>
+            </div>`;
+        });
+        const trainBlocks = isEN ? [
+          { when:'2–3 hours before', what:'Full balanced meal: rice or sweet potato + chicken or fish + vegetables. Avoid high-fat.' },
+          { when:'30–60 min before', what:'Small and light: banana, rice cakes, small bowl of oats. Nothing unfamiliar.' },
+          { when:'During (>90 min)', what:'Sports drink or date every 30–45 min to maintain blood glucose.' },
+          { when:'Within 60 min after', what:'20–40g protein + carbs. The anabolic window is real — use it.' },
+          { when:'Evening', what:'Full meal with vegetables, protein and complex carbs to refuel overnight glycogen.' },
+        ] : [
+          { when:'2–3 uur voor', what:'Volledige maaltijd: rijst of zoete aardappel + kip of vis + groente. Vermijd hoog vet.' },
+          { when:'30–60 min voor', what:'Klein en licht: banaan, rijstwafels, kleine kom havermout. Niets nieuws.' },
+          { when:'Tijdens (>90 min)', what:'Sportdrank of dadel elke 30–45 min om bloedglucose op peil te houden.' },
+          { when:'Binnen 60 min na', what:'20–40g eiwit + koolhydraten. Het anabole venster bestaat — gebruik het.' },
+          { when:'Avond', what:'Volledige maaltijd met groente, eiwit en complexe koolhydraten voor glycogeenaanvulling.' },
+        ];
+        h += `<div style="border-top:1px solid #1A1A1A;padding-top:16px;margin-top:16px;"><div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#555;margin-bottom:12px;">${isEN?'Training day guide':'Trainingsdag richtlijn'}</div>`;
+        trainBlocks.forEach(b => {
+          h += `<div style="border:1px solid #1A1A1A;border-radius:10px;padding:10px 12px;margin-bottom:6px;"><div style="font-size:0.72rem;font-weight:700;color:#C8F135;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">${b.when}</div><div style="font-size:0.8rem;color:#888;line-height:1.6;">${b.what}</div></div>`;
+        });
+        h += `</div>`;
+        return h;
+      }
+
+      // ── TAB: SUPPLEMENTEN ─────────────────────────────────
+      function suppPanel() {
+        const supps = isEN ? [
+          { name:'Creatine Monohydrate', color:'#C8F135', ev:'A', evLabel:'Highest evidence',
+            what:'The most studied sports supplement in history. Increases phosphocreatine stores, directly boosting explosive power, sprint recovery and training volume. Safe for long-term use.',
+            dose:'3–5g daily', when:'Any time — consistency matters more than timing',
+            note:'Loading phase (20g/day × 5 days) is optional — steady 5g reaches full saturation in ~3 weeks.' },
+          { name:'Caffeine', color:'#f59e0b', ev:'A', evLabel:'Highest evidence',
+            what:'Proven to improve endurance, focus and reaction time. Particularly effective for match play where mental sharpness matters alongside physical output.',
+            dose:'3–6mg per kg bodyweight', when:'60 min before training or match',
+            note:'Cut caffeine by 14:00 on match day to protect sleep quality. Avoid daily use to preserve sensitivity.' },
+          { name:'Vitamin D3', color:'#3b82f6', ev:'B', evLabel:'Strong evidence',
+            what:'Most athletes — especially in the Netherlands — are deficient. Affects muscle function, immune health, bone density, and mood regulation.',
+            dose:'1500–2000 IU daily', when:'With a fat-containing meal (improves absorption)',
+            note:'Combine with vitamin K2 for optimal bone health. Get blood levels tested before supplementing at high doses.' },
+          { name:'Omega-3 (EPA/DHA)', color:'#22d3ee', ev:'B', evLabel:'Strong evidence',
+            what:'Reduces exercise-induced inflammation, supports joint health, and may improve reaction time and cognitive performance during long matches.',
+            dose:'2–3g EPA+DHA daily', when:'With a meal',
+            note:'Choose fish oil from a brand tested for heavy metals. Algae-based omega-3 works just as well and is vegan.' },
+          { name:'Magnesium', color:'#a855f7', ev:'B', evLabel:'Strong evidence',
+            what:'Involved in 300+ enzyme reactions. Athletes lose magnesium through sweat. Supports muscle recovery, sleep quality, nerve function and stress regulation.',
+            dose:'200–400mg daily', when:'Evening — also promotes sleep quality',
+            note:'Magnesium glycinate or bisglycinate absorbs best. Avoid magnesium oxide — poorly absorbed and causes GI issues.' },
+          { name:'Beta-Alanine', color:'#ef4444', ev:'B', evLabel:'Good evidence',
+            what:'Increases muscle carnosine, which buffers lactic acid during high-intensity efforts. Useful for long rallies and repeated short sprints throughout a match.',
+            dose:'3.2–6.4g daily', when:'Any time — daily consistency required for 4+ weeks',
+            note:'Causes harmless tingling (paresthesia). Splitting the dose reduces this. Full effect builds over 4–8 weeks of daily use.' },
+        ] : [
+          { name:'Creatine Monohydraat', color:'#C8F135', ev:'A', evLabel:'Hoogste bewijs',
+            what:'Het meest onderzochte sportsupplement ter wereld. Verhoogt fosfocreatinevoorraden — verhoogt direct explosief vermogen, sprinterstel en trainingsvolume. Veilig voor langdurig gebruik.',
+            dose:'3–5g per dag', when:'Op elk moment — regelmaat telt meer dan timing',
+            note:'Laadfase (20g/dag × 5 dagen) is optioneel — continue 5g bereikt volledige saturatie in ~3 weken.' },
+          { name:'Cafeïne', color:'#f59e0b', ev:'A', evLabel:'Hoogste bewijs',
+            what:'Bewezen effectief voor uithoudingsvermogen, focus en reactietijd. Bijzonder nuttig bij wedstrijdspel waarbij mentale scherpte én lichamelijke output samenkomen.',
+            dose:'3–6mg per kg lichaamsgewicht', when:'60 min voor training of wedstrijd',
+            note:'Stop cafeïne voor 14:00 op wedstrijddag om slaapkwaliteit te beschermen. Vermijd dagelijks gebruik om gevoeligheid te behouden.' },
+          { name:'Vitamine D3', color:'#3b82f6', ev:'B', evLabel:'Sterk bewijs',
+            what:'De meeste atleten — zeker in Nederland — hebben een tekort. Beïnvloedt spierfunctie, immuungezondheid, botdichtheid en stemming.',
+            dose:'1500–2000 IE per dag', when:'Bij een maaltijd met vet (verbetert opname)',
+            note:'Combineer met vitamine K2 voor optimale botgezondheid. Laat je bloedwaarden testen voor je hoog doseert.' },
+          { name:'Omega-3 (EPA/DHA)', color:'#22d3ee', ev:'B', evLabel:'Sterk bewijs',
+            what:'Vermindert inspanningsgerelateerde ontstekingen, ondersteunt gewrichtsgezonheid en kan reactietijd en cognitieve prestatie tijdens lange wedstrijden verbeteren.',
+            dose:'2–3g EPA+DHA per dag', when:'Bij een maaltijd',
+            note:'Kies visolie van een merk getest op zware metalen. Algenolie werkt even goed en is veganistisch.' },
+          { name:'Magnesium', color:'#a855f7', ev:'B', evLabel:'Sterk bewijs',
+            what:'Betrokken bij 300+ enzymreacties. Sporters verliezen magnesium via zweet. Ondersteunt spierherstel, slaapkwaliteit, zenuwfunctie en stressregulatie.',
+            dose:'200–400mg per dag', when:'Avond — bevordert ook slaapkwaliteit',
+            note:'Magnesiumglycinaat of -bisiglycinaat absorbeert het best. Vermijd magnesiumoxide — slecht opneembaar en veroorzaakt maagklachten.' },
+          { name:'Beta-Alanine', color:'#ef4444', ev:'B', evLabel:'Goed bewijs',
+            what:'Verhoogt spiercarnosine, dat melkzuur buffert bij intensieve inspanning. Nuttig bij lange rally\'s en herhaalde korte sprints gedurende een wedstrijd.',
+            dose:'3.2–6.4g per dag', when:'Op elk moment — dagelijkse regelmaat 4+ weken vereist',
+            note:'Veroorzaakt onschadelijk tintelgevoel (paresthesie). Gesplitste doses verminderen dit. Vol effect na 4–8 weken dagelijks gebruik.' },
+        ];
+        let h = `<div style="font-size:0.82rem;color:#555;line-height:1.65;margin-bottom:16px;">${isEN?'Supplements are a small addition on top of a solid nutrition base — not a substitute. Food comes first, always.':'Supplementen zijn een kleine aanvulling op een solide voedingsbasis — geen vervanging. Eten komt altijd eerst.'}</div>`;
+        supps.forEach((s,i) => {
+          const exId = `supp-${i}`;
+          const evColor = s.ev==='A'?'#C8F135':s.ev==='B'?'#f59e0b':'#3b82f6';
+          h += `
+            <div style="border:1px solid #1A1A1A;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;user-select:none;" onclick="document.getElementById('${exId}').classList.toggle('hidden')">
+                <div style="width:32px;height:32px;border-radius:8px;background:${s.color}18;border:1px solid ${s.color}33;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span style="font-size:0.85rem;font-weight:800;color:${s.color};">${s.ev}</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:0.88rem;font-weight:600;color:#DDD;">${escapeHtml(s.name)}</div>
+                  <div style="font-size:0.7rem;color:#555;margin-top:1px;">${escapeHtml(s.dose)} · <span style="color:${evColor}">${escapeHtml(s.evLabel)}</span></div>
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div id="${exId}" class="hidden" style="padding:0 14px 14px 58px;border-top:1px solid #111;">
+                <p style="font-size:0.82rem;color:#888;line-height:1.65;margin-top:10px;">${escapeHtml(s.what)}</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+                  <div style="background:#111;border-radius:8px;padding:8px 10px;">
+                    <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.07em;color:#555;margin-bottom:3px;">${isEN?'Dose':'Dosering'}</div>
+                    <div style="font-size:0.78rem;color:#CCC;">${escapeHtml(s.dose)}</div>
+                  </div>
+                  <div style="background:#111;border-radius:8px;padding:8px 10px;">
+                    <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.07em;color:#555;margin-bottom:3px;">${isEN?'When':'Wanneer'}</div>
+                    <div style="font-size:0.78rem;color:#CCC;">${escapeHtml(s.when)}</div>
+                  </div>
+                </div>
+                <div style="background:${s.color}08;border:1px solid ${s.color}22;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:0.78rem;color:#777;line-height:1.6;">
+                  <span style="color:${s.color};font-weight:600;">${isEN?'Note: ':'Let op: '}</span>${escapeHtml(s.note)}
+                </div>
+              </div>
+            </div>`;
+        });
+        return h;
+      }
+
+      // ── TAB: RECEPTEN ─────────────────────────────────────
+      function receptenPanel() {
+        return `
+          <div class="recipe-tabs" id="recipeTabs">
+            <button class="recipe-tab active" data-recipe="ontbijt">${T.recipeTabOntbijt}</button>
+            <button class="recipe-tab" data-recipe="lunch">${T.recipeTabLunch}</button>
+            <button class="recipe-tab" data-recipe="diner">${T.recipeTabDiner}</button>
+            <button class="recipe-tab" data-recipe="snacks">${T.recipeTabSnacks}</button>
+          </div>
+          <div id="recipeList"></div>`;
+      }
+
+      const voedingTabs = [
+        { id:'basis',    label: isEN?'Foundations':'Basis',        color:'#C8F135' },
+        { id:'bord',     label: isEN?'Plate':'Bord',               color:'#f59e0b' },
+        { id:'timing',   label: 'Timing',                          color:'#3b82f6' },
+        { id:'supps',    label: isEN?'Supplements':'Supplementen', color:'#a855f7' },
+        { id:'recepten', label: isEN?'Recipes':'Recepten',         color:'#22d3ee' },
+      ];
+      const panels = { basis:basisPanel(), bord:bordPanel(), timing:timingPanel(), supps:suppPanel(), recepten:receptenPanel() };
+      const firstId = 'basis';
 
       list.innerHTML = `
-        <div class="card" style="margin-bottom:16px;">
-          <h3 style="margin-bottom:4px;">${T.voedingTitle}</h3>
-          <p class="muted" style="font-size:0.82rem;margin-bottom:16px;">${T.voedingSubtitle}</p>
-          ${macrosHtml}
-          <div class="voeding-cta">${T.voedingCta}</div>
+        <h3 style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:.05em;color:#fff;margin-bottom:4px;">${T.voedingTitle}</h3>
+        <p style="font-size:0.82rem;color:#555;line-height:1.65;margin-bottom:16px;">${T.voedingSubtitle}</p>
+        <div style="display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;">
+          ${voedingTabs.map(t=>`
+            <button id="vtab-${t.id}" onclick="voedTab('${t.id}')"
+              style="flex-shrink:0;background:${t.id===firstId?t.color+'22':'transparent'};border:1px solid ${t.id===firstId?t.color+'55':'#1A1A1A'};border-radius:999px;color:${t.id===firstId?t.color:'#555'};font-family:Inter,sans-serif;font-size:0.8rem;font-weight:600;padding:7px 14px;cursor:pointer;transition:all .15s;white-space:nowrap;">
+              ${escapeHtml(t.label)}
+            </button>`).join('')}
         </div>
-
-        <div class="recipe-tabs" id="recipeTabs">
-          <button class="recipe-tab active" data-recipe="ontbijt">${T.recipeTabOntbijt}</button>
-          <button class="recipe-tab" data-recipe="lunch">${T.recipeTabLunch}</button>
-          <button class="recipe-tab" data-recipe="diner">${T.recipeTabDiner}</button>
-          <button class="recipe-tab" data-recipe="snacks">${T.recipeTabSnacks}</button>
-        </div>
-
-        <div id="recipeList"></div>
+        ${voedingTabs.map(t=>`<div id="vpanel-${t.id}" ${t.id!==firstId?'class="hidden"':''}>${panels[t.id]}</div>`).join('')}
       `;
 
+      // Wire recipe tabs
       document.querySelectorAll('.recipe-tab').forEach((btn) => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.recipe-tab').forEach((b) => b.classList.remove('active'));
@@ -3002,9 +3261,28 @@
           renderRecipes(btn.dataset.recipe);
         });
       });
-
       renderRecipes('ontbijt');
     }
+
+    window.voedTab = function(id) {
+      const tabs   = ['basis','bord','timing','supps','recepten'];
+      const colors = { basis:'#C8F135', bord:'#f59e0b', timing:'#3b82f6', supps:'#a855f7', recepten:'#22d3ee' };
+      tabs.forEach(t => {
+        const panel = document.getElementById(`vpanel-${t}`);
+        const btn   = document.getElementById(`vtab-${t}`);
+        if (!panel || !btn) return;
+        const active = t === id;
+        panel.classList.toggle('hidden', !active);
+        const c = colors[t];
+        btn.style.background  = active ? c+'22' : 'transparent';
+        btn.style.borderColor = active ? c+'55' : '#1A1A1A';
+        btn.style.color       = active ? c : '#555';
+        if (active && id === 'recepten') {
+          const rl = document.getElementById('recipeList');
+          if (rl && !rl.innerHTML.trim()) renderRecipes('ontbijt');
+        }
+      });
+    };
 
     function renderRecipes(cat) {
       const T = i18n[lang];
