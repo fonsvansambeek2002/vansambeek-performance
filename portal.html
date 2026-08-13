@@ -1096,7 +1096,12 @@
       </section>
 
       <section class="screen" id="screen-klanten">
+        <div class="sgn-bar" id="sgn-klanten">
+          <button class="sgn-btn active" data-klscreen="overzicht" onclick="switchKlScreen('overzicht')">Klanten</button>
+          <button class="sgn-btn" data-klscreen="beheer" onclick="switchKlScreen('beheer')">Beheer</button>
+        </div>
         <div id="klantenContent"></div>
+        <div id="beheerContent" class="hidden"></div>
       </section>
 
       <section class="screen" id="screen-planning">
@@ -1829,7 +1834,7 @@
         loadOpdrachten();
       }
       if (name === 'klanten') {
-        loadKlanten();
+        switchKlScreen('overzicht');
       }
       if (name === 'planning') {
         loadPlanning();
@@ -2489,7 +2494,7 @@
         },
 
         A: {
-          title:    isEN ? 'Workout A — Lower Body & Explosiveness' : 'Workout A — Onderbeen & Explosiviteit',
+          title:    isEN ? 'Workout A — Lower Body & Explosiveness' : 'Workout A — Onderlichaam & Explosiviteit',
           subtitle: isEN ? '2× per week · ~45 min · Strength + Speed' : '2× per week · ~45 min · Kracht + Snelheid',
           color: '#C8F135',
           intro: isEN
@@ -2513,7 +2518,7 @@
         },
 
         B: {
-          title:    isEN ? 'Workout B — Upper Body, Core & Rotation' : 'Workout B — Bovenbeen, Core & Rotatie',
+          title:    isEN ? 'Workout B — Upper Body, Core & Rotation' : 'Workout B — Bovenlichaam, Core & Rotatie',
           subtitle: isEN ? '2× per week · ~45 min · Stability + Shot Power' : '2× per week · ~45 min · Stabiliteit + Slagkracht',
           color: '#3b82f6',
           intro: isEN
@@ -3469,6 +3474,329 @@
 
     function getAssignments() {
       return lang === 'en' ? assignmentsEN : assignments;
+    }
+
+    // ── BEHEER (ADMIN CRM) ────────────────────────────────
+
+    function switchKlScreen(tab) {
+      const isOverzicht = tab === 'overzicht';
+      document.getElementById('klantenContent').classList.toggle('hidden', !isOverzicht);
+      document.getElementById('beheerContent').classList.toggle('hidden', isOverzicht);
+      document.querySelectorAll('#sgn-klanten .sgn-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.klscreen === tab);
+      });
+      if (isOverzicht) loadKlanten();
+      else loadBeheer();
+    }
+
+    async function loadBeheer() {
+      const container = document.getElementById('beheerContent');
+      container.innerHTML = `<div class="empty-state" style="padding:20px 0;">Laden…</div>`;
+      const today = new Date().toISOString().split('T')[0];
+
+      const [{ data: programs, error: pErr }, { data: allPayments }] = await Promise.all([
+        supabaseClient.from('client_programs').select('*, profiles(full_name)').order('start_date', { ascending: false }),
+        supabaseClient.from('payments').select('*').order('week_number', { ascending: true }),
+      ]);
+
+      if (pErr) {
+        container.innerHTML = `<div class="empty-state">Fout: ${escapeHtml(pErr.message)}</div>`;
+        return;
+      }
+
+      const progs = programs || [];
+      const pays = (allPayments || []).map(p => ({
+        ...p,
+        status: (p.status === 'pending' || p.status === 'invoice_sent') && p.due_date < today ? 'overdue' : p.status,
+      }));
+
+      const byProg = {};
+      pays.forEach(p => { (byProg[p.program_id] = byProg[p.program_id] || []).push(p); });
+
+      const active = progs.filter(p => p.status === 'active');
+      let toInvoice = 0, overdueAmt = 0, overdueCount = 0, totalPaid = 0;
+      pays.forEach(p => {
+        if (p.status === 'overdue')       { overdueCount++; overdueAmt += Number(p.amount); }
+        else if (p.status === 'pending')  { toInvoice++; }
+        else if (p.status === 'paid')     { totalPaid += Number(p.amount); }
+      });
+
+      const statusCfg = {
+        pending:      { label: 'Openstaand',        color: '#888',    bg: '#88888818' },
+        invoice_sent: { label: 'Factuur verstuurd', color: '#f59e0b', bg: '#f59e0b18' },
+        paid:         { label: 'Betaald',            color: '#22c55e', bg: '#22c55e18' },
+        overdue:      { label: 'Te laat',            color: '#ef4444', bg: '#ef444418' },
+      };
+
+      function badge(status) {
+        const c = statusCfg[status] || statusCfg.pending;
+        return `<span style="display:inline-block;font-size:0.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${c.color};background:${c.bg};border:1px solid ${c.color}33;border-radius:999px;padding:2px 7px;">${c.label}</span>`;
+      }
+
+      function formatDate(d) {
+        if (!d) return '—';
+        return new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+
+      function currentWeek(startDate) {
+        const diff = Math.floor((new Date() - new Date(startDate)) / (7 * 864e5)) + 1;
+        return Math.min(Math.max(diff, 1), 999);
+      }
+
+      function paymentRows(prog) {
+        const rows = byProg[prog.id] || [];
+        const name = prog.profiles?.full_name || 'Onbekend';
+        if (!rows.length) return `<p style="font-size:0.82rem;color:#555;padding:8px 0;">Geen betalingen gevonden.</p>`;
+        const paidTotal = rows.filter(r => r.status === 'paid').reduce((a, r) => a + Number(r.amount), 0);
+        const totalAmt  = rows.reduce((a, r) => a + Number(r.amount), 0);
+        return `
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.79rem;min-width:360px;">
+              <thead><tr style="border-bottom:1px solid #1A1A1A;">
+                <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px 5px 0;">Wk</th>
+                <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;white-space:nowrap;">Vervaldatum</th>
+                <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;">Bedrag</th>
+                <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;">Status</th>
+                <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;">Actie</th>
+              </tr></thead>
+              <tbody>
+                ${rows.map(p => {
+                  const sc = statusCfg[p.status] || statusCfg.pending;
+                  const canInvoice = p.status === 'pending' || p.status === 'overdue';
+                  const canPay     = p.status !== 'paid';
+                  return `<tr style="border-bottom:1px solid #0D0D0D;${p.status==='overdue'?'background:#ef444406;':''}">
+                    <td style="padding:7px 6px 7px 0;font-weight:700;color:${sc.color};">${p.week_number}</td>
+                    <td style="padding:7px 6px;color:#777;white-space:nowrap;">${formatDate(p.due_date)}</td>
+                    <td style="padding:7px 6px;color:#CCC;font-weight:600;">€${Number(p.amount).toFixed(0)}</td>
+                    <td style="padding:7px 6px;">${badge(p.status)}</td>
+                    <td style="padding:7px 6px;">
+                      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        ${canInvoice ? `<button onclick="beheerMarkInvoiceSent('${p.id}')" style="background:#f59e0b18;border:1px solid #f59e0b44;border-radius:6px;color:#f59e0b;font-size:0.68rem;font-weight:700;padding:3px 7px;cursor:pointer;white-space:nowrap;">📤 Verstuurd</button>` : ''}
+                        ${canPay     ? `<button onclick="beheerMarkPaid('${p.id}')" style="background:#22c55e18;border:1px solid #22c55e44;border-radius:6px;color:#22c55e;font-size:0.68rem;font-weight:700;padding:3px 7px;cursor:pointer;white-space:nowrap;">✓ Betaald</button>` : ''}
+                      </div>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+              <tfoot><tr style="border-top:1px solid #1A1A1A;">
+                <td colspan="2" style="padding:7px 6px 4px 0;color:#444;font-size:0.72rem;">Totaal</td>
+                <td style="padding:7px 6px;color:#CCC;font-weight:700;">€${totalAmt.toFixed(0)}</td>
+                <td colspan="2" style="padding:7px 6px;color:#22c55e;font-size:0.72rem;">€${paidTotal.toFixed(0)} ontvangen</td>
+              </tr></tfoot>
+            </table>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+            <button onclick="beheerCopyInvoice('${escapeAttr(name)}','${escapeAttr(prog.start_date)}')" style="background:transparent;border:1px solid #1A1A1A;border-radius:8px;color:#888;font-size:0.78rem;padding:7px 12px;cursor:pointer;">📋 Kopieer factuurgegevens</button>
+            <button onclick="beheerExtend('${prog.id}')" style="background:transparent;border:1px solid #3b82f633;border-radius:8px;color:#3b82f6;font-size:0.78rem;padding:7px 12px;cursor:pointer;">↻ Verleng 10 weken</button>
+            <button onclick="beheerMarkComplete('${prog.id}')" style="background:transparent;border:1px solid #55555533;border-radius:8px;color:#555;font-size:0.78rem;padding:7px 12px;cursor:pointer;">Afsluiten</button>
+          </div>`;
+      }
+
+      function progCard(prog) {
+        const rows     = byProg[prog.id] || [];
+        const name     = prog.profiles?.full_name || 'Onbekend';
+        const week     = currentWeek(prog.start_date);
+        const total    = prog.total_weeks || 10;
+        const pct      = Math.min(Math.round((week / total) * 100), 100);
+        const paidAmt  = rows.filter(r => r.status === 'paid').reduce((a, r) => a + Number(r.amount), 0);
+        const paidCnt  = rows.filter(r => r.status === 'paid').length;
+        const hasOver  = rows.some(r => r.status === 'overdue');
+        const nextDue  = rows.find(r => r.status !== 'paid');
+        const scColors = { active:'#C8F135', paused:'#f59e0b', completed:'#3b82f6', cancelled:'#ef4444' };
+        const scLabels = { active:'Actief', paused:'Gepauzeerd', completed:'Voltooid', cancelled:'Gestopt' };
+        const sc       = scColors[prog.status] || '#555';
+        const sl       = scLabels[prog.status] || prog.status;
+        const init     = name.charAt(0).toUpperCase();
+        return `
+          <div style="border:1px solid ${hasOver?'#ef444433':'#1A1A1A'};border-radius:14px;overflow:hidden;margin-bottom:10px;" id="bprog-${prog.id}">
+            <div style="padding:14px 16px;cursor:pointer;" onclick="beheerToggleProg('${prog.id}')">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:${sc}18;border:2px solid ${sc}44;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:${sc};flex-shrink:0;">${init}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span style="font-size:0.92rem;font-weight:700;color:#DDD;">${escapeHtml(name)}</span>
+                    <span style="font-size:0.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${sc};background:${sc}18;border:1px solid ${sc}33;border-radius:999px;padding:2px 7px;">${sl}</span>
+                    ${hasOver ? `<span style="font-size:0.62rem;font-weight:700;color:#ef4444;background:#ef444418;border:1px solid #ef444433;border-radius:999px;padding:2px 7px;">⚠ Te laat</span>` : ''}
+                  </div>
+                  <div style="font-size:0.73rem;color:#555;margin-top:3px;">Start ${formatDate(prog.start_date)} · €${paidAmt.toFixed(0)} ontvangen</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                  <div style="font-size:1.1rem;font-weight:800;color:#CCC;line-height:1;">${Math.min(week,total)}<span style="font-size:0.65rem;color:#444;">/${total}</span></div>
+                  <div style="font-size:0.6rem;color:#444;margin-top:1px;">week</div>
+                </div>
+              </div>
+              <div style="margin-top:10px;">
+                <div style="height:5px;background:#1A1A1A;border-radius:99px;overflow:hidden;">
+                  <div style="height:100%;width:${pct}%;background:${sc};border-radius:99px;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                  <span style="font-size:0.65rem;color:#444;">${paidCnt}/${total} betaald</span>
+                  ${nextDue
+                    ? `<span style="font-size:0.65rem;color:${nextDue.status==='overdue'?'#ef4444':'#666'};">Volgende: ${formatDate(nextDue.due_date)}</span>`
+                    : `<span style="font-size:0.65rem;color:#22c55e;">Alles ontvangen ✓</span>`}
+                </div>
+              </div>
+            </div>
+            <div id="bpay-${prog.id}" class="hidden" style="border-top:1px solid #111;padding:14px 16px;">
+              ${paymentRows(prog)}
+              ${prog.notes ? `<div style="margin-top:10px;font-size:0.79rem;color:#555;border-top:1px solid #0D0D0D;padding-top:8px;line-height:1.6;">📝 ${escapeHtml(prog.notes)}</div>` : ''}
+            </div>
+          </div>`;
+      }
+
+      const sorted = [...progs].sort((a, b) => {
+        const ao = (byProg[a.id]||[]).some(p => p.status==='overdue');
+        const bo = (byProg[b.id]||[]).some(p => p.status==='overdue');
+        if (ao && !bo) return -1; if (!ao && bo) return 1;
+        if (a.status==='active' && b.status!=='active') return -1;
+        if (a.status!=='active' && b.status==='active') return 1;
+        return new Date(b.start_date) - new Date(a.start_date);
+      });
+
+      container.innerHTML = `
+        <div style="padding:0 0 100px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+            ${[
+              { icon:'👥', val: active.length,                 label:'Actieve klanten',   color:'#C8F135' },
+              { icon:'💰', val:`€${(active.length*75).toFixed(0)}`,label:'Wekelijkse omzet', color:'#22c55e' },
+              { icon:'📤', val: toInvoice,                      label:'Te factureren',      color:'#f59e0b' },
+              { icon:'⚠️', val:`€${overdueAmt.toFixed(0)}`,    label:'Achterstallig',      color: overdueCount>0?'#ef4444':'#444' },
+            ].map(s=>`
+              <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:12px 14px;">
+                <div style="font-size:1.1rem;margin-bottom:5px;">${s.icon}</div>
+                <div style="font-size:1.3rem;font-weight:800;color:${s.color};line-height:1;">${s.val}</div>
+                <div style="font-size:0.68rem;color:#444;margin-top:3px;">${s.label}</div>
+              </div>`).join('')}
+          </div>
+
+          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+            <div style="font-size:0.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:8px;">Omzet totaal ontvangen</div>
+            <div style="font-size:1.6rem;font-weight:800;color:#22c55e;">€${totalPaid.toFixed(0)}</div>
+            <div style="font-size:0.72rem;color:#444;margin-top:2px;">${pays.filter(p=>p.status==='paid').length} betalingen van ${active.length} actieve klant${active.length!==1?'en':''} · €75/week</div>
+          </div>
+
+          <button onclick="beheerShowAddForm()" style="width:100%;background:#C8F13512;border:1px dashed #C8F13544;border-radius:12px;color:#C8F135;font-weight:700;font-size:0.88rem;padding:12px;cursor:pointer;margin-bottom:12px;">+ Nieuwe klant toevoegen</button>
+
+          <div id="beheerAddForm" class="hidden" style="border:1px solid #C8F13530;border-radius:14px;padding:16px;margin-bottom:14px;background:#C8F13506;">
+            <div style="font-size:0.72rem;font-weight:700;color:#C8F135;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">Nieuw 10-weken programma</div>
+            <div style="margin-bottom:10px;">
+              <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Klant</label>
+              <select id="beheerUserId" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;appearance:none;"></select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+              <div>
+                <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Startdatum</label>
+                <input type="date" id="beheerStartDate" value="${today}" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;box-sizing:border-box;" />
+              </div>
+              <div>
+                <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Tarief/week</label>
+                <input type="number" id="beheerRate" value="75" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;box-sizing:border-box;" />
+              </div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Notities (optioneel)</label>
+              <textarea id="beheerNotes" rows="2" placeholder="bijv. niveau, doelen, bijzonderheden…" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;resize:none;box-sizing:border-box;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="beheerCreateProgram()" style="flex:1;background:#C8F135;color:#0A0A0A;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:0.88rem;cursor:pointer;">Programma aanmaken</button>
+              <button onclick="document.getElementById('beheerAddForm').classList.add('hidden')" style="background:transparent;border:1px solid #1A1A1A;border-radius:10px;color:#555;padding:11px 16px;cursor:pointer;font-size:0.85rem;">✕</button>
+            </div>
+            <div id="beheerAddErr" class="hidden" style="margin-top:8px;font-size:0.8rem;color:#ef4444;"></div>
+          </div>
+
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#333;margin-bottom:10px;">${progs.length} programma${progs.length!==1?'s':''}</div>
+          ${sorted.length ? sorted.map(progCard).join('') : `<div class="empty-state">Nog geen programma's aangemaakt.<br><br>Klik op "Nieuwe klant toevoegen" om te starten.</div>`}
+        </div>`;
+    }
+
+    function beheerToggleProg(id) {
+      document.getElementById(`bpay-${id}`)?.classList.toggle('hidden');
+    }
+
+    async function beheerMarkInvoiceSent(payId) {
+      const today = new Date().toISOString().split('T')[0];
+      const { error } = await supabaseClient.from('payments')
+        .update({ status: 'invoice_sent', invoice_sent_at: today }).eq('id', payId);
+      if (!error) loadBeheer(); else alert('Fout: ' + error.message);
+    }
+
+    async function beheerMarkPaid(payId) {
+      const today = new Date().toISOString().split('T')[0];
+      const { error } = await supabaseClient.from('payments')
+        .update({ status: 'paid', paid_at: today }).eq('id', payId);
+      if (!error) loadBeheer(); else alert('Fout: ' + error.message);
+    }
+
+    async function beheerMarkComplete(progId) {
+      if (!confirm('Programma afsluiten?')) return;
+      await supabaseClient.from('client_programs').update({ status: 'completed' }).eq('id', progId);
+      loadBeheer();
+    }
+
+    async function beheerShowAddForm() {
+      const form = document.getElementById('beheerAddForm');
+      form.classList.remove('hidden');
+      form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const { data: profiles } = await supabaseClient.from('profiles')
+        .select('id, full_name').eq('is_admin', false).order('full_name', { ascending: true });
+      const sel = document.getElementById('beheerUserId');
+      sel.innerHTML = (profiles && profiles.length)
+        ? `<option value="">Selecteer klant…</option>` + profiles.map(p => `<option value="${p.id}">${escapeHtml(p.full_name || p.id)}</option>`).join('')
+        : `<option value="">Geen klanten gevonden</option>`;
+    }
+
+    async function beheerCreateProgram() {
+      const userId    = document.getElementById('beheerUserId').value;
+      const startDate = document.getElementById('beheerStartDate').value;
+      const rate      = Number(document.getElementById('beheerRate').value) || 75;
+      const notes     = document.getElementById('beheerNotes').value.trim();
+      const errEl     = document.getElementById('beheerAddErr');
+      if (!userId)    { errEl.textContent = 'Selecteer een klant.'; errEl.classList.remove('hidden'); return; }
+      if (!startDate) { errEl.textContent = 'Kies een startdatum.'; errEl.classList.remove('hidden'); return; }
+      errEl.classList.add('hidden');
+
+      const { data: prog, error: pErr } = await supabaseClient.from('client_programs')
+        .insert({ user_id: userId, start_date: startDate, status: 'active', notes, weekly_rate: rate, total_weeks: 10 })
+        .select().single();
+      if (pErr) { errEl.textContent = 'Fout: ' + pErr.message; errEl.classList.remove('hidden'); return; }
+
+      const payments = Array.from({ length: 10 }, (_, i) => {
+        const d = new Date(startDate); d.setDate(d.getDate() + i * 7);
+        return { program_id: prog.id, user_id: userId, week_number: i+1, amount: rate, due_date: d.toISOString().split('T')[0], status: 'pending' };
+      });
+      const { error: payErr } = await supabaseClient.from('payments').insert(payments);
+      if (payErr) { errEl.textContent = 'Programma aangemaakt maar betalingen mislukt: ' + payErr.message; errEl.classList.remove('hidden'); return; }
+
+      document.getElementById('beheerAddForm').classList.add('hidden');
+      loadBeheer();
+    }
+
+    async function beheerExtend(progId) {
+      const { data: last } = await supabaseClient.from('payments').select('due_date, week_number, user_id, amount')
+        .eq('program_id', progId).order('week_number', { ascending: false }).limit(1);
+      if (!last || !last.length) return;
+      const { due_date, week_number, user_id, amount } = last[0];
+      const payments = Array.from({ length: 10 }, (_, i) => {
+        const d = new Date(due_date); d.setDate(d.getDate() + (i + 1) * 7);
+        return { program_id: progId, user_id, week_number: week_number + i + 1, amount, due_date: d.toISOString().split('T')[0], status: 'pending' };
+      });
+      await supabaseClient.from('payments').insert(payments);
+      await supabaseClient.from('client_programs').update({ status: 'active', total_weeks: week_number + 10 }).eq('id', progId);
+      loadBeheer();
+    }
+
+    function beheerCopyInvoice(name, startDate) {
+      const today = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+      const text = `Factuur — Van Sambeek Performance Coaching\nDatum: ${today}\nKlant: ${name}\nProgramma gestart: ${startDate}\nBedrag: €75,00\nOmschrijving: Wekelijkse coaching sessie + portal toegang + WhatsApp begeleiding\n\nVerstuur via Revolut Pro`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          const t = document.createElement('div');
+          t.style.cssText = 'position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:#C8F135;color:#0A0A0A;font-weight:700;font-size:0.85rem;padding:10px 20px;border-radius:999px;z-index:9999;white-space:nowrap;';
+          t.textContent = '✓ Factuurgegevens gekopieerd';
+          document.body.appendChild(t);
+          setTimeout(() => t.remove(), 2500);
+        });
+      }
     }
 
     // ── KLANTEN ───────────────────────────────────────────
