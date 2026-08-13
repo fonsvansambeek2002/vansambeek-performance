@@ -2601,7 +2601,7 @@
       const tabs = fysiekData.tabs;
       const activeTab = tabs[0].id;
 
-      function renderExercises(section) {
+      function renderExercises(section, tabId) {
         const color = section.color;
         let h = `
           <div style="border-left:3px solid ${color};padding-left:14px;margin-bottom:14px;">
@@ -2610,7 +2610,7 @@
           </div>
           <div style="background:${color}0d;border:1px solid ${color}22;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:#888;line-height:1.65;">${section.intro}</div>`;
         section.exercises.forEach((ex, i) => {
-          const exId = `fysiek-ex-${section.id||'x'}-${i}`;
+          const exId = `fysiek-ex-${tabId}-${i}`;
           const hasMeta = ex.sets || ex.rest;
           h += `
             <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
@@ -2664,7 +2664,7 @@
 
         ${tabs.map(t=>`
           <div id="fpanel-${t.id}" ${t.id!==activeTab?'class="hidden"':''}>
-            ${renderExercises(fysiekData[t.id])}
+            ${renderExercises(fysiekData[t.id], t.id)}
           </div>`).join('')}
       `;
 
@@ -3492,15 +3492,16 @@
     async function loadBeheer() {
       const container = document.getElementById('beheerContent');
       container.innerHTML = `<div class="empty-state" style="padding:20px 0;">Laden…</div>`;
+      try {
       const today = new Date().toISOString().split('T')[0];
 
-      const [{ data: programs, error: pErr }, { data: allPayments }] = await Promise.all([
+      const [{ data: programs, error: pErr }, { data: allPayments, error: payErr }] = await Promise.all([
         supabaseClient.from('client_programs').select('*, profiles(full_name)').order('start_date', { ascending: false }),
         supabaseClient.from('payments').select('*').order('week_number', { ascending: true }),
       ]);
 
-      if (pErr) {
-        container.innerHTML = `<div class="empty-state">Fout: ${escapeHtml(pErr.message)}</div>`;
+      if (pErr || payErr) {
+        container.innerHTML = `<div class="empty-state">Fout: ${escapeHtml((pErr || payErr).message)}</div>`;
         return;
       }
 
@@ -3707,6 +3708,9 @@
           <div style="font-size:0.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#333;margin-bottom:10px;">${progs.length} programma${progs.length!==1?'s':''}</div>
           ${sorted.length ? sorted.map(progCard).join('') : `<div class="empty-state">Nog geen programma's aangemaakt.<br><br>Klik op "Nieuwe klant toevoegen" om te starten.</div>`}
         </div>`;
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state">Fout: ${escapeHtml(err.message || String(err))}</div>`;
+      }
     }
 
     function beheerToggleProg(id) {
