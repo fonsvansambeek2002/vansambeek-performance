@@ -1014,11 +1014,21 @@
 
     <main class="app-main">
       <section class="screen active" id="screen-home">
-        <div style="text-align:center;padding:12px 0 6px;">
-          <img src="assets/logo.png" alt="Van Sambeek Performance" style="width:280px;height:280px;max-width:70vw;border-radius:40px;display:inline-block;" />
+        <div style="display:flex;align-items:center;gap:12px;padding:4px 0 14px;">
+          <img src="assets/logo.png" alt="VSP" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;" />
+          <div style="flex:1;min-width:0;">
+            <p class="greeting" id="homeGreeting" style="margin:0;font-size:1.05rem;"></p>
+            <p class="subgreeting" id="subgreeting" style="margin:0;font-size:0.78rem;"></p>
+          </div>
+          <div id="homeStreakBadge" class="hidden" style="flex-shrink:0;text-align:center;background:#C8F13510;border:1px solid #C8F13530;border-radius:10px;padding:5px 10px;">
+            <div id="homeStreakNum" style="font-size:1.1rem;font-weight:800;color:#C8F135;line-height:1;"></div>
+            <div style="font-size:0.55rem;color:#555;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-top:1px;">streak</div>
+          </div>
         </div>
-        <p class="greeting" id="homeGreeting">Hoi</p>
-        <p class="subgreeting" id="subgreeting">Fijn dat je er bent.</p>
+
+        <div id="homeWeekBanner" class="hidden"></div>
+        <div id="homeCoachNote" class="hidden"></div>
+        <div id="homeToday" class="hidden"></div>
 
         <div id="welcomeCard" class="welcome-card hidden">
           <h3 id="welcomeTitle">Welkom bij je coaching portal</h3>
@@ -1026,7 +1036,6 @@
           <button class="btn-accent" onclick="switchScreen('opdrachten')" id="welcomeBtn">Start met opdracht 1 →</button>
         </div>
         <div class="action-cards" id="homeActions"></div>
-
 
         <div class="card" id="tipCard">
           <h3 id="tipTitle">Tip van de dag</h3>
@@ -1917,30 +1926,128 @@
 
     async function loadHome() {
       const T = i18n[lang];
+      const isEN = lang === 'en';
       const name = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'sporter';
-      document.getElementById('homeGreeting').textContent = T.greeting(name);
+      const firstName = name.split(' ')[0];
+      document.getElementById('homeGreeting').textContent = T.greeting(firstName);
 
       const start = new Date(new Date().getFullYear(), 0, 0);
       const dayOfYear = Math.floor((Date.now() - start) / 86400000);
       const q = quotes[dayOfYear % quotes.length];
-
       document.getElementById('tipBody').innerHTML =
         `<em style="display:block;font-size:1rem;color:#DDD;line-height:1.75;margin-bottom:12px;">"${escapeHtml(q.text)}"</em>` +
         `<span style="color:#C8F135;font-size:0.82rem;font-weight:600;">— ${escapeHtml(q.author)}</span>`;
 
-      // ── action cards ──────────────────────────────────────
-      const [{ data: completions }, { data: checkins }, { data: tournaments }] = await Promise.all([
+      const today = new Date().toISOString().split('T')[0];
+      const [
+        { data: completions },
+        { data: checkins },
+        { data: tournaments },
+        { data: myPrograms },
+        { data: coachNotes },
+        { data: allCheckins },
+      ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
-        supabaseClient.from('checkins').select('id').eq('user_id', currentUser.id).eq('week_start', getWeekStart()),
+        supabaseClient.from('weekly_checkins').select('id').eq('user_id', currentUser.id).eq('week_start', getWeekStart()),
         supabaseClient.from('tournaments').select('name,start_date,end_date').eq('user_id', currentUser.id)
-          .or(`end_date.gte.${new Date().toISOString().split('T')[0]},start_date.gte.${new Date().toISOString().split('T')[0]}`)
-          .order('start_date').limit(1),
+          .or(`end_date.gte.${today},start_date.gte.${today}`).order('start_date').limit(1),
+        supabaseClient.from('client_programs').select('id,start_date,status,total_weeks').eq('user_id', currentUser.id).eq('status','active').order('start_date', { ascending: false }).limit(1),
+        supabaseClient.from('coach_notes').select('content,session_date').eq('client_id', currentUser.id).order('session_date', { ascending: false }).limit(1),
+        supabaseClient.from('weekly_checkins').select('week_start').eq('user_id', currentUser.id).order('week_start', { ascending: false }).limit(20),
       ]);
 
       const asData = getAssignments();
       const doneCount = (completions || []).length;
       const allDone = doneCount >= asData.length;
+      const checkinDone = (checkins || []).length > 0;
+      const nextTournament = (tournaments || [])[0] || null;
+      const activeProgram = (myPrograms || [])[0] || null;
+      const latestNote = (coachNotes || [])[0] || null;
 
+      // streak: consecutive weeks with check-in
+      let streak = 0;
+      const ciWeeks = (allCheckins || []).map(c => c.week_start).sort((a,b) => b.localeCompare(a));
+      for (let i = 0; i < ciWeeks.length; i++) {
+        const expected = new Date(getWeekStart());
+        expected.setDate(expected.getDate() - i * 7);
+        const exp = expected.toISOString().split('T')[0];
+        if (ciWeeks[i] === exp) streak++;
+        else break;
+      }
+      if (streak > 1) {
+        document.getElementById('homeStreakBadge').classList.remove('hidden');
+        document.getElementById('homeStreakNum').textContent = streak + 'w';
+      }
+
+      // ── week banner ───────────────────────────────────────
+      const bannerEl = document.getElementById('homeWeekBanner');
+      if (activeProgram) {
+        const weekNum = Math.min(Math.max(Math.floor((new Date() - new Date(activeProgram.start_date)) / (7 * 864e5)) + 1, 1), activeProgram.total_weeks);
+        const pct = Math.round((weekNum / activeProgram.total_weeks) * 100);
+        bannerEl.classList.remove('hidden');
+        bannerEl.innerHTML = `
+          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#444;">${isEN ? 'Your program' : 'Jouw programma'}</span>
+              <span style="font-size:0.78rem;font-weight:700;color:#C8F135;">${isEN ? 'Week' : 'Week'} ${weekNum}<span style="color:#333;font-weight:400;">/${activeProgram.total_weeks}</span></span>
+            </div>
+            <div style="height:6px;background:#1A1A1A;border-radius:99px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#C8F135,#a3c910);border-radius:99px;transition:width .4s;"></div>
+            </div>
+            <div style="font-size:0.65rem;color:#333;margin-top:5px;">${pct}% ${isEN ? 'completed' : 'voltooid'}</div>
+          </div>`;
+      }
+
+      // ── coach note ────────────────────────────────────────
+      const noteEl = document.getElementById('homeCoachNote');
+      if (latestNote) {
+        noteEl.classList.remove('hidden');
+        const noteDate = new Date(latestNote.session_date).toLocaleDateString(isEN ? 'en-GB' : 'nl-NL', { day: 'numeric', month: 'short' });
+        noteEl.innerHTML = `
+          <div style="background:#C8F13508;border:1px solid #C8F13525;border-radius:12px;padding:14px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#C8F135;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="2.5" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;color:#C8F135;">Fons van Sambeek</div>
+                <div style="font-size:0.62rem;color:#444;">${isEN ? 'Coach note' : 'Sessienotitie'} · ${noteDate}</div>
+              </div>
+            </div>
+            <p style="font-size:0.85rem;color:#CCC;line-height:1.65;margin:0;">${escapeHtml(latestNote.content)}</p>
+          </div>`;
+      }
+
+      // ── today's training ──────────────────────────────────
+      const todayEl = document.getElementById('homeToday');
+      const dow = new Date().getDay(); // 0=Sun,1=Mon,...
+      const trainMap = {
+        1: { label: 'Workout A', sub: isEN ? 'Lower Body & Explosiveness' : 'Onderlichaam & Explosiviteit', color: '#C8F135', screen: 'library', cat: 'fysiek' },
+        2: { label: isEN ? 'Rest day' : 'Rustdag',       sub: isEN ? 'Recovery & mobility' : 'Herstel & mobiliteit', color: '#555',    screen: null },
+        3: { label: 'Workout B', sub: isEN ? 'Upper Body, Core & Rotation' : 'Bovenlichaam, Core & Rotatie', color: '#3b82f6', screen: 'library', cat: 'fysiek' },
+        4: { label: 'Workout C', sub: isEN ? 'Agility, Balance & Court Movement' : 'Agility, Balans & Baanbeweging', color: '#a855f7', screen: 'library', cat: 'fysiek' },
+        5: { label: 'Workout A', sub: isEN ? 'Lower Body & Explosiveness' : 'Onderlichaam & Explosiviteit', color: '#C8F135', screen: 'library', cat: 'fysiek' },
+        6: { label: isEN ? 'Rest day' : 'Rustdag',       sub: isEN ? 'Light walk or nothing' : 'Licht wandelen of niets', color: '#555', screen: null },
+        0: { label: isEN ? 'Rest day' : 'Rustdag',       sub: isEN ? 'Prepare mentally for the week' : 'Mentaal voorbereiden op de week', color: '#555', screen: null },
+      };
+      const t = trainMap[dow];
+      todayEl.classList.remove('hidden');
+      todayEl.innerHTML = `
+        <div style="background:#111;border:1px solid ${t.color}22;border-radius:12px;padding:12px 14px;margin-bottom:12px;${t.screen ? 'cursor:pointer;' : ''}" ${t.screen ? `onclick="switchScreen('${t.screen}')${t.cat ? `;setTimeout(()=>{document.querySelector('[data-category=\\'${t.cat}\\']')?.click()},200)` : ''}"` : ''}>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:9px;background:${t.color}18;border:1px solid ${t.color}33;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-width="2" width="18" height="18"><path d="M6.5 6.5h11M6.5 17.5h11M12 2v20M2 12h4M18 12h4"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:0.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:2px;">${isEN ? 'Today' : 'Vandaag'}</div>
+              <div style="font-size:0.9rem;font-weight:700;color:${t.color};">${t.label}</div>
+              <div style="font-size:0.72rem;color:#555;margin-top:1px;">${t.sub}</div>
+            </div>
+            ${t.screen ? `<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" width="16" height="16"><path d="M9 18l6-6-6-6"/></svg>` : ''}
+          </div>
+        </div>`;
+
+      // ── welcome / action cards ────────────────────────────
       const welcomeCard = document.getElementById('welcomeCard');
       if (doneCount === 0 && !isAdmin) {
         document.getElementById('welcomeTitle').textContent = T.welcomeTitle;
@@ -1951,8 +2058,6 @@
         welcomeCard.classList.add('hidden');
       }
       const nextA = allDone ? null : asData[doneCount];
-      const checkinDone = (checkins || []).length > 0;
-      const nextTournament = (tournaments || [])[0] || null;
 
       const cards = document.getElementById('homeActions');
       cards.innerHTML = `
@@ -3495,9 +3600,12 @@
       try {
       const today = new Date().toISOString().split('T')[0];
 
-      const [{ data: programs, error: pErr }, { data: allPayments, error: payErr }] = await Promise.all([
+      const [{ data: programs, error: pErr }, { data: allPayments, error: payErr }, { data: thisWeekCi }, { data: allCompletions }, { data: recentNotes }] = await Promise.all([
         supabaseClient.from('client_programs').select('*, profiles(full_name)').order('start_date', { ascending: false }),
         supabaseClient.from('payments').select('*').order('week_number', { ascending: true }),
+        supabaseClient.from('weekly_checkins').select('user_id,week_start').eq('week_start', getWeekStart()),
+        supabaseClient.from('assignment_completions').select('user_id'),
+        supabaseClient.from('coach_notes').select('client_id,session_date').order('session_date', { ascending: false }),
       ]);
 
       if (pErr || payErr) {
@@ -3513,6 +3621,12 @@
 
       const byProg = {};
       pays.forEach(p => { (byProg[p.program_id] = byProg[p.program_id] || []).push(p); });
+
+      const ciThisWeek = new Set((thisWeekCi || []).map(c => c.user_id));
+      const completionsByUser = {};
+      (allCompletions || []).forEach(c => { completionsByUser[c.user_id] = (completionsByUser[c.user_id] || 0) + 1; });
+      const lastNoteDateByClient = {};
+      (recentNotes || []).forEach(n => { if (!lastNoteDateByClient[n.client_id]) lastNoteDateByClient[n.client_id] = n.session_date; });
 
       const active = progs.filter(p => p.status === 'active');
       let toInvoice = 0, overdueAmt = 0, overdueCount = 0, totalPaid = 0;
@@ -3594,20 +3708,32 @@
       }
 
       function progCard(prog) {
-        const rows     = byProg[prog.id] || [];
-        const name     = prog.profiles?.full_name || 'Onbekend';
-        const week     = currentWeek(prog.start_date);
-        const total    = prog.total_weeks || 10;
-        const pct      = Math.min(Math.round((week / total) * 100), 100);
-        const paidAmt  = rows.filter(r => r.status === 'paid').reduce((a, r) => a + Number(r.amount), 0);
-        const paidCnt  = rows.filter(r => r.status === 'paid').length;
-        const hasOver  = rows.some(r => r.status === 'overdue');
-        const nextDue  = rows.find(r => r.status !== 'paid');
-        const scColors = { active:'#C8F135', paused:'#f59e0b', completed:'#3b82f6', cancelled:'#ef4444' };
-        const scLabels = { active:'Actief', paused:'Gepauzeerd', completed:'Voltooid', cancelled:'Gestopt' };
-        const sc       = scColors[prog.status] || '#555';
-        const sl       = scLabels[prog.status] || prog.status;
-        const init     = name.charAt(0).toUpperCase();
+        const rows      = byProg[prog.id] || [];
+        const name      = prog.profiles?.full_name || 'Onbekend';
+        const uid       = prog.user_id;
+        const week      = currentWeek(prog.start_date);
+        const total     = prog.total_weeks || 10;
+        const pct       = Math.min(Math.round((week / total) * 100), 100);
+        const paidAmt   = rows.filter(r => r.status === 'paid').reduce((a, r) => a + Number(r.amount), 0);
+        const paidCnt   = rows.filter(r => r.status === 'paid').length;
+        const hasOver   = rows.some(r => r.status === 'overdue');
+        const nextDue   = rows.find(r => r.status !== 'paid');
+        const scColors  = { active:'#C8F135', paused:'#f59e0b', completed:'#3b82f6', cancelled:'#ef4444' };
+        const scLabels  = { active:'Actief', paused:'Gepauzeerd', completed:'Voltooid', cancelled:'Gestopt' };
+        const sc        = scColors[prog.status] || '#555';
+        const sl        = scLabels[prog.status] || prog.status;
+        const init      = name.charAt(0).toUpperCase();
+
+        // engagement
+        const didCiThisWeek = ciThisWeek.has(uid);
+        const totalAssgn    = (completionsByUser[uid] || 0);
+        const asData        = getAssignments ? getAssignments() : [];
+        const asTotal       = asData.length || 10;
+        const assPct        = Math.min(Math.round((totalAssgn / asTotal) * 100), 100);
+        const lastNoteDate  = lastNoteDateByClient[uid];
+        const engColor      = didCiThisWeek ? '#22c55e' : '#f59e0b';
+        const engLabel      = didCiThisWeek ? '✓ Check-in gedaan' : '⚠ Geen check-in deze week';
+
         return `
           <div style="border:1px solid ${hasOver?'#ef444433':'#1A1A1A'};border-radius:14px;overflow:hidden;margin-bottom:10px;" id="bprog-${prog.id}">
             <div style="padding:14px 16px;cursor:pointer;" onclick="beheerToggleProg('${prog.id}')">
@@ -3637,9 +3763,23 @@
                     : `<span style="font-size:0.65rem;color:#22c55e;">Alles ontvangen ✓</span>`}
                 </div>
               </div>
+              <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">
+                <span style="font-size:0.65rem;font-weight:700;color:${engColor};background:${engColor}15;border:1px solid ${engColor}33;border-radius:999px;padding:3px 8px;">${engLabel}</span>
+                <span style="font-size:0.65rem;color:#444;background:#111;border:1px solid #1A1A1A;border-radius:999px;padding:3px 8px;">📚 ${assPct}% opdrachten</span>
+                ${lastNoteDate ? `<span style="font-size:0.65rem;color:#555;background:#111;border:1px solid #1A1A1A;border-radius:999px;padding:3px 8px;">📝 Notitie ${formatDate(lastNoteDate)}</span>` : ''}
+              </div>
             </div>
             <div id="bpay-${prog.id}" class="hidden" style="border-top:1px solid #111;padding:14px 16px;">
               ${paymentRows(prog)}
+              <div style="border-top:1px solid #0D0D0D;margin-top:14px;padding-top:12px;">
+                <div style="font-size:0.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#444;margin-bottom:8px;">Sessienotitie toevoegen</div>
+                <textarea id="bnote-${uid}" rows="3" placeholder="Schrijf je notitie na de sessie… (zichtbaar voor de klant op hun home scherm)" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.82rem;resize:none;box-sizing:border-box;line-height:1.5;"></textarea>
+                <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+                  <input type="date" id="bnotedate-${uid}" value="${today}" style="background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:8px 10px;font-size:0.8rem;" />
+                  <button onclick="beheerSaveNote('${uid}')" style="flex:1;background:#C8F135;color:#0A0A0A;border:none;border-radius:8px;padding:9px;font-weight:700;font-size:0.82rem;cursor:pointer;">Opslaan & versturen</button>
+                </div>
+                <div id="bnote-err-${uid}" class="hidden" style="font-size:0.75rem;color:#ef4444;margin-top:5px;"></div>
+              </div>
               ${prog.notes ? `<div style="margin-top:10px;font-size:0.79rem;color:#555;border-top:1px solid #0D0D0D;padding-top:8px;line-height:1.6;">📝 ${escapeHtml(prog.notes)}</div>` : ''}
             </div>
           </div>`;
@@ -3801,6 +3941,25 @@
           setTimeout(() => t.remove(), 2500);
         });
       }
+    }
+
+    async function beheerSaveNote(clientId) {
+      const content = document.getElementById(`bnote-${clientId}`)?.value?.trim();
+      const dateVal = document.getElementById(`bnotedate-${clientId}`)?.value;
+      const errEl   = document.getElementById(`bnote-err-${clientId}`);
+      if (!content) { errEl.textContent = 'Schrijf eerst een notitie.'; errEl.classList.remove('hidden'); return; }
+      errEl.classList.add('hidden');
+      const { error } = await supabaseClient.from('coach_notes').insert({
+        client_id: clientId, content, session_date: dateVal || new Date().toISOString().split('T')[0],
+      });
+      if (error) { errEl.textContent = 'Fout: ' + error.message; errEl.classList.remove('hidden'); return; }
+      document.getElementById(`bnote-${clientId}`).value = '';
+      const t = document.createElement('div');
+      t.style.cssText = 'position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:#C8F135;color:#0A0A0A;font-weight:700;font-size:0.85rem;padding:10px 20px;border-radius:999px;z-index:9999;white-space:nowrap;';
+      t.textContent = '✓ Notitie opgeslagen & zichtbaar voor klant';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+      loadBeheer();
     }
 
     // ── KLANTEN ───────────────────────────────────────────
