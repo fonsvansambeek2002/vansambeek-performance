@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vsp-portal-v19';
+const CACHE_NAME = 'vsp-portal-v20';
 const PRECACHE_URLS = [
   '/',
   'index.html',
@@ -28,6 +28,14 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Treat HTML/navigation and core scripts as always-fresh: network-first,
+// falling back to cache only when offline. This prevents the app from
+// serving a stale portal.html after a new deploy.
+function isFreshFirst(request, url) {
+  if (request.mode === 'navigate') return true;
+  return /\.(html)$/.test(url.pathname) || url.pathname.endsWith('/');
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
@@ -35,6 +43,23 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.hostname.includes('supabase.co') || url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com')) return;
 
+  // Network-first for HTML so users always get the latest version online.
+  if (isFreshFirst(request, url)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('offline.html')))
+    );
+    return;
+  }
+
+  // Cache-first with background refresh for static assets.
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request)

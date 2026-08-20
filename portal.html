@@ -2987,7 +2987,7 @@
           breathState.phaseIdx = 0;
           breathState.round    = 1;
           breathState.countdown = t.phases[0].dur;
-          _breathApplyPhase();
+          window._breathApplyPhase();
         }
         breathState.running = true;
         document.getElementById('breathStartBtn').style.opacity = '0.4';
@@ -3025,7 +3025,7 @@
         if (btn)   btn.style.opacity = '1';
       };
 
-      function _breathApplyPhase() {
+      window._breathApplyPhase = function() {
         const p    = breathState.tech.phases[breathState.phaseIdx];
         const ring = document.getElementById('breathRing');
         const col  = breathState.tech.color;
@@ -3036,47 +3036,50 @@
           ring.style.boxShadow  = glow;
         }
         const ph = document.getElementById('breathPhase');
-        if (ph) ph.textContent = p.label.toUpperCase();
+        if (ph) { ph.textContent = p.label.toUpperCase(); ph.style.color = col; }
         const ct = document.getElementById('breathCount');
         if (ct) ct.textContent = breathState.countdown;
-      }
+      };
     }
 
     function _breathTick() {
       if (!breathState.running) return;
       breathState.countdown--;
-      const ct = document.getElementById('breathCount');
-      if (ct) ct.textContent = breathState.countdown;
-      if (breathState.countdown <= 0) {
-        breathState.phaseIdx++;
-        if (breathState.phaseIdx >= breathState.tech.phases.length) {
-          breathState.phaseIdx = 0;
-          breathState.round++;
-          const rnum = document.getElementById('breathRoundNum');
-          if (rnum) rnum.textContent = Math.min(breathState.round, breathState.totalRounds);
-          if (breathState.round > breathState.totalRounds) {
-            clearInterval(breathState.interval);
-            breathState.interval = null;
-            breathState.running  = false;
-            const ring = document.getElementById('breathRing');
-            if (ring) { ring.style.transition='transform 1s ease'; ring.style.transform='scale(1)'; ring.style.boxShadow=''; }
-            const ph = document.getElementById('breathPhase');
-            if (ph) ph.textContent = '';
-            const c2 = document.getElementById('breathCount');
-            if (c2) c2.textContent = '✓';
-            const msg = document.getElementById('breathStatusMsg');
-            const isEN = window._breathIsEN;
-            if (msg) msg.textContent = isEN ? 'Session complete — well done!' : 'Sessie klaar — goed gedaan!';
-            const btn = document.getElementById('breathStartBtn');
-            if (btn) btn.style.opacity = '1';
-            return;
-          }
-        }
-        breathState.countdown = breathState.tech.phases[breathState.phaseIdx].dur;
-        _breathApplyPhase();
-        const ct2 = document.getElementById('breathCount');
-        if (ct2) ct2.textContent = breathState.countdown;
+
+      // still counting down within the current phase
+      if (breathState.countdown > 0) {
+        const ct = document.getElementById('breathCount');
+        if (ct) ct.textContent = breathState.countdown;
+        return;
       }
+
+      // phase finished — advance to the next phase (or next round)
+      breathState.phaseIdx++;
+      if (breathState.phaseIdx >= breathState.tech.phases.length) {
+        breathState.phaseIdx = 0;
+        breathState.round++;
+        const rnum = document.getElementById('breathRoundNum');
+        if (rnum) rnum.textContent = Math.min(breathState.round, breathState.totalRounds);
+        if (breathState.round > breathState.totalRounds) {
+          clearInterval(breathState.interval);
+          breathState.interval = null;
+          breathState.running  = false;
+          const ring = document.getElementById('breathRing');
+          if (ring) { ring.style.transition='transform 1s ease'; ring.style.transform='scale(1)'; ring.style.boxShadow=''; }
+          const ph = document.getElementById('breathPhase');
+          if (ph) ph.textContent = '';
+          const c2 = document.getElementById('breathCount');
+          if (c2) c2.textContent = '✓';
+          const msg = document.getElementById('breathStatusMsg');
+          const isEN = window._breathIsEN;
+          if (msg) msg.textContent = isEN ? 'Session complete — well done!' : 'Sessie klaar — goed gedaan!';
+          const btn = document.getElementById('breathStartBtn');
+          if (btn) btn.style.opacity = '1';
+          return;
+        }
+      }
+      breathState.countdown = breathState.tech.phases[breathState.phaseIdx].dur;
+      if (window._breathApplyPhase) window._breathApplyPhase();
     }
 
     function loadVoedingSection(list) {
