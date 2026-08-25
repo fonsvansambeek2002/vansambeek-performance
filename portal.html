@@ -3603,16 +3603,23 @@
       try {
       const today = new Date().toISOString().split('T')[0];
 
-      const [{ data: programs, error: pErr }, { data: allPayments, error: payErr }, { data: thisWeekCi }, { data: allCompletions }, { data: recentNotes }] = await Promise.all([
+      const [
+        { data: programs,       error: pErr    },
+        { data: allPayments,    error: payErr  },
+        { data: thisWeekCi                     },
+        { data: allCompletions                 },
+        { data: recentNotesRaw                 },
+      ] = await Promise.all([
         supabaseClient.from('client_programs').select('*, profiles(full_name)').order('start_date', { ascending: false }),
         supabaseClient.from('payments').select('*').order('week_number', { ascending: true }),
         supabaseClient.from('weekly_checkins').select('user_id,week_start').eq('week_start', getWeekStart()),
         supabaseClient.from('assignment_completions').select('user_id'),
         supabaseClient.from('coach_notes').select('client_id,session_date').order('session_date', { ascending: false }),
       ]);
+      const recentNotes = recentNotesRaw || [];
 
       if (pErr || payErr) {
-        container.innerHTML = `<div class="empty-state">Fout: ${escapeHtml((pErr || payErr).message)}</div>`;
+        container.innerHTML = `<div style="padding:20px;color:#ef4444;font-size:0.85rem;line-height:1.6;">Fout bij laden: ${escapeHtml((pErr || payErr).message)}<br><br><span style="color:#555;font-size:0.78rem;">Controleer of de tabellen client_programs en payments bestaan in Supabase.</span></div>`;
         return;
       }
 
@@ -4035,7 +4042,7 @@
       };
 
       } catch (err) {
-        container.innerHTML = `<div class="empty-state">Fout: ${escapeHtml(err.message || String(err))}</div>`;
+        container.innerHTML = `<div style="padding:20px;color:#ef4444;font-size:0.85rem;line-height:1.6;">Onverwachte fout: ${escapeHtml(err.message || String(err))}</div>`;
       }
     }
 
