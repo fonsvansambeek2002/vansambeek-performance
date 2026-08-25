@@ -3788,7 +3788,23 @@
           </div>`;
       }
 
-      const sorted = [...progs].sort((a, b) => {
+      // ── extra computed data ───────────────────────────────
+      const clientByProg = {};
+      progs.forEach(p => { clientByProg[p.id] = p.profiles?.full_name || 'Onbekend'; });
+
+      const next7 = new Date(); next7.setDate(next7.getDate() + 7);
+      const next7str = next7.toISOString().split('T')[0];
+      const thisMonth = today.slice(0,7);
+
+      const overdueRows      = pays.filter(p => p.status === 'overdue').sort((a,b) => a.due_date.localeCompare(b.due_date));
+      const dueThisWeek      = pays.filter(p => (p.status === 'pending' || p.status === 'invoice_sent') && p.due_date >= today && p.due_date <= next7str).sort((a,b) => a.due_date.localeCompare(b.due_date));
+      const upcomingPays     = pays.filter(p => p.status !== 'paid').sort((a,b) => a.due_date.localeCompare(b.due_date));
+      const paidThisMonth    = pays.filter(p => p.status === 'paid' && p.paid_at && p.paid_at.startsWith(thisMonth)).reduce((a,p) => a + Number(p.amount), 0);
+      const totalOutstanding = upcomingPays.reduce((a,p) => a + Number(p.amount), 0);
+      const noCheckin        = active.filter(p => !ciThisWeek.has(p.user_id));
+      const urgentCount      = overdueRows.length + (noCheckin.length > 0 ? 1 : 0);
+
+      const sortedProgs = [...progs].sort((a, b) => {
         const ao = (byProg[a.id]||[]).some(p => p.status==='overdue');
         const bo = (byProg[b.id]||[]).some(p => p.status==='overdue');
         if (ao && !bo) return -1; if (!ao && bo) return 1;
@@ -3797,60 +3813,227 @@
         return new Date(b.start_date) - new Date(a.start_date);
       });
 
+      // ── sub-tab switcher ──────────────────────────────────
+      function subTabBtn(id, label, active_) {
+        return `<button id="bst-${id}" onclick="beheerSubTab('${id}')" style="
+          flex:1;background:${active_?'#1E1E1E':'transparent'};border:none;border-radius:8px;
+          color:${active_?'#DDD':'#555'};font-family:Inter,sans-serif;font-size:0.78rem;
+          font-weight:${active_?700:500};padding:8px 4px;cursor:pointer;transition:all .15s;
+          position:relative;">${label}${id==='dash'&&urgentCount>0?`<span style="position:absolute;top:4px;right:4px;width:6px;height:6px;background:#ef4444;border-radius:50%;"></span>`:''}
+        </button>`;
+      }
+
+      // ── payment pill for list views ────────────────────────
+      function payRow(p, showClient=true) {
+        const name = clientByProg[p.program_id] || '?';
+        const init = name.charAt(0).toUpperCase();
+        const sc   = { pending:{c:'#888',bg:'#88888818'}, invoice_sent:{c:'#f59e0b',bg:'#f59e0b18'}, overdue:{c:'#ef4444',bg:'#ef444418'}, paid:{c:'#22c55e',bg:'#22c55e18'} }[p.status] || {c:'#888',bg:'#88888818'};
+        const canInvoice = p.status === 'pending' || p.status === 'overdue';
+        const canPay     = p.status !== 'paid';
+        return `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #0D0D0D;">
+            ${showClient?`<div style="width:30px;height:30px;border-radius:50%;background:${sc.c}18;border:1px solid ${sc.c}33;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:${sc.c};flex-shrink:0;">${init}</div>`:''}
+            <div style="flex:1;min-width:0;">
+              ${showClient?`<div style="font-size:0.82rem;font-weight:600;color:#CCC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(name)}</div>`:''}
+              <div style="font-size:0.72rem;color:#555;">Week ${p.week_number} · ${formatDate(p.due_date)}</div>
+            </div>
+            <div style="font-size:0.88rem;font-weight:700;color:#CCC;flex-shrink:0;">€${Number(p.amount).toFixed(0)}</div>
+            <div style="display:flex;gap:4px;flex-shrink:0;">
+              ${canInvoice?`<button onclick="beheerMarkInvoiceSent('${p.id}')" style="background:#f59e0b18;border:1px solid #f59e0b44;border-radius:6px;color:#f59e0b;font-size:0.65rem;font-weight:700;padding:4px 7px;cursor:pointer;white-space:nowrap;">📤</button>`:''}
+              ${canPay?`<button onclick="beheerMarkPaid('${p.id}')" style="background:#22c55e18;border:1px solid #22c55e44;border-radius:6px;color:#22c55e;font-size:0.65rem;font-weight:700;padding:4px 7px;cursor:pointer;white-space:nowrap;">✓</button>`:''}
+            </div>
+          </div>`;
+      }
+
+      function sectionHead(label, color='#444') {
+        return `<div style="font-size:0.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${color};padding:12px 0 4px;">${label}</div>`;
+      }
+
+      // ── PANEL: DASHBOARD ──────────────────────────────────
+      const dashPanel = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          ${[
+            { label:'Actieve klanten',   val: active.length,                            color:'#C8F135', sub: `${active.length} programma${active.length!==1?'s':''}` },
+            { label:'Omzet deze maand',  val:`€${paidThisMonth.toFixed(0)}`,            color:'#22c55e', sub: `${pays.filter(p=>p.status==='paid'&&p.paid_at&&p.paid_at.startsWith(thisMonth)).length} betalingen` },
+            { label:'Totaal ontvangen',  val:`€${totalPaid.toFixed(0)}`,                color:'#3b82f6', sub: `${pays.filter(p=>p.status==='paid').length} betalingen ooit` },
+            { label:'Nog te ontvangen',  val:`€${totalOutstanding.toFixed(0)}`,         color: overdueRows.length?'#ef4444':'#888', sub: `${overdueRows.length} te laat · ${dueThisWeek.length} deze week` },
+          ].map(s=>`
+            <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:13px 14px;">
+              <div style="font-size:0.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#333;margin-bottom:6px;">${s.label}</div>
+              <div style="font-size:1.25rem;font-weight:800;color:${s.color};line-height:1;">${s.val}</div>
+              <div style="font-size:0.65rem;color:#333;margin-top:4px;">${s.sub}</div>
+            </div>`).join('')}
+        </div>
+
+        ${overdueRows.length ? `
+        <div style="background:#ef444408;border:1px solid #ef444430;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+          ${sectionHead('🚨 Te laat — actie vereist', '#ef4444')}
+          ${overdueRows.map(p => payRow(p)).join('')}
+        </div>` : ''}
+
+        ${dueThisWeek.length ? `
+        <div style="background:#f59e0b08;border:1px solid #f59e0b25;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+          ${sectionHead('📅 Vervalt deze week', '#f59e0b')}
+          ${dueThisWeek.map(p => payRow(p)).join('')}
+        </div>` : ''}
+
+        ${noCheckin.length ? `
+        <div style="background:#3b82f608;border:1px solid #3b82f625;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+          ${sectionHead('💬 Nog geen check-in deze week', '#3b82f6')}
+          ${noCheckin.map(prog => {
+            const name = prog.profiles?.full_name || 'Onbekend';
+            const init = name.charAt(0).toUpperCase();
+            const asData2 = getAssignments ? getAssignments() : [];
+            const assPct  = Math.min(Math.round(((completionsByUser[prog.user_id]||0) / (asData2.length||10)) * 100), 100);
+            return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #0D0D0D;">
+              <div style="width:30px;height:30px;border-radius:50%;background:#3b82f618;border:1px solid #3b82f633;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:#3b82f6;flex-shrink:0;">${init}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:0.82rem;font-weight:600;color:#CCC;">${escapeHtml(name)}</div>
+                <div style="font-size:0.7rem;color:#555;">Week ${Math.min(Math.max(Math.floor((new Date()-new Date(prog.start_date))/(7*864e5))+1,1),prog.total_weeks||10)}/${prog.total_weeks||10} · ${assPct}% opdrachten</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>` : ''}
+
+        ${!overdueRows.length && !dueThisWeek.length && !noCheckin.length ? `
+        <div style="background:#C8F13508;border:1px solid #C8F13525;border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:1.2rem;margin-bottom:6px;">✓</div>
+          <div style="font-size:0.85rem;font-weight:700;color:#C8F135;">Alles op orde</div>
+          <div style="font-size:0.75rem;color:#444;margin-top:4px;">Geen achterstallige betalingen of gemiste check-ins.</div>
+        </div>` : ''}
+
+        <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:14px 16px;">
+          ${sectionHead('Actieve trajecten')}
+          ${active.length ? active.map(prog => {
+            const week = Math.min(Math.max(Math.floor((new Date()-new Date(prog.start_date))/(7*864e5))+1,1),prog.total_weeks||10);
+            const total = prog.total_weeks || 10;
+            const pct   = Math.min(Math.round((week/total)*100),100);
+            const name  = prog.profiles?.full_name || 'Onbekend';
+            const paidA = (byProg[prog.id]||[]).filter(r=>r.status==='paid').reduce((a,r)=>a+Number(r.amount),0);
+            const hasOv = (byProg[prog.id]||[]).some(r=>r.status==='overdue');
+            return `<div style="padding:10px 0;border-bottom:1px solid #0D0D0D;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:0.85rem;font-weight:600;color:#CCC;">${escapeHtml(name)}</span>
+                <span style="font-size:0.75rem;font-weight:700;color:${hasOv?'#ef4444':'#888'};">Week ${week}/${total}</span>
+              </div>
+              <div style="height:4px;background:#1A1A1A;border-radius:99px;overflow:hidden;">
+                <div style="height:100%;width:${pct}%;background:${hasOv?'#ef4444':'#C8F135'};border-radius:99px;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                <span style="font-size:0.62rem;color:#333;">${pct}% voltooid</span>
+                <span style="font-size:0.62rem;color:#22c55e;">€${paidA.toFixed(0)} ontvangen</span>
+              </div>
+            </div>`;
+          }).join('') : `<div style="font-size:0.82rem;color:#444;padding:8px 0;">Geen actieve klanten.</div>`}
+        </div>`;
+
+      // ── PANEL: BETALINGEN ─────────────────────────────────
+      function groupPayments(list) {
+        const groups = { overdue:[], thisweek:[], nextweek:[], later:[] };
+        const nextWeekStr = (() => { const d = new Date(); d.setDate(d.getDate()+14); return d.toISOString().split('T')[0]; })();
+        list.forEach(p => {
+          if (p.status === 'overdue') groups.overdue.push(p);
+          else if (p.due_date <= next7str) groups.thisweek.push(p);
+          else if (p.due_date <= nextWeekStr) groups.nextweek.push(p);
+          else groups.later.push(p);
+        });
+        return groups;
+      }
+      const payGroups = groupPayments(upcomingPays);
+      const payPanel = `
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            ${[
+              {label:`${overdueRows.length} te laat`,   color:'#ef4444'},
+              {label:`${dueThisWeek.length} deze week`, color:'#f59e0b'},
+              {label:`€${totalOutstanding.toFixed(0)} openstaand`, color:'#888'},
+            ].map(t=>`<span style="font-size:0.72rem;font-weight:700;color:${t.color};background:${t.color}15;border:1px solid ${t.color}33;border-radius:999px;padding:3px 10px;">${t.label}</span>`).join('')}
+          </div>
+
+          ${payGroups.overdue.length ? `
+          <div style="background:#ef444408;border:1px solid #ef444425;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+            ${sectionHead('Te laat', '#ef4444')}
+            ${payGroups.overdue.map(p => payRow(p)).join('')}
+          </div>` : ''}
+
+          ${payGroups.thisweek.length ? `
+          <div style="background:#f59e0b06;border:1px solid #f59e0b22;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+            ${sectionHead('Deze week', '#f59e0b')}
+            ${payGroups.thisweek.map(p => payRow(p)).join('')}
+          </div>` : ''}
+
+          ${payGroups.nextweek.length ? `
+          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+            ${sectionHead('Volgende week')}
+            ${payGroups.nextweek.map(p => payRow(p)).join('')}
+          </div>` : ''}
+
+          ${payGroups.later.length ? `
+          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+            ${sectionHead('Later')}
+            ${payGroups.later.map(p => payRow(p)).join('')}
+          </div>` : ''}
+
+          ${!upcomingPays.length ? `<div class="empty-state">Alle betalingen zijn ontvangen. 🎉</div>` : ''}
+        </div>`;
+
+      // ── PANEL: KLANTEN ────────────────────────────────────
+      const klPanel = `
+        <button onclick="beheerShowAddForm()" style="width:100%;background:#C8F13512;border:1px dashed #C8F13544;border-radius:12px;color:#C8F135;font-weight:700;font-size:0.88rem;padding:12px;cursor:pointer;margin-bottom:12px;">+ Nieuwe klant toevoegen</button>
+        <div id="beheerAddForm" class="hidden" style="border:1px solid #C8F13530;border-radius:14px;padding:16px;margin-bottom:14px;background:#C8F13506;">
+          <div style="font-size:0.72rem;font-weight:700;color:#C8F135;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">Nieuw 10-weken programma</div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Klant</label>
+            <select id="beheerUserId" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;appearance:none;"></select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div>
+              <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Startdatum</label>
+              <input type="date" id="beheerStartDate" value="${today}" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;box-sizing:border-box;" />
+            </div>
+            <div>
+              <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Tarief/week</label>
+              <input type="number" id="beheerRate" value="75" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;box-sizing:border-box;" />
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Notities (optioneel)</label>
+            <textarea id="beheerNotes" rows="2" placeholder="bijv. niveau, doelen, bijzonderheden…" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;resize:none;box-sizing:border-box;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="beheerCreateProgram()" style="flex:1;background:#C8F135;color:#0A0A0A;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:0.88rem;cursor:pointer;">Programma aanmaken</button>
+            <button onclick="document.getElementById('beheerAddForm').classList.add('hidden')" style="background:transparent;border:1px solid #1A1A1A;border-radius:10px;color:#555;padding:11px 16px;cursor:pointer;font-size:0.85rem;">✕</button>
+          </div>
+          <div id="beheerAddErr" class="hidden" style="margin-top:8px;font-size:0.8rem;color:#ef4444;"></div>
+        </div>
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#333;margin-bottom:10px;">${progs.length} programma${progs.length!==1?'s':''}</div>
+        ${sortedProgs.length ? sortedProgs.map(progCard).join('') : `<div class="empty-state">Nog geen programma's aangemaakt.<br><br>Klik op "+ Nieuwe klant toevoegen" om te starten.</div>`}`;
+
+      // ── RENDER ────────────────────────────────────────────
       container.innerHTML = `
         <div style="padding:0 0 100px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-            ${[
-              { icon:'👥', val: active.length,                 label:'Actieve klanten',   color:'#C8F135' },
-              { icon:'💰', val:`€${(active.length*75).toFixed(0)}`,label:'Wekelijkse omzet', color:'#22c55e' },
-              { icon:'📤', val: toInvoice,                      label:'Te factureren',      color:'#f59e0b' },
-              { icon:'⚠️', val:`€${overdueAmt.toFixed(0)}`,    label:'Achterstallig',      color: overdueCount>0?'#ef4444':'#444' },
-            ].map(s=>`
-              <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:12px 14px;">
-                <div style="font-size:1.1rem;margin-bottom:5px;">${s.icon}</div>
-                <div style="font-size:1.3rem;font-weight:800;color:${s.color};line-height:1;">${s.val}</div>
-                <div style="font-size:0.68rem;color:#444;margin-top:3px;">${s.label}</div>
-              </div>`).join('')}
+          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:4px;display:flex;gap:2px;margin-bottom:16px;">
+            ${subTabBtn('dash','Dashboard',true)}
+            ${subTabBtn('pay','Betalingen',false)}
+            ${subTabBtn('kl','Klanten',false)}
           </div>
-
-          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
-            <div style="font-size:0.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:8px;">Omzet totaal ontvangen</div>
-            <div style="font-size:1.6rem;font-weight:800;color:#22c55e;">€${totalPaid.toFixed(0)}</div>
-            <div style="font-size:0.72rem;color:#444;margin-top:2px;">${pays.filter(p=>p.status==='paid').length} betalingen van ${active.length} actieve klant${active.length!==1?'en':''} · €75/week</div>
-          </div>
-
-          <button onclick="beheerShowAddForm()" style="width:100%;background:#C8F13512;border:1px dashed #C8F13544;border-radius:12px;color:#C8F135;font-weight:700;font-size:0.88rem;padding:12px;cursor:pointer;margin-bottom:12px;">+ Nieuwe klant toevoegen</button>
-
-          <div id="beheerAddForm" class="hidden" style="border:1px solid #C8F13530;border-radius:14px;padding:16px;margin-bottom:14px;background:#C8F13506;">
-            <div style="font-size:0.72rem;font-weight:700;color:#C8F135;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">Nieuw 10-weken programma</div>
-            <div style="margin-bottom:10px;">
-              <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Klant</label>
-              <select id="beheerUserId" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;appearance:none;"></select>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-              <div>
-                <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Startdatum</label>
-                <input type="date" id="beheerStartDate" value="${today}" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;box-sizing:border-box;" />
-              </div>
-              <div>
-                <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Tarief/week</label>
-                <input type="number" id="beheerRate" value="75" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;box-sizing:border-box;" />
-              </div>
-            </div>
-            <div style="margin-bottom:14px;">
-              <label style="font-size:0.73rem;color:#555;display:block;margin-bottom:5px;">Notities (optioneel)</label>
-              <textarea id="beheerNotes" rows="2" placeholder="bijv. niveau, doelen, bijzonderheden…" style="width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;resize:none;box-sizing:border-box;"></textarea>
-            </div>
-            <div style="display:flex;gap:8px;">
-              <button onclick="beheerCreateProgram()" style="flex:1;background:#C8F135;color:#0A0A0A;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:0.88rem;cursor:pointer;">Programma aanmaken</button>
-              <button onclick="document.getElementById('beheerAddForm').classList.add('hidden')" style="background:transparent;border:1px solid #1A1A1A;border-radius:10px;color:#555;padding:11px 16px;cursor:pointer;font-size:0.85rem;">✕</button>
-            </div>
-            <div id="beheerAddErr" class="hidden" style="margin-top:8px;font-size:0.8rem;color:#ef4444;"></div>
-          </div>
-
-          <div style="font-size:0.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#333;margin-bottom:10px;">${progs.length} programma${progs.length!==1?'s':''}</div>
-          ${sorted.length ? sorted.map(progCard).join('') : `<div class="empty-state">Nog geen programma's aangemaakt.<br><br>Klik op "Nieuwe klant toevoegen" om te starten.</div>`}
+          <div id="bpanel-dash">${dashPanel}</div>
+          <div id="bpanel-pay" class="hidden">${payPanel}</div>
+          <div id="bpanel-kl"  class="hidden">${klPanel}</div>
         </div>`;
+
+      window.beheerSubTab = function(tab) {
+        ['dash','pay','kl'].forEach(t => {
+          document.getElementById(`bpanel-${t}`)?.classList.toggle('hidden', t !== tab);
+          const btn = document.getElementById(`bst-${t}`);
+          if (btn) {
+            btn.style.background = t === tab ? '#1E1E1E' : 'transparent';
+            btn.style.color      = t === tab ? '#DDD'    : '#555';
+            btn.style.fontWeight = t === tab ? '700'     : '500';
+          }
+        });
+      };
+
       } catch (err) {
         container.innerHTML = `<div class="empty-state">Fout: ${escapeHtml(err.message || String(err))}</div>`;
       }
