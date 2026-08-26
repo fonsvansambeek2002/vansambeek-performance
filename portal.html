@@ -941,6 +941,82 @@
     }
     #ciMessage.success-msg { color: #C8F135; font-size: 0.9rem; margin-top: 10px; }
     #ciMessage.error-msg   { color: #ff4444; font-size: 0.9rem; margin-top: 10px; }
+
+    /* ── TODAY HERO CARD ── */
+    .today-hero {
+      background: #111;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      border: 1px solid #1E1E1E;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .today-hero-ghost {
+      position: absolute;
+      right: -8px; top: -14px;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 6rem;
+      opacity: .04;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+    .today-hero-top { display: flex; align-items: flex-start; gap: 14px; }
+    .today-hero-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .today-hero-meta { flex: 1; min-width: 0; }
+    .today-hero-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #444; margin-bottom: 4px; }
+    .today-hero-name { font-family: 'Bebas Neue', cursive; font-size: 1.9rem; letter-spacing: .04em; line-height: 1; margin-bottom: 4px; }
+    .today-hero-sub { font-size: 0.8rem; color: #666; line-height: 1.4; }
+    .today-hero-cta { margin-top: 14px; padding-top: 12px; border-top: 1px solid #1E1E1E; display: flex; align-items: center; gap: 6px; font-size: 0.83rem; font-weight: 600; color: #C8F135; }
+    .today-hero.rest { cursor: default; }
+    .today-hero.rest .today-hero-cta { display: none; }
+
+    /* ── PROGRESS RING ── */
+    .opr-ring-wrap {
+      display: flex; align-items: center; gap: 20px;
+      margin-bottom: 24px; padding: 18px 16px;
+      background: #111; border: 1px solid #1E1E1E; border-radius: 14px;
+    }
+    .opr-ring-text { flex: 1; min-width: 0; }
+    .opr-ring-count { font-family: 'Bebas Neue', cursive; font-size: 2.2rem; letter-spacing: .04em; color: #FFF; line-height: 1; }
+    .opr-ring-label { font-size: 0.72rem; color: #555; margin-top: 3px; }
+    .opr-ring-next { font-size: 0.82rem; color: #C8F135; margin-top: 10px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── SPARKLINE CHART ── */
+    .spark-wrap {
+      background: #111; border: 1px solid #1E1E1E; border-radius: 14px;
+      padding: 16px; margin-bottom: 20px;
+    }
+    .spark-title { font-size: 0.68rem; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px; }
+    .spark-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .spark-row:last-child { margin-bottom: 0; }
+    .spark-label { font-size: 0.7rem; color: #555; width: 54px; flex-shrink: 0; }
+    .spark-val { font-size: 0.9rem; font-weight: 700; width: 20px; text-align: right; flex-shrink: 0; }
+
+    /* ── MATCH CARD ── */
+    .match-card {
+      background: #111; border: 1px solid #1E1E1E; border-radius: 12px;
+      overflow: hidden; margin-bottom: 10px;
+    }
+    .match-card-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; cursor: pointer; user-select: none;
+    }
+    .match-card-chevron { color: #333; transition: transform 0.2s; flex-shrink: 0; }
+    .match-card.open .match-card-chevron { transform: rotate(180deg); }
+    .match-card-body {
+      display: none; padding: 14px 16px 16px;
+      border-top: 1px solid #1E1E1E;
+    }
+    .match-card.open .match-card-body { display: block; }
+    .match-q-label {
+      font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; margin-bottom: 3px; display: block;
+    }
+    .match-q-text { font-size: 0.85rem; color: #888; line-height: 1.65; margin-bottom: 12px; }
+    .match-q-text:last-child { margin-bottom: 0; }
   </style>
 </head>
 <body>
@@ -1026,9 +1102,9 @@
           </div>
         </div>
 
+        <div id="homeToday" class="hidden"></div>
         <div id="homeWeekBanner" class="hidden"></div>
         <div id="homeCoachNote" class="hidden"></div>
-        <div id="homeToday" class="hidden"></div>
 
         <div id="welcomeCard" class="welcome-card hidden">
           <h3 id="welcomeTitle">Welkom bij je coaching portal</h3>
@@ -2021,30 +2097,41 @@
       // ── today's training ──────────────────────────────────
       const todayEl = document.getElementById('homeToday');
       const dow = new Date().getDay(); // 0=Sun,1=Mon,...
+      const dayNamesNL = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+      const dayNamesEN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const dayLabel = isEN ? dayNamesEN[dow] : dayNamesNL[dow];
       const trainMap = {
         1: { label: 'Workout A', sub: isEN ? 'Lower Body & Explosiveness' : 'Onderlichaam & Explosiviteit', color: '#C8F135', screen: 'library', cat: 'fysiek' },
-        2: { label: isEN ? 'Rest day' : 'Rustdag',       sub: isEN ? 'Recovery & mobility' : 'Herstel & mobiliteit', color: '#555',    screen: null },
+        2: { label: isEN ? 'Rest' : 'Rustdag', sub: isEN ? 'Recovery & mobility' : 'Herstel & mobiliteit', color: '#555', screen: null },
         3: { label: 'Workout B', sub: isEN ? 'Upper Body, Core & Rotation' : 'Bovenlichaam, Core & Rotatie', color: '#3b82f6', screen: 'library', cat: 'fysiek' },
         4: { label: 'Workout C', sub: isEN ? 'Agility, Balance & Court Movement' : 'Agility, Balans & Baanbeweging', color: '#a855f7', screen: 'library', cat: 'fysiek' },
         5: { label: 'Workout A', sub: isEN ? 'Lower Body & Explosiveness' : 'Onderlichaam & Explosiviteit', color: '#C8F135', screen: 'library', cat: 'fysiek' },
-        6: { label: isEN ? 'Rest day' : 'Rustdag',       sub: isEN ? 'Light walk or nothing' : 'Licht wandelen of niets', color: '#555', screen: null },
-        0: { label: isEN ? 'Rest day' : 'Rustdag',       sub: isEN ? 'Prepare mentally for the week' : 'Mentaal voorbereiden op de week', color: '#555', screen: null },
+        6: { label: isEN ? 'Rest' : 'Rustdag', sub: isEN ? 'Light walk or nothing' : 'Licht wandelen of niets', color: '#555', screen: null },
+        0: { label: isEN ? 'Rest' : 'Rustdag', sub: isEN ? 'Prepare mentally for the week' : 'Mentaal voorbereiden op de week', color: '#555', screen: null },
       };
       const t = trainMap[dow];
+      const workoutIcon = t.screen
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-width="2" width="26" height="26"><path d="M6.5 6.5h11M6.5 17.5h11M12 2v20M2 12h4M18 12h4"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-width="1.8" width="26" height="26"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
       todayEl.classList.remove('hidden');
       todayEl.innerHTML = `
-        <div style="background:#111;border:1px solid ${t.color}22;border-radius:12px;padding:12px 14px;margin-bottom:12px;${t.screen ? 'cursor:pointer;' : ''}" ${t.screen ? `onclick="switchScreen('${t.screen}')${t.cat ? `;setTimeout(()=>{document.querySelector('[data-category=\\'${t.cat}\\']')?.click()},200)` : ''}"` : ''}>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height:36px;border-radius:9px;background:${t.color}18;border:1px solid ${t.color}33;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-width="2" width="18" height="18"><path d="M6.5 6.5h11M6.5 17.5h11M12 2v20M2 12h4M18 12h4"/></svg>
+        <div class="today-hero${t.screen ? '' : ' rest'}" ${t.screen ? `onclick="switchScreen('${t.screen}')${t.cat ? `;setTimeout(()=>{document.querySelector('[data-category=\\'${t.cat}\\']')?.click()},200)` : ''}"` : ''}>
+          <div class="today-hero-ghost">${t.screen ? t.label.replace(' ','') : 'REST'}</div>
+          <div class="today-hero-top">
+            <div class="today-hero-icon" style="background:${t.color}15;border:1px solid ${t.color}30;">
+              ${workoutIcon}
             </div>
-            <div style="flex:1;">
-              <div style="font-size:0.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:2px;">${isEN ? 'Today' : 'Vandaag'}</div>
-              <div style="font-size:0.9rem;font-weight:700;color:${t.color};">${t.label}</div>
-              <div style="font-size:0.72rem;color:#555;margin-top:1px;">${t.sub}</div>
+            <div class="today-hero-meta">
+              <div class="today-hero-label">${dayLabel} · ${isEN ? 'Today' : 'Vandaag'}</div>
+              <div class="today-hero-name" style="color:${t.color};">${t.label}</div>
+              <div class="today-hero-sub">${t.sub}</div>
             </div>
-            ${t.screen ? `<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" width="16" height="16"><path d="M9 18l6-6-6-6"/></svg>` : ''}
           </div>
+          ${t.screen ? `
+          <div class="today-hero-cta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path d="M9 18l6-6-6-6"/></svg>
+            ${isEN ? 'Open workout' : 'Open workout'}
+          </div>` : ''}
         </div>`;
 
       // ── welcome / action cards ────────────────────────────
@@ -2182,15 +2269,30 @@
         return;
       }
 
-      list.innerHTML = data.map((r) => `
-        <div class="content-item">
-          <strong>${escapeHtml(r.tegenstander)}</strong>
-          <span class="muted"> · ${escapeHtml(r.datum)}${r.score ? ' · ' + escapeHtml(r.score) : ''}</span>
-          <p class="muted" style="margin-top:10px;"><strong style="color:#AAA;">${T.wentWell}</strong><br>${escapeHtml(r.vraag1)}</p>
-          <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">${T.improve}</strong><br>${escapeHtml(r.vraag2)}</p>
-          <p class="muted" style="margin-top:8px;"><strong style="color:#AAA;">${T.approach}</strong><br>${escapeHtml(r.vraag3)}</p>
-        </div>
-      `).join('');
+      list.innerHTML = data.map((r, idx) => {
+        const dateStr = new Date(r.datum + 'T00:00:00').toLocaleDateString(lang === 'en' ? 'en-GB' : 'nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+        return `
+          <div class="match-card" id="mc-${idx}">
+            <div class="match-card-header" onclick="document.getElementById('mc-${idx}').classList.toggle('open')">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:0.68rem;color:#444;margin-bottom:3px;">${dateStr}</div>
+                <div style="font-size:0.95rem;font-weight:700;color:#FFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.tegenstander)}</div>
+                ${r.score ? `<div style="font-size:0.78rem;color:#888;margin-top:2px;font-family:'Bebas Neue',cursive;letter-spacing:.05em;">${escapeHtml(r.score)}</div>` : ''}
+              </div>
+              <svg class="match-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="match-card-body">
+              <span class="match-q-label" style="color:#C8F135;">${T.wentWell}</span>
+              <p class="match-q-text">${escapeHtml(r.vraag1)}</p>
+              <span class="match-q-label" style="color:#3b82f6;">${T.improve}</span>
+              <p class="match-q-text">${escapeHtml(r.vraag2)}</p>
+              <span class="match-q-label" style="color:#a855f7;">${T.approach}</span>
+              <p class="match-q-text">${escapeHtml(r.vraag3)}</p>
+            </div>
+          </div>`;
+      }).join('');
+      // auto-open first card
+      document.getElementById('mc-0')?.classList.add('open');
     }
 
     // ── VOEDING ───────────────────────────────────────────
@@ -4467,10 +4569,25 @@
       const allDone = done.length >= total;
       const pct = Math.round((done.length / total) * 100);
 
+      const R = 28, circ = 2 * Math.PI * R;
+      const ringOffset = allDone ? 0 : circ * (1 - done.length / total);
+      const ringColor = allDone ? '#C8F135' : done.length === 0 ? '#1A1A1A' : '#C8F135';
+      const nextTitle = !allDone ? asData[done.length]?.title : '';
       let html = `
-        <div class="opr-progress-row">
-          <div class="opr-bar-wrap"><div class="opr-bar" style="width:${pct}%"></div></div>
-          <span class="opr-progress-label">${done.length} / ${total}</span>
+        <div class="opr-ring-wrap">
+          <svg viewBox="0 0 72 72" width="72" height="72" style="flex-shrink:0;">
+            <circle cx="36" cy="36" r="${R}" fill="none" stroke="#1A1A1A" stroke-width="7"/>
+            <circle cx="36" cy="36" r="${R}" fill="none" stroke="${ringColor}" stroke-width="7"
+              stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${ringOffset.toFixed(1)}"
+              stroke-linecap="round" transform="rotate(-90 36 36)" style="transition:stroke-dashoffset .5s;"/>
+            ${allDone ? `<text x="36" y="41" text-anchor="middle" font-size="11" fill="#C8F135" font-family="Inter,sans-serif" font-weight="700">✓</text>` : `<text x="36" y="40" text-anchor="middle" font-size="12" fill="#fff" font-family="Inter,sans-serif" font-weight="700">${done.length}</text>`}
+          </svg>
+          <div class="opr-ring-text">
+            <div class="opr-ring-count">${done.length}<span style="color:#333;font-size:1.2rem;font-family:'Inter',sans-serif;font-weight:400;">/${total}</span></div>
+            <div class="opr-ring-label">${lang === 'en' ? 'assignments completed' : 'opdrachten voltooid'}</div>
+            ${!allDone && nextTitle ? `<div class="opr-ring-next">${lang === 'en' ? 'Next' : 'Volgende'}: ${escapeHtml(nextTitle)}</div>` : ''}
+            ${allDone ? `<div class="opr-ring-next">${lang === 'en' ? 'All done!' : 'Alles voltooid!'} 🎯</div>` : ''}
+          </div>
         </div>
       `;
 
@@ -5324,7 +5441,49 @@
         return;
       }
 
-      histList.innerHTML = history.map((c) => {
+      // Sparkline helper
+      function makeSparkSvg(vals, color) {
+        if (vals.length < 2) return '';
+        const W = 100, H = 34;
+        const step = W / (vals.length - 1);
+        const pts = vals.map((v, i) => `${(i * step).toFixed(1)},${(H - ((v - 1) / 9) * H).toFixed(1)}`).join(' ');
+        const lastX = ((vals.length - 1) * step).toFixed(1);
+        const lastY = (H - ((vals[vals.length - 1] - 1) / 9) * H).toFixed(1);
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px;display:block;">
+          <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+          <circle cx="${lastX}" cy="${lastY}" r="2.5" fill="${color}"/>
+        </svg>`;
+      }
+
+      const sorted = [...history].sort((a,b) => a.week_start.localeCompare(b.week_start));
+      const spOverall  = sorted.map(c => c.overall_rating).filter(v => v != null);
+      const spEnergy   = sorted.map(c => c.energy_level).filter(v => v != null);
+      const spSleep    = sorted.map(c => c.sleep_recovery).filter(v => v != null);
+
+      let sparkHtml = '';
+      if (spOverall.length >= 3) {
+        sparkHtml = `
+          <div class="spark-wrap">
+            <div class="spark-title">${lang === 'en' ? `Trend — last ${spOverall.length} weeks` : `Trend — afgelopen ${spOverall.length} weken`}</div>
+            <div class="spark-row">
+              <span class="spark-label">${T.ciOverall}</span>
+              <div style="flex:1;">${makeSparkSvg(spOverall, '#C8F135')}</div>
+              <span class="spark-val" style="color:#C8F135;">${spOverall[spOverall.length-1]}</span>
+            </div>
+            <div class="spark-row">
+              <span class="spark-label">${T.ciEnergy}</span>
+              <div style="flex:1;">${makeSparkSvg(spEnergy, '#3b82f6')}</div>
+              <span class="spark-val" style="color:#3b82f6;">${spEnergy[spEnergy.length-1]}</span>
+            </div>
+            <div class="spark-row">
+              <span class="spark-label">${T.ciSleep}</span>
+              <div style="flex:1;">${makeSparkSvg(spSleep, '#a855f7')}</div>
+              <span class="spark-val" style="color:#a855f7;">${spSleep[spSleep.length-1]}</span>
+            </div>
+          </div>`;
+      }
+
+      histList.innerHTML = sparkHtml + history.map((c) => {
         const wd = new Date(c.week_start + 'T00:00:00');
         const wLabel = T.ciWeekOf + ' ' + wd.toLocaleDateString(lang === 'nl' ? 'nl-NL' : 'en-US', opts);
         return `
