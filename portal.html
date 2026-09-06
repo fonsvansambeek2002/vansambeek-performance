@@ -995,6 +995,54 @@
     .spark-label { font-size: 0.7rem; color: #555; width: 54px; flex-shrink: 0; }
     .spark-val { font-size: 0.9rem; font-weight: 700; width: 20px; text-align: right; flex-shrink: 0; }
 
+    /* ── DAGBOEK ── */
+    .dj-type-toggle {
+      display: flex; gap: 0; background: #111; border: 1px solid #2A2A2A;
+      border-radius: 10px; overflow: hidden; margin-bottom: 20px;
+    }
+    .dj-type-btn {
+      flex: 1; background: transparent; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
+      padding: 12px 10px; color: #555; transition: all .15s; touch-action: manipulation;
+    }
+    .dj-type-btn.active { background: #C8F135; color: #0A0A0A; }
+    .dj-section-label {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: #555; margin: 18px 0 10px; display: block;
+    }
+    .dj-card {
+      background: #111; border: 1px solid #1E1E1E; border-radius: 12px;
+      overflow: hidden; margin-bottom: 10px;
+    }
+    .dj-card-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 15px; cursor: pointer; user-select: none;
+    }
+    .dj-card-body {
+      display: none; padding: 12px 15px 15px; border-top: 1px solid #1A1A1A;
+    }
+    .dj-card.open .dj-card-body { display: block; }
+    .dj-card.open .dj-card-chevron { transform: rotate(180deg); }
+    .dj-card-chevron { color: #333; transition: transform 0.2s; flex-shrink: 0; }
+    .dj-type-badge {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; padding: 3px 8px; border-radius: 4px; flex-shrink: 0;
+    }
+    .dj-badge-training { background: rgba(200,241,53,.12); color: #C8F135; }
+    .dj-badge-match    { background: rgba(59,130,246,.12);  color: #3b82f6; }
+    .dj-score-pill {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      font-size: 0.78rem; font-weight: 700;
+    }
+    .dj-field-group { margin-bottom: 14px; }
+    .dj-field-group:last-child { margin-bottom: 0; }
+    .dj-q-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; margin-bottom: 4px; display: block;
+    }
+    .dj-q-text { font-size: 0.85rem; color: #888; line-height: 1.65; }
+
     /* ── MATCH CARD ── */
     .match-card {
       background: #111; border: 1px solid #1E1E1E; border-radius: 12px;
@@ -1134,43 +1182,10 @@
 
       <section class="screen" id="screen-wedstrijden">
         <div class="sgn-bar" id="sgn-reflectie">
-          <button class="sgn-btn active" data-screen="wedstrijden" id="sgnWedstrijden">Wedstrijden</button>
+          <button class="sgn-btn active" data-screen="wedstrijden" id="sgnDagboek">Dagboek</button>
           <button class="sgn-btn" data-screen="checkin" id="sgnCheckin">Check-in</button>
         </div>
-        <div class="card">
-          <h3 id="matchFormTitle">Wedstrijdreflectie</h3>
-          <form id="matchForm">
-            <div class="field">
-              <label id="labelDatum">Datum</label>
-              <input type="date" id="matchDatum" required />
-            </div>
-            <div class="field">
-              <label id="labelTegenstander">Tegenstander</label>
-              <input type="text" id="matchTegenstander" required placeholder="Naam tegenstander" />
-            </div>
-            <div class="field">
-              <label id="labelScore">Score</label>
-              <input type="text" id="matchScore" placeholder="bijv. 6-3 6-4" />
-            </div>
-            <div class="field">
-              <label id="labelVraag1">Wat heb ik vandaag goed gedaan?</label>
-              <textarea id="matchVraag1" required style="min-height: 80px;"></textarea>
-            </div>
-            <div class="field">
-              <label id="labelVraag2">Wat zou ik de volgende keer beter willen doen?</label>
-              <textarea id="matchVraag2" required style="min-height: 80px;"></textarea>
-            </div>
-            <div class="field">
-              <label id="labelVraag3">Hoe kan ik ervoor zorgen dat ik dit ga verbeteren?</label>
-              <textarea id="matchVraag3" required style="min-height: 80px;"></textarea>
-            </div>
-            <button type="submit" class="btn-accent" id="matchSubmitBtn">Opslaan</button>
-            <p id="matchMessage" class="hidden"></p>
-          </form>
-        </div>
-
-        <h3 id="prevReflectionsTitle" style="margin: 24px 0 12px;">Eerder ingevulde reflecties</h3>
-        <div id="matchList"></div>
+        <div id="dagboekContent"></div>
       </section>
       <section class="screen" id="screen-highlights">
         <div id="highlightsList"></div>
@@ -1296,7 +1311,7 @@
 
       <section class="screen" id="screen-checkin">
         <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="wedstrijden">Wedstrijden</button>
+          <button class="sgn-btn" data-screen="wedstrijden" id="sgnCheckinBack">Dagboek</button>
           <button class="sgn-btn active" data-screen="checkin">Check-in</button>
         </div>
         <div class="card">
@@ -1412,7 +1427,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflectie', checkin: 'Reflectie', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Dagboek', checkin: 'Check-in', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
         sgnWedstrijden: 'Wedstrijden',
@@ -1559,9 +1574,34 @@
         vidNoHistory: 'Nog geen video\'s ingediend.',
         vidFeedbackLabel: 'Feedback van Fons',
         vidPending: 'Wacht op feedback',
+        djTypeTrain: 'Trainingsdag',
+        djTypeMatch: 'Wedstrijddag',
+        djDateLabel: 'Datum',
+        djSectionGeneral: 'Algemeen',
+        djSectionTraining: 'Training',
+        djSectionMatch: 'Wedstrijd',
+        djMoodLabel: 'Stemming & gevoel',
+        djEnergyLabel: 'Energie',
+        djFocusLabel: 'Focus & concentratie tijdens training',
+        djWorkedOnLabel: 'Waar heb je vandaag aan gewerkt?',
+        djWentWellLabel: 'Wat ging er goed (mentaal)?',
+        djChallengingLabel: 'Wat was uitdagend?',
+        djTakeawayLabel: 'Wat neem je mee naar de volgende training?',
+        djOpponentLabel: 'Tegenstander',
+        djScoreLabel: 'Score',
+        djMentalPerfLabel: 'Mentale performance',
+        djPressureLabel: 'Hoe ging je om met drukke momenten?',
+        djImproveLabel: 'Wat wil je de volgende keer verbeteren?',
+        djSave: 'Opslaan',
+        djSaveSuccess: 'Entry opgeslagen!',
+        djSaveFailed: 'Opslaan mislukt: ',
+        djHistoryTitle: 'Eerdere entries',
+        djNoHistory: 'Nog geen dagboekentries.',
+        djTrainingLabel: 'Training',
+        djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Reflect', checkin: 'Reflect', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Journal', checkin: 'Check-in', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
         sgnWedstrijden: 'Matches',
@@ -1708,6 +1748,31 @@
         vidNoHistory: 'No videos submitted yet.',
         vidFeedbackLabel: 'Feedback from Fons',
         vidPending: 'Awaiting feedback',
+        djTypeTrain: 'Training day',
+        djTypeMatch: 'Match day',
+        djDateLabel: 'Date',
+        djSectionGeneral: 'General',
+        djSectionTraining: 'Training',
+        djSectionMatch: 'Match',
+        djMoodLabel: 'Mood & feeling',
+        djEnergyLabel: 'Energy',
+        djFocusLabel: 'Focus & concentration during training',
+        djWorkedOnLabel: 'What did you work on today?',
+        djWentWellLabel: 'What went well (mentally)?',
+        djChallengingLabel: 'What was challenging?',
+        djTakeawayLabel: 'What do you take into the next session?',
+        djOpponentLabel: 'Opponent',
+        djScoreLabel: 'Score',
+        djMentalPerfLabel: 'Mental performance',
+        djPressureLabel: 'How did you handle pressure moments?',
+        djImproveLabel: 'What do you want to improve next time?',
+        djSave: 'Save entry',
+        djSaveSuccess: 'Entry saved!',
+        djSaveFailed: 'Save failed: ',
+        djHistoryTitle: 'Previous entries',
+        djNoHistory: 'No journal entries yet.',
+        djTrainingLabel: 'Training',
+        djMatchLabel: 'Match',
       },
     };
 
@@ -1778,7 +1843,7 @@
         loadLibrary(activeCategory);
       }
       if (document.getElementById('screen-wedstrijden').classList.contains('active')) {
-        loadMatchReflections();
+        loadJournal();
       }
       if (document.getElementById('screen-checkin').classList.contains('active')) {
         loadCheckin();
@@ -1851,34 +1916,7 @@
       });
     });
 
-    document.getElementById('matchForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const T = i18n[lang];
-      const messageEl = document.getElementById('matchMessage');
-      const payload = {
-        user_id: currentUser.id,
-        datum: document.getElementById('matchDatum').value,
-        tegenstander: document.getElementById('matchTegenstander').value.trim(),
-        score: document.getElementById('matchScore').value.trim() || null,
-        vraag1: document.getElementById('matchVraag1').value.trim(),
-        vraag2: document.getElementById('matchVraag2').value.trim(),
-        vraag3: document.getElementById('matchVraag3').value.trim(),
-      };
-
-      const { error } = await supabaseClient.from('match_reflections').insert(payload);
-      messageEl.classList.remove('hidden', 'error-msg', 'success-msg');
-
-      if (error) {
-        messageEl.classList.add('error-msg');
-        messageEl.textContent = T.saveFailed + error.message;
-        return;
-      }
-
-      messageEl.classList.add('success-msg');
-      messageEl.textContent = T.saveSuccess;
-      document.getElementById('matchForm').reset();
-      loadMatchReflections();
-    });
+    // journal submit wired up inside loadJournal()
 
     const screenNavGroup = {
       wedstrijden: 'reflectie', checkin: 'reflectie',
@@ -1910,7 +1948,7 @@
         loadLibrary(activeCategory);
       }
       if (name === 'wedstrijden') {
-        loadMatchReflections();
+        loadJournal();
       }
       if (name === 'checkin') {
         loadCheckin();
@@ -2254,45 +2292,261 @@
       }).join('');
     }
 
-    async function loadMatchReflections() {
+    function loadJournal() {
       const T = i18n[lang];
-      const list = document.getElementById('matchList');
+      const container = document.getElementById('dagboekContent');
+      const today = new Date().toISOString().split('T')[0];
+
+      function moodColor(v) {
+        return v >= 8 ? '#C8F135' : v >= 6 ? '#88BB44' : v >= 4 ? '#EEAA33' : '#EE4444';
+      }
+
+      container.innerHTML = `
+        <div class="card" style="margin-bottom:20px;">
+          <div class="dj-type-toggle">
+            <button class="dj-type-btn active" id="djTypeTrain">${T.djTypeTrain}</button>
+            <button class="dj-type-btn" id="djTypeMatch">${T.djTypeMatch}</button>
+          </div>
+
+          <div class="field">
+            <label>${T.djDateLabel}</label>
+            <input type="date" id="djDate" value="${today}" />
+          </div>
+
+          <span class="dj-section-label">${T.djSectionGeneral}</span>
+
+          <div class="slider-field">
+            <div class="slider-label">
+              <span>${T.djMoodLabel}</span>
+              <span class="slider-val" id="valDjMood">7</span>
+            </div>
+            <input type="range" min="1" max="10" value="7" id="djMood" />
+          </div>
+          <div class="slider-field">
+            <div class="slider-label">
+              <span>${T.djEnergyLabel}</span>
+              <span class="slider-val" id="valDjEnergy">7</span>
+            </div>
+            <input type="range" min="1" max="10" value="7" id="djEnergy" />
+          </div>
+
+          <!-- TRAINING FIELDS -->
+          <div id="djTrainFields">
+            <span class="dj-section-label">${T.djSectionTraining}</span>
+            <div class="slider-field">
+              <div class="slider-label">
+                <span>${T.djFocusLabel}</span>
+                <span class="slider-val" id="valDjFocus">7</span>
+              </div>
+              <input type="range" min="1" max="10" value="7" id="djFocus" />
+            </div>
+            <div class="field">
+              <label>${T.djWorkedOnLabel}</label>
+              <textarea id="djWorkedOn" style="min-height:80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>${T.djWentWellLabel}</label>
+              <textarea id="djWentWell" style="min-height:80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>${T.djChallengingLabel}</label>
+              <textarea id="djChallenging" style="min-height:80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>${T.djTakeawayLabel}</label>
+              <textarea id="djTakeaway" style="min-height:70px;"></textarea>
+            </div>
+          </div>
+
+          <!-- MATCH FIELDS -->
+          <div id="djMatchFields" style="display:none;">
+            <span class="dj-section-label">${T.djSectionMatch}</span>
+            <div class="field">
+              <label>${T.djOpponentLabel}</label>
+              <input type="text" id="djOpponent" />
+            </div>
+            <div class="field">
+              <label>${T.djScoreLabel}</label>
+              <input type="text" id="djScore" placeholder="bijv. 6-3 6-4" />
+            </div>
+            <div class="slider-field">
+              <div class="slider-label">
+                <span>${T.djMentalPerfLabel}</span>
+                <span class="slider-val" id="valDjMentalPerf">7</span>
+              </div>
+              <input type="range" min="1" max="10" value="7" id="djMentalPerf" />
+            </div>
+            <div class="field">
+              <label>${T.djPressureLabel}</label>
+              <textarea id="djPressure" style="min-height:80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>${T.djWentWellLabel}</label>
+              <textarea id="djMatchWentWell" style="min-height:80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>${T.djImproveLabel}</label>
+              <textarea id="djImprove" style="min-height:80px;"></textarea>
+            </div>
+          </div>
+
+          <button class="btn-accent" id="djSubmitBtn">${T.djSave}</button>
+          <p id="djMessage" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
+        </div>
+
+        <h4 style="font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#444;font-size:1rem;margin:0 0 10px;" id="djHistoryHeading">${T.djHistoryTitle}</h4>
+        <div id="djList"><div class="empty-state">${T.loading}</div></div>
+      `;
+
+      // Toggle training / match fields
+      let djType = 'training';
+      document.getElementById('djTypeTrain').addEventListener('click', () => {
+        djType = 'training';
+        document.getElementById('djTypeTrain').classList.add('active');
+        document.getElementById('djTypeMatch').classList.remove('active');
+        document.getElementById('djTrainFields').style.display = '';
+        document.getElementById('djMatchFields').style.display = 'none';
+      });
+      document.getElementById('djTypeMatch').addEventListener('click', () => {
+        djType = 'match';
+        document.getElementById('djTypeMatch').classList.add('active');
+        document.getElementById('djTypeTrain').classList.remove('active');
+        document.getElementById('djTrainFields').style.display = 'none';
+        document.getElementById('djMatchFields').style.display = '';
+      });
+
+      // Slider live values
+      ['djMood','djEnergy','djFocus','djMentalPerf'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', function() {
+          document.getElementById('val' + id.charAt(0).toUpperCase() + id.slice(1)).textContent = this.value;
+        });
+      });
+
+      // Submit
+      document.getElementById('djSubmitBtn').addEventListener('click', async () => {
+        const T = i18n[lang];
+        const msg = document.getElementById('djMessage');
+        const btn = document.getElementById('djSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = T.opdrachtSaving;
+
+        const payload = {
+          user_id: currentUser.id,
+          entry_date: document.getElementById('djDate').value,
+          type: djType,
+          mood: Number(document.getElementById('djMood').value),
+          energy: Number(document.getElementById('djEnergy').value),
+        };
+
+        if (djType === 'training') {
+          payload.mental_score  = Number(document.getElementById('djFocus').value);
+          payload.worked_on     = document.getElementById('djWorkedOn').value.trim() || null;
+          payload.went_well     = document.getElementById('djWentWell').value.trim() || null;
+          payload.challenging   = document.getElementById('djChallenging').value.trim() || null;
+          payload.takeaway      = document.getElementById('djTakeaway').value.trim() || null;
+        } else {
+          payload.opponent      = document.getElementById('djOpponent').value.trim() || null;
+          payload.match_score   = document.getElementById('djScore').value.trim() || null;
+          payload.mental_score  = Number(document.getElementById('djMentalPerf').value);
+          payload.pressure      = document.getElementById('djPressure').value.trim() || null;
+          payload.went_well     = document.getElementById('djMatchWentWell').value.trim() || null;
+          payload.improve       = document.getElementById('djImprove').value.trim() || null;
+        }
+
+        const { error } = await supabaseClient.from('daily_journal').insert(payload);
+        btn.disabled = false;
+        btn.textContent = T.djSave;
+        msg.classList.remove('hidden', 'error-msg', 'success-msg');
+
+        if (error) {
+          msg.classList.add('error-msg');
+          msg.textContent = T.djSaveFailed + error.message;
+          return;
+        }
+
+        msg.classList.add('success-msg');
+        msg.textContent = T.djSaveSuccess;
+        loadJournalHistory(T, moodColor);
+      });
+
+      loadJournalHistory(T, moodColor);
+    }
+
+    async function loadJournalHistory(T, moodColor) {
+      const list = document.getElementById('djList');
+      if (!list) return;
       list.innerHTML = `<div class="empty-state">${T.loading}</div>`;
 
-      const { data, error } = await supabaseClient
-        .from('match_reflections')
+      const { data } = await supabaseClient
+        .from('daily_journal')
         .select('*')
-        .order('datum', { ascending: false });
+        .eq('user_id', currentUser.id)
+        .order('entry_date', { ascending: false })
+        .limit(40);
 
-      if (error || !data || !data.length) {
-        list.innerHTML = `<div class="empty-state">${T.noReflections}</div>`;
+      if (!data || !data.length) {
+        list.innerHTML = `<div class="empty-state">${T.djNoHistory}</div>`;
         return;
       }
 
-      list.innerHTML = data.map((r, idx) => {
-        const dateStr = new Date(r.datum + 'T00:00:00').toLocaleDateString(lang === 'en' ? 'en-GB' : 'nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+      const isNL = lang === 'nl';
+      list.innerHTML = data.map((e, idx) => {
+        const dateStr = new Date(e.entry_date + 'T00:00:00').toLocaleDateString(isNL ? 'nl-NL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        const isMatch = e.type === 'match';
+        const badgeClass = isMatch ? 'dj-badge-match' : 'dj-badge-training';
+        const badgeLabel = isMatch ? T.djMatchLabel : T.djTrainingLabel;
+        const mc = moodColor(e.mood || 5);
+
+        const bodyParts = [];
+        if (e.worked_on)      bodyParts.push({ label: T.djWorkedOnLabel,   color: '#C8F135', text: e.worked_on });
+        if (e.went_well)      bodyParts.push({ label: T.djWentWellLabel,   color: '#C8F135', text: e.went_well });
+        if (e.challenging)    bodyParts.push({ label: T.djChallengingLabel, color: '#EEAA33', text: e.challenging });
+        if (e.takeaway)       bodyParts.push({ label: T.djTakeawayLabel,   color: '#3b82f6', text: e.takeaway });
+        if (e.pressure)       bodyParts.push({ label: T.djPressureLabel,   color: '#EEAA33', text: e.pressure });
+        if (e.improve)        bodyParts.push({ label: T.djImproveLabel,    color: '#a855f7', text: e.improve });
+
+        const bodyHtml = bodyParts.map(p => `
+          <div class="dj-field-group">
+            <span class="dj-q-label" style="color:${p.color};">${p.label}</span>
+            <p class="dj-q-text">${escapeHtml(p.text)}</p>
+          </div>`).join('') || `<p class="muted" style="font-size:0.84rem;">${isNL ? 'Geen aantekeningen.' : 'No notes.'}</p>`;
+
+        const scoreRow = isMatch && e.opponent
+          ? `<div style="font-size:0.78rem;color:#888;margin-top:1px;">${escapeHtml(e.opponent)}${e.match_score ? ' · ' + escapeHtml(e.match_score) : ''}</div>`
+          : '';
+
+        const mentalBadge = e.mental_score
+          ? `<div style="margin-left:auto;font-size:0.72rem;color:#555;">mentaal <span style="color:${moodColor(e.mental_score)};font-weight:700;">${e.mental_score}</span></div>`
+          : '';
+
         return `
-          <div class="match-card" id="mc-${idx}">
-            <div class="match-card-header" onclick="document.getElementById('mc-${idx}').classList.toggle('open')">
+          <div class="dj-card" id="djc-${idx}">
+            <div class="dj-card-header" onclick="document.getElementById('djc-${idx}').classList.toggle('open')">
+              <div class="dj-score-pill" style="background:${mc}20;color:${mc};">${e.mood || '?'}</div>
               <div style="flex:1;min-width:0;">
-                <div style="font-size:0.68rem;color:#444;margin-bottom:3px;">${dateStr}</div>
-                <div style="font-size:0.95rem;font-weight:700;color:#FFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.tegenstander)}</div>
-                ${r.score ? `<div style="font-size:0.78rem;color:#888;margin-top:2px;font-family:'Bebas Neue',cursive;letter-spacing:.05em;">${escapeHtml(r.score)}</div>` : ''}
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="dj-type-badge ${badgeClass}">${badgeLabel}</span>
+                  <span style="font-size:0.78rem;color:#555;">${dateStr}</span>
+                </div>
+                ${scoreRow}
               </div>
-              <svg class="match-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
+              ${mentalBadge}
+              <svg class="dj-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M6 9l6 6 6-6"/></svg>
             </div>
-            <div class="match-card-body">
-              <span class="match-q-label" style="color:#C8F135;">${T.wentWell}</span>
-              <p class="match-q-text">${escapeHtml(r.vraag1)}</p>
-              <span class="match-q-label" style="color:#3b82f6;">${T.improve}</span>
-              <p class="match-q-text">${escapeHtml(r.vraag2)}</p>
-              <span class="match-q-label" style="color:#a855f7;">${T.approach}</span>
-              <p class="match-q-text">${escapeHtml(r.vraag3)}</p>
+            <div class="dj-card-body">
+              <div style="display:flex;gap:16px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1A1A1A;">
+                ${[['Stemming', e.mood], [isNL ? 'Energie' : 'Energy', e.energy], [isNL ? 'Mentaal' : 'Mental', e.mental_score]].filter(x=>x[1]).map(x => `
+                  <div><div style="font-size:0.62rem;color:#444;font-weight:700;text-transform:uppercase;letter-spacing:.07em;">${x[0]}</div>
+                  <div style="font-size:1rem;font-weight:700;color:${moodColor(x[1])};">${x[1]}<span style="font-size:0.68rem;color:#333;">/10</span></div></div>`).join('')}
+              </div>
+              ${bodyHtml}
             </div>
           </div>`;
       }).join('');
-      // auto-open first card
-      document.getElementById('mc-0')?.classList.add('open');
+
+      // auto-open first
+      document.querySelector('.dj-card')?.classList.add('open');
     }
 
     // ── VOEDING ───────────────────────────────────────────
