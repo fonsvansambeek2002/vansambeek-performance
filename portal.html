@@ -1799,18 +1799,6 @@
         tab.textContent = T.tabs[tab.dataset.category];
       });
 
-      document.getElementById('matchFormTitle').textContent = T.matchTitle;
-      document.getElementById('labelDatum').textContent = T.date;
-      document.getElementById('labelTegenstander').textContent = T.opponent;
-      document.getElementById('matchTegenstander').placeholder = T.opponentPlaceholder;
-      document.getElementById('labelScore').textContent = T.score;
-      document.getElementById('matchScore').placeholder = T.scorePlaceholder;
-      document.getElementById('labelVraag1').textContent = T.q1;
-      document.getElementById('labelVraag2').textContent = T.q2;
-      document.getElementById('labelVraag3').textContent = T.q3;
-      document.getElementById('matchSubmitBtn').textContent = T.save;
-      document.getElementById('prevReflectionsTitle').textContent = T.prevReflections;
-
       const navKeys = { home: 'navHome', library: 'navContent', opdrachten: 'navOpdrachten', wedstrijden: 'navReflectie', planning: 'navTraject', klanten: 'navKlanten' };
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
         const key = navKeys[btn.dataset.screen];
