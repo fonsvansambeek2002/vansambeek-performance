@@ -1875,13 +1875,23 @@
       ['planning', 'video'],
     ];
     (function initSwipe() {
-      let tx = 0, ty = 0;
+      let tx = 0, ty = 0, ignore = false;
       const appMain = document.querySelector('.app-main');
+      // don't treat dragging a slider, typing, or scrolling a horizontal strip as a screen swipe
+      function startsOnInteractive(el) {
+        for (; el && el !== appMain; el = el.parentElement) {
+          if (el.matches('input, textarea, select, button, label, [contenteditable="true"]')) return true;
+          if (el.scrollWidth > el.clientWidth && /(auto|scroll)/.test(getComputedStyle(el).overflowX)) return true;
+        }
+        return false;
+      }
       appMain.addEventListener('touchstart', (e) => {
         tx = e.touches[0].clientX;
         ty = e.touches[0].clientY;
+        ignore = e.touches.length > 1 || startsOnInteractive(e.target);
       }, { passive: true });
       appMain.addEventListener('touchend', (e) => {
+        if (ignore) return;
         const dx = e.changedTouches[0].clientX - tx;
         const dy = e.changedTouches[0].clientY - ty;
         if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
@@ -3206,7 +3216,7 @@
         },
         {
           id: 'match',
-          name: isEN ? 'Between-point' : 'Tussenbal',
+          name: isEN ? 'Between-point' : 'Tussen punten',
           tag:   isEN ? 'On court · 4-6' : 'Op de baan · 4-6',
           color: '#f59e0b',
           textColor: '#0A0A0A',
@@ -4013,9 +4023,24 @@
       }
 
       function paymentRows(prog) {
-        const rows = byProg[prog.id] || [];
-        const name = prog.profiles?.full_name || 'Onbekend';
-        if (!rows.length) return `<p style="font-size:0.82rem;color:#555;padding:8px 0;">Geen betalingen gevonden.</p>`;
+        const rows  = byProg[prog.id] || [];
+        const name  = prog.profiles?.full_name || 'Onbekend';
+        const total = prog.total_weeks || 10;
+        const today = new Date().toISOString().split('T')[0];
+        const addForm = `
+          <div style="margin-top:14px;border-top:1px solid #111;padding-top:14px;">
+            <div style="font-size:0.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#444;margin-bottom:8px;">Betaling registreren</div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <select id="bpay-wk-${prog.id}" style="background:#111;border:1px solid #1A1A1A;border-radius:6px;color:#CCC;padding:7px 8px;font-size:0.8rem;">
+                ${Array.from({length: total}, (_, i) => `<option value="${i+1}">Week ${i+1}</option>`).join('')}
+              </select>
+              <input type="number" id="bpay-amt-${prog.id}" value="75" min="0" step="1" placeholder="€" style="background:#111;border:1px solid #1A1A1A;border-radius:6px;color:#CCC;padding:7px 8px;font-size:0.8rem;width:68px;" />
+              <input type="date" id="bpay-date-${prog.id}" value="${today}" style="background:#111;border:1px solid #1A1A1A;border-radius:6px;color:#CCC;padding:7px 8px;font-size:0.8rem;" />
+              <button onclick="beheerAddPayment('${prog.id}','${prog.user_id}',${total})" style="background:#22c55e18;border:1px solid #22c55e44;border-radius:6px;color:#22c55e;font-size:0.78rem;font-weight:700;padding:7px 12px;cursor:pointer;white-space:nowrap;">+ Registreer</button>
+            </div>
+            <div id="bpay-msg-${prog.id}" style="font-size:0.75rem;margin-top:5px;min-height:1.2em;"></div>
+          </div>`;
+        if (!rows.length) return `<p style="font-size:0.82rem;color:#555;padding:8px 0;">Nog geen betalingen geregistreerd.</p>${addForm}`;
         const paidTotal = rows.filter(r => r.status === 'paid').reduce((a, r) => a + Number(r.amount), 0);
         const totalAmt  = rows.reduce((a, r) => a + Number(r.amount), 0);
         return `
@@ -4023,7 +4048,7 @@
             <table style="width:100%;border-collapse:collapse;font-size:0.79rem;min-width:360px;">
               <thead><tr style="border-bottom:1px solid #1A1A1A;">
                 <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px 5px 0;">Wk</th>
-                <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;white-space:nowrap;">Vervaldatum</th>
+                <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;white-space:nowrap;">Datum</th>
                 <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;">Bedrag</th>
                 <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;">Status</th>
                 <th style="text-align:left;color:#444;font-weight:600;padding:5px 6px;">Actie</th>
@@ -4035,7 +4060,7 @@
                   const canPay     = p.status !== 'paid';
                   return `<tr style="border-bottom:1px solid #0D0D0D;${p.status==='overdue'?'background:#ef444406;':''}">
                     <td style="padding:7px 6px 7px 0;font-weight:700;color:${sc.color};">${p.week_number}</td>
-                    <td style="padding:7px 6px;color:#777;white-space:nowrap;">${formatDate(p.due_date)}</td>
+                    <td style="padding:7px 6px;color:#777;white-space:nowrap;">${p.paid_at ? formatDate(p.paid_at) : formatDate(p.due_date)}</td>
                     <td style="padding:7px 6px;color:#CCC;font-weight:600;">€${Number(p.amount).toFixed(0)}</td>
                     <td style="padding:7px 6px;">${badge(p.status)}</td>
                     <td style="padding:7px 6px;">
@@ -4054,6 +4079,7 @@
               </tr></tfoot>
             </table>
           </div>
+          ${addForm}
           <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
             <button onclick="beheerCopyInvoice('${escapeAttr(name)}','${escapeAttr(prog.start_date)}')" style="background:transparent;border:1px solid #1A1A1A;border-radius:8px;color:#888;font-size:0.78rem;padding:7px 12px;cursor:pointer;">📋 Kopieer factuurgegevens</button>
             <button onclick="beheerExtend('${prog.id}')" style="background:transparent;border:1px solid #3b82f633;border-radius:8px;color:#3b82f6;font-size:0.78rem;padding:7px 12px;cursor:pointer;">↻ Verleng 10 weken</button>
@@ -4106,15 +4132,30 @@
                   <div style="font-size:0.6rem;color:#444;margin-top:1px;">week</div>
                 </div>
               </div>
-              <div style="margin-top:10px;">
-                <div style="height:5px;background:#1A1A1A;border-radius:99px;overflow:hidden;">
-                  <div style="height:100%;width:${pct}%;background:${sc};border-radius:99px;"></div>
+              <div style="margin-top:12px;">
+                <div style="display:flex;gap:3px;margin-bottom:5px;">
+                  ${Array.from({length: total}, (_, i) => {
+                    const wn = i + 1;
+                    const row = rows.find(r => r.week_number === wn);
+                    const st  = row ? row.status : (wn <= week ? 'past' : 'future');
+                    const cfg = {
+                      paid:         { bg:'#22c55e',   border:'#22c55e',   label:'✓' },
+                      overdue:      { bg:'#ef444430',  border:'#ef4444',   label:'!' },
+                      invoice_sent: { bg:'#f59e0b25',  border:'#f59e0b',   label:'~' },
+                      past:         { bg:'#C8F13515',  border:'#C8F13540', label: String(wn) },
+                      future:       { bg:'#111',       border:'#1A1A1A',   label: String(wn) },
+                      pending:      { bg:'#C8F13515',  border:'#C8F13540', label: String(wn) },
+                    }[st] || { bg:'#111', border:'#1A1A1A', label: String(wn) };
+                    const isNow = wn === Math.min(week, total);
+                    const txtColor = st==='paid'?'#22c55e': st==='overdue'?'#ef4444': isNow?'#C8F135':'#333';
+                    return `<div title="Week ${wn}: ${st}" style="flex:1;min-width:0;height:28px;border-radius:4px;background:${cfg.bg};border:1px solid ${cfg.border};display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:700;color:${txtColor};${isNow?'box-shadow:0 0 0 1.5px #C8F135;':''}">${cfg.label}</div>`;
+                  }).join('')}
                 </div>
-                <div style="display:flex;justify-content:space-between;margin-top:4px;">
-                  <span style="font-size:0.65rem;color:#444;">${paidCnt}/${total} betaald</span>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="font-size:0.62rem;color:#444;">${paidCnt}/${total} betaald · week ${Math.min(week,total)} actief</span>
                   ${nextDue
-                    ? `<span style="font-size:0.65rem;color:${nextDue.status==='overdue'?'#ef4444':'#666'};">Volgende: ${formatDate(nextDue.due_date)}</span>`
-                    : `<span style="font-size:0.65rem;color:#22c55e;">Alles ontvangen ✓</span>`}
+                    ? `<span style="font-size:0.62rem;color:${nextDue.status==='overdue'?'#ef4444':'#555'};">Volgende: ${formatDate(nextDue.due_date)}</span>`
+                    : `<span style="font-size:0.62rem;color:#22c55e;">Alles ontvangen ✓</span>`}
                 </div>
               </div>
               <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">
@@ -4406,6 +4447,34 @@
       const { error } = await supabaseClient.from('payments')
         .update({ status: 'paid', paid_at: today }).eq('id', payId);
       if (!error) loadBeheer(); else alert('Fout: ' + error.message);
+    }
+
+    async function beheerAddPayment(progId, userId, totalWeeks) {
+      const weekEl  = document.getElementById(`bpay-wk-${progId}`);
+      const amtEl   = document.getElementById(`bpay-amt-${progId}`);
+      const dateEl  = document.getElementById(`bpay-date-${progId}`);
+      const msgEl   = document.getElementById(`bpay-msg-${progId}`);
+      const week    = parseInt(weekEl?.value);
+      const amount  = parseFloat(amtEl?.value);
+      const date    = dateEl?.value;
+      if (!week || !amount || !date) {
+        if (msgEl) { msgEl.style.color = '#ef4444'; msgEl.textContent = 'Vul alle velden in.'; }
+        return;
+      }
+      const { data: existing } = await supabaseClient.from('payments')
+        .select('id').eq('program_id', progId).eq('week_number', week).maybeSingle();
+      let error;
+      if (existing) {
+        ({ error } = await supabaseClient.from('payments')
+          .update({ status: 'paid', paid_at: date, amount }).eq('id', existing.id));
+      } else {
+        ({ error } = await supabaseClient.from('payments')
+          .insert({ program_id: progId, user_id: userId, week_number: week, amount, due_date: date, status: 'paid', paid_at: date }));
+      }
+      if (msgEl) {
+        if (error) { msgEl.style.color = '#ef4444'; msgEl.textContent = 'Fout: ' + error.message; }
+        else        { msgEl.style.color = '#22c55e'; msgEl.textContent = '✓ Betaling opgeslagen!'; setTimeout(() => loadBeheer(), 700); }
+      }
     }
 
     async function beheerMarkComplete(progId) {

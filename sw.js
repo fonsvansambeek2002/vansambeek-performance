@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vsp-portal-v24';
+const CACHE_NAME = 'vsp-portal-v26';
 const PRECACHE_URLS = [
   '/',
   'index.html',
