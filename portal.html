@@ -1175,9 +1175,12 @@
           <button class="tab" data-category="voeding">Voeding</button>
           <button class="tab" data-category="fysiek">Fysiek</button>
           <button class="tab" data-category="highlights">Highlights</button>
-          <button class="tab" data-category="podcasts">Podcasts</button>
         </div>
         <div id="libraryList"></div>
+      </section>
+
+      <section class="screen" id="screen-media">
+        <div id="mediaContent"></div>
       </section>
 
       <section class="screen" id="screen-wedstrijden">
@@ -1403,6 +1406,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M18 4v16"/></svg>
         <span id="navContent">Content</span>
       </button>
+      <button class="nav-btn" data-screen="media">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>
+        <span id="navMedia">Media</span>
+      </button>
       <button class="nav-btn" data-screen="opdrachten">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         <span id="navOpdrachten">Opdrachten</span>
@@ -1427,7 +1434,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Dagboek', checkin: 'Check-in', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Content', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
         sgnWedstrijden: 'Wedstrijden',
@@ -1475,6 +1482,7 @@
         approach: 'Aanpak:',
         navHome: 'Home',
         navContent: 'Content',
+        navMedia: 'Media',
         navMatches: 'Wedstrijden',
         navCheckin: 'Check-in',
         navHighlights: 'Highlights',
@@ -1601,7 +1609,7 @@
         djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Content', wedstrijden: 'Journal', checkin: 'Check-in', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Content', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
         sgnWedstrijden: 'Matches',
@@ -1649,6 +1657,7 @@
         approach: 'Approach:',
         navHome: 'Home',
         navContent: 'Content',
+        navMedia: 'Media',
         navMatches: 'Matches',
         navCheckin: 'Check-in',
         navHighlights: 'Highlights',
@@ -1799,7 +1808,7 @@
         tab.textContent = T.tabs[tab.dataset.category];
       });
 
-      const navKeys = { home: 'navHome', library: 'navContent', opdrachten: 'navOpdrachten', wedstrijden: 'navReflectie', planning: 'navTraject', klanten: 'navKlanten' };
+      const navKeys = { home: 'navHome', library: 'navContent', media: 'navMedia', opdrachten: 'navOpdrachten', wedstrijden: 'navReflectie', planning: 'navTraject', klanten: 'navKlanten' };
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
         const key = navKeys[btn.dataset.screen];
         if (key) btn.querySelector('span').textContent = T[key];
@@ -1838,6 +1847,9 @@
       }
       if (document.getElementById('screen-opdrachten').classList.contains('active')) {
         loadOpdrachten();
+      }
+      if (document.getElementById('screen-media').classList.contains('active')) {
+        loadMedia();
       }
       if (document.getElementById('screen-planning').classList.contains('active')) {
         planLoaded = false;
@@ -1953,6 +1965,9 @@
       }
       if (name === 'opdrachten') {
         loadOpdrachten();
+      }
+      if (name === 'media') {
+        loadMedia();
       }
       if (name === 'klanten') {
         switchKlScreen('overzicht');
@@ -2245,10 +2260,6 @@
         return;
       }
 
-      if (category === 'podcasts') {
-        loadPodcasts(list);
-        return;
-      }
 
       if (category === 'voeding') {
         loadVoedingSection(list);
@@ -5546,7 +5557,7 @@
       { id:'nl',      nl:'🇳🇱 Nederlands',        en:'🇳🇱 Dutch' },
     ];
 
-    const mediaState = { topic: 'all', type: 'all', q: '', open: null };
+    const mediaState = { topic: 'all', type: 'all', q: '' };
 
     function mediaDoneGet() {
       try { return new Set(JSON.parse(localStorage.getItem('vsp-media-done') || '[]')); } catch (e) { return new Set(); }
@@ -5555,6 +5566,7 @@
       try { localStorage.setItem('vsp-media-done', JSON.stringify([...set])); } catch (e) {}
     }
 
+    function mediaKey(m) { return m.type + ':' + m.id; }
     function mediaThumb(m) {
       return m.type === 'yt' ? `https://i.ytimg.com/vi/${m.id}/hqdefault.jpg` : `https://i.scdn.co/image/${m.img}`;
     }
@@ -5564,15 +5576,49 @@
     function mediaEmbed(m) {
       if (m.type === 'yt') {
         return `<div style="position:relative;aspect-ratio:16/9;background:#000;">
-          <iframe src="https://www.youtube-nocookie.com/embed/${m.id}?autoplay=1&rel=0" title="${escapeAttr(m.t[0])}" frameborder="0"
+          <iframe src="https://www.youtube-nocookie.com/embed/${m.id}?autoplay=1&rel=0&playsinline=1" title="${escapeAttr(m.t[0])}" frameborder="0"
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen
             style="position:absolute;inset:0;width:100%;height:100%;display:block;"></iframe></div>`;
       }
-      return `<iframe src="https://open.spotify.com/embed/episode/${m.id}" width="100%" height="152" frameborder="0"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="display:block;"></iframe>`;
+      return `<iframe src="https://open.spotify.com/embed/episode/${m.id}" width="100%" height="232" frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="display:block;border-radius:12px;"></iframe>`;
     }
 
-    function loadPodcasts(container) {
+    function mediaMatches(m) {
+      const L = lang === 'en' ? 1 : 0;
+      const q = mediaState.q.trim().toLowerCase();
+      return (mediaState.type === 'all' || m.type === mediaState.type) &&
+        (mediaState.topic === 'all' || m.c.includes(mediaState.topic)) &&
+        (!q || [m.t[0], m.t[1], m.d[L], m.show].join(' ').toLowerCase().includes(q));
+    }
+
+    // One card. Videos are 16:9, podcasts square; `wide` = fixed width for horizontal rows.
+    function mediaCard(m, wide) {
+      const L = lang === 'en' ? 1 : 0;
+      const isYt = m.type === 'yt';
+      const done = mediaDoneGet().has(mediaKey(m));
+      const accent = isYt ? '#ef4444' : '#1DB954';
+      const w = wide ? (isYt ? 'width:220px;flex-shrink:0;' : 'width:140px;flex-shrink:0;') : 'min-width:0;';
+      return `
+        <div onclick="mediaOpen('${mediaKey(m)}')" style="${w}cursor:pointer;">
+          <div style="position:relative;aspect-ratio:${isYt ? '16/9' : '1/1'};border-radius:12px;overflow:hidden;background:#111 url('${mediaThumb(m)}') center/cover;border:1px solid #1A1A1A;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,#000a);"></div>
+            <div style="position:absolute;left:8px;bottom:8px;display:flex;align-items:center;gap:5px;background:#000b;border-radius:999px;padding:3px 8px 3px 5px;">
+              <span style="width:14px;height:14px;border-radius:50%;background:${accent};display:flex;align-items:center;justify-content:center;">
+                <svg viewBox="0 0 24 24" width="8" height="8" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span style="font-size:0.6rem;font-weight:700;color:#fff;letter-spacing:.03em;">${isYt ? 'VIDEO' : 'PODCAST'}</span>
+            </div>
+            ${done ? `<div style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:#C8F135;color:#0A0A0A;font-size:0.75rem;font-weight:900;display:flex;align-items:center;justify-content:center;">✓</div>` : ''}
+          </div>
+          <div style="font-size:0.8rem;font-weight:700;color:${done ? '#777' : '#DDD'};line-height:1.3;margin-top:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(m.t[L])}</div>
+          <div style="font-size:0.68rem;color:#555;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(m.show)}</div>
+        </div>`;
+    }
+
+    function loadMedia() {
+      const container = document.getElementById('mediaContent');
+      if (!container) return;
       const isEN = lang === 'en';
       const L = isEN ? 1 : 0;
       const done = mediaDoneGet();
@@ -5580,186 +5626,185 @@
       const nVid = mediaLibrary.filter(m => m.type === 'yt').length;
       const featured = mediaLibrary.find(m => m.featured);
 
-      const chip = (active) => `flex-shrink:0;background:${active?'#C8F135':'transparent'};border:1px solid ${active?'#C8F135':'#1A1A1A'};border-radius:999px;color:${active?'#0A0A0A':'#777'};font-family:Inter,sans-serif;font-size:0.8rem;font-weight:700;padding:7px 14px;cursor:pointer;white-space:nowrap;`;
-
       container.innerHTML = `
-        <h3 style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:.05em;color:#fff;margin-bottom:4px;">${isEN?'Listen & Watch':'Luisteren & Kijken'}</h3>
-        <p style="font-size:0.85rem;color:#666;line-height:1.65;margin-bottom:14px;">${isEN
-          ?'Hand-picked podcasts and videos on the mental game, from tennis legends to sport psychologists.'
-          :'Handgeselecteerde podcasts en video\'s over de mentale kant van sport, van tennislegendes tot sportpsychologen.'}</p>
-
-        <div style="display:flex;gap:8px;margin-bottom:16px;">
-          ${[[nPod, isEN?'podcasts':'podcasts', '#1DB954'], [nVid, isEN?'videos':'video\'s', '#ef4444'], [`<span id="mediaDoneCount">${done.size}</span>`, isEN?'finished':'afgerond', '#C8F135']].map(([n, l, c]) => `
-            <div style="flex:1;border:1px solid #1A1A1A;border-radius:12px;padding:10px 12px;">
-              <div style="font-size:1.15rem;font-weight:800;color:${c};line-height:1;">${n}</div>
-              <div style="font-size:0.68rem;color:#555;margin-top:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;">${l}</div>
-            </div>`).join('')}
-        </div>
+        <p style="font-size:0.85rem;color:#666;line-height:1.6;margin:0 0 14px;">${isEN
+          ? 'Hand-picked podcasts and videos on the mental game. Tap one to start.'
+          : 'Handgeselecteerde podcasts en video\'s over de mentale kant van sport. Tik er een aan om te starten.'}</p>
 
         ${featured ? `
-        <div style="border:1px solid #C8F13533;border-radius:16px;overflow:hidden;margin-bottom:20px;background:#C8F13506;">
-          <div id="mediaFeatured" onclick="mediaPlayFeatured()" style="position:relative;aspect-ratio:16/9;cursor:pointer;background:#000 url('${mediaThumb(featured)}') center/cover;">
-            <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,#000c);"></div>
-            <div style="position:absolute;top:10px;left:10px;background:#C8F135;color:#0A0A0A;font-size:0.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 10px;">${isEN?'Start here':'Start hier'}</div>
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;background:#C8F135;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px #0008;">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="#0A0A0A"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-            <div style="position:absolute;left:14px;right:14px;bottom:12px;">
-              <div style="font-size:1rem;font-weight:800;color:#fff;line-height:1.3;">${escapeHtml(featured.t[L])}</div>
-              <div style="font-size:0.72rem;color:#C8F135;font-weight:600;margin-top:3px;">${escapeHtml(featured.show)}</div>
-            </div>
+        <div onclick="mediaOpen('${mediaKey(featured)}')" style="position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;cursor:pointer;margin-bottom:16px;background:#000 url('${mediaThumb(featured)}') center/cover;border:1px solid #C8F13533;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,#000d);"></div>
+          <div style="position:absolute;top:10px;left:10px;background:#C8F135;color:#0A0A0A;font-size:0.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 10px;">${isEN ? 'Start here' : 'Start hier'}</div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:#C8F135;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px #0008;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#0A0A0A"><path d="M8 5v14l11-7z"/></svg>
           </div>
-          <div style="padding:12px 14px;font-size:0.82rem;color:#888;line-height:1.6;">${escapeHtml(featured.d[L])}</div>
+          <div style="position:absolute;left:14px;right:14px;bottom:12px;">
+            <div style="font-size:1rem;font-weight:800;color:#fff;line-height:1.3;">${escapeHtml(featured.t[L])}</div>
+            <div style="font-size:0.72rem;color:#C8F135;font-weight:600;margin-top:3px;">${escapeHtml(featured.show)}</div>
+          </div>
         </div>` : ''}
+
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          ${[['all', isEN ? 'All' : 'Alles', mediaLibrary.length], ['sp', '🎧 Podcasts', nPod], ['yt', isEN ? '▶ Videos' : '▶ Video\'s', nVid]].map(([id, label, n]) => `
+            <button data-mtype="${id}" onclick="mediaSetType('${id}')" style="flex:1;border-radius:10px;padding:9px 4px;font-family:Inter,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;"
+              >${label} <span style="opacity:.6;font-weight:600;">${n}</span></button>`).join('')}
+        </div>
 
         <div style="position:relative;margin-bottom:12px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" width="16" height="16" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input id="mediaSearch" type="search" placeholder="${isEN?'Search player, topic or show…':'Zoek speler, onderwerp of podcast…'}" value="${escapeAttr(mediaState.q)}"
-            style="width:100%;box-sizing:border-box;background:#111;border:1px solid #1A1A1A;border-radius:10px;color:#DDD;padding:10px 12px 10px 36px;font-size:0.88rem;font-family:Inter,sans-serif;" />
+          <input id="mediaSearch" type="search" placeholder="${isEN ? 'Search player, topic or show…' : 'Zoek speler, onderwerp of podcast…'}" value="${escapeAttr(mediaState.q)}"
+            style="width:100%;box-sizing:border-box;background:#111;border:1px solid #1A1A1A;border-radius:10px;color:#DDD;padding:10px 12px 10px 36px;font-size:16px;font-family:Inter,sans-serif;" />
         </div>
 
-        <div style="display:flex;background:#111;border:1px solid #1A1A1A;border-radius:10px;padding:3px;margin-bottom:10px;">
-          ${[['all', isEN?'All':'Alles'], ['sp', '🎧 Podcasts'], ['yt', isEN?'▶ Videos':'▶ Video\'s']].map(([id, label]) => `
-            <button data-mtype="${id}" onclick="mediaSetType('${id}')" style="flex:1;border:none;border-radius:8px;padding:8px 6px;font-family:Inter,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;background:${mediaState.type===id?'#222':'transparent'};color:${mediaState.type===id?'#fff':'#666'};">${label}</button>`).join('')}
-        </div>
-
-        <div style="display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;">
-          ${mediaTopics.map(tp => `<button data-mtopic="${tp.id}" onclick="mediaSetTopic('${tp.id}')" style="${chip(mediaState.topic===tp.id)}">${tp[isEN?'en':'nl']}</button>`).join('')}
+        <div style="display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;">
+          ${mediaTopics.map(tp => `<button data-mtopic="${tp.id}" onclick="mediaSetTopic('${tp.id}')">${tp[isEN ? 'en' : 'nl']}</button>`).join('')}
         </div>
 
         <div id="mediaList"></div>
+        <div style="font-size:0.72rem;color:#444;text-align:center;margin:18px 0 8px;">${done.size ? `✓ ${done.size} ${isEN ? 'finished' : 'afgerond'}` : ''}</div>
       `;
 
-      container._chip = chip;
       document.getElementById('mediaSearch').addEventListener('input', (e) => {
         mediaState.q = e.target.value;
-        mediaState.open = null;
         renderMediaList();
       });
+      mediaStyleControls();
       renderMediaList();
+    }
+
+    function mediaStyleControls() {
+      document.querySelectorAll('[data-mtype]').forEach(b => {
+        const a = b.dataset.mtype === mediaState.type;
+        b.style.background = a ? '#C8F135' : '#111';
+        b.style.border = '1px solid ' + (a ? '#C8F135' : '#1A1A1A');
+        b.style.color = a ? '#0A0A0A' : '#888';
+      });
+      document.querySelectorAll('[data-mtopic]').forEach(b => {
+        const a = b.dataset.mtopic === mediaState.topic;
+        b.setAttribute('style', `flex-shrink:0;background:${a ? '#fff' : 'transparent'};border:1px solid ${a ? '#fff' : '#1A1A1A'};border-radius:999px;color:${a ? '#0A0A0A' : '#777'};font-family:Inter,sans-serif;font-size:0.78rem;font-weight:700;padding:6px 13px;cursor:pointer;white-space:nowrap;`);
+      });
     }
 
     function renderMediaList() {
       const list = document.getElementById('mediaList');
       if (!list) return;
       const isEN = lang === 'en';
-      const L = isEN ? 1 : 0;
-      const done = mediaDoneGet();
-      const q = mediaState.q.trim().toLowerCase();
+      const browsing = mediaState.topic === 'all' && !mediaState.q.trim();
 
-      const items = mediaLibrary.filter(m =>
-        !m.featured &&
-        (mediaState.type === 'all' || m.type === mediaState.type) &&
-        (mediaState.topic === 'all' || m.c.includes(mediaState.topic)) &&
-        (!q || [m.t[0], m.t[1], m.d[L], m.show].join(' ').toLowerCase().includes(q))
-      );
-      // feature item still findable through search/filters, just not duplicated in "all"
-      const feat = mediaLibrary.find(m => m.featured);
-      if (feat && (mediaState.topic !== 'all' || q || mediaState.type !== 'all') &&
-          (mediaState.type === 'all' || feat.type === mediaState.type) &&
-          (mediaState.topic === 'all' || feat.c.includes(mediaState.topic)) &&
-          (!q || [feat.t[0], feat.t[1], feat.d[L], feat.show].join(' ').toLowerCase().includes(q))) {
-        items.unshift(feat);
-      }
-
-      if (!items.length) {
-        list.innerHTML = `<div class="empty-state">${isEN?'Nothing found. Try another search or topic.':'Niets gevonden. Probeer een andere zoekterm of categorie.'}</div>`;
+      // Overview: one horizontal row per topic
+      if (browsing) {
+        list.innerHTML = mediaTopics.filter(tp => tp.id !== 'all').map(tp => {
+          const items = mediaLibrary.filter(m => m.c.includes(tp.id) && (mediaState.type === 'all' || m.type === mediaState.type));
+          if (!items.length) return '';
+          // videos first within a row so the row starts visually strong
+          items.sort((a, b) => (a.type === b.type ? 0 : a.type === 'yt' ? -1 : 1));
+          return `
+            <div style="margin-bottom:22px;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+                <div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;letter-spacing:.05em;color:#fff;">${tp[isEN ? 'en' : 'nl']} <span style="font-family:Inter,sans-serif;font-size:0.7rem;color:#444;letter-spacing:0;">${items.length}</span></div>
+                <button onclick="mediaSetTopic('${tp.id}')" style="background:none;border:none;color:#C8F135;font-size:0.75rem;font-weight:700;cursor:pointer;padding:4px 0;">${isEN ? 'See all →' : 'Bekijk alles →'}</button>
+              </div>
+              <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;align-items:flex-start;">
+                ${items.map(m => mediaCard(m, true)).join('')}
+              </div>
+            </div>`;
+        }).join('');
         return;
       }
 
-      const topicLabel = (id) => { const tp = mediaTopics.find(x => x.id === id); return tp ? tp[isEN?'en':'nl'] : id; };
-
-      list.innerHTML = `
-        <div style="font-size:0.7rem;color:#444;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">${items.length} ${isEN?'results':'resultaten'}</div>
-        ${items.map(m => {
-          const key = m.type + ':' + m.id;
-          const isDone = done.has(key);
-          const isOpen = mediaState.open === key;
-          const isYt = m.type === 'yt';
-          const accent = isYt ? '#ef4444' : '#1DB954';
-          const thumbStyle = isYt
-            ? 'width:112px;aspect-ratio:16/9;border-radius:8px;'
-            : 'width:64px;height:64px;border-radius:10px;';
-          return `
-          <div style="border:1px solid ${isOpen?'#2a2a2a':'#1A1A1A'};border-radius:14px;overflow:hidden;margin-bottom:10px;background:${isOpen?'#0E0E0E':'transparent'};">
-            <div style="display:flex;gap:12px;padding:12px;cursor:pointer;user-select:none;" onclick="mediaToggle('${key}')">
-              <div style="position:relative;flex-shrink:0;${thumbStyle}background:#111 url('${mediaThumb(m)}') center/cover;${isDone?'opacity:.55;':''}">
-                <div style="position:absolute;bottom:4px;right:4px;width:20px;height:20px;border-radius:50%;background:${accent};display:flex;align-items:center;justify-content:center;">
-                  ${isYt
-                    ? `<svg viewBox="0 0 24 24" width="10" height="10" fill="#fff"><path d="M8 5v14l11-7z"/></svg>`
-                    : `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#000" stroke-width="2.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1v-6h3zM3 19a2 2 0 002 2h1v-6H3z"/></svg>`}
-                </div>
-              </div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:0.88rem;font-weight:700;color:${isDone?'#777':'#DDD'};line-height:1.35;">${isDone?'<span style="color:#C8F135;">✓ </span>':''}${escapeHtml(m.t[L])}</div>
-                <div style="font-size:0.7rem;color:${accent};font-weight:600;margin-top:3px;">${escapeHtml(m.show)}</div>
-                <div style="font-size:0.78rem;color:#666;margin-top:4px;line-height:1.5;${isOpen?'':'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;'}">${escapeHtml(m.d[L])}</div>
-              </div>
-            </div>
-            ${isOpen ? `
-              <div style="border-top:1px solid #151515;">
-                ${mediaEmbed(m)}
-                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;">
-                  <button onclick="mediaToggleDone('${key}')" style="background:${isDone?'#C8F13518':'transparent'};border:1px solid ${isDone?'#C8F13555':'#2a2a2a'};border-radius:8px;color:${isDone?'#C8F135':'#999'};font-size:0.78rem;font-weight:700;padding:7px 12px;cursor:pointer;">
-                    ${isDone ? (isEN?'✓ Finished':'✓ Afgerond') : (isEN?'Mark as finished':'Markeer als afgerond')}
-                  </button>
-                  <a href="${mediaLink(m)}" target="_blank" rel="noopener" style="color:${accent};font-size:0.78rem;font-weight:700;text-decoration:none;padding:7px 4px;">
-                    ${isYt ? (isEN?'Open in YouTube ↗':'Openen in YouTube ↗') : (isEN?'Open in Spotify ↗':'Openen in Spotify ↗')}
-                  </a>
-                  <div style="flex-basis:100%;display:flex;gap:5px;flex-wrap:wrap;">
-                    ${m.c.map(c => `<span style="font-size:0.65rem;color:#666;border:1px solid #1A1A1A;border-radius:999px;padding:2px 8px;">${topicLabel(c)}</span>`).join('')}
-                  </div>
-                </div>
-              </div>` : ''}
-          </div>`;
-        }).join('')}
-      `;
+      // Filtered: grid of all matches
+      const items = mediaLibrary.filter(mediaMatches);
+      if (!items.length) {
+        list.innerHTML = `<div class="empty-state">${isEN ? 'Nothing found. Try another search or topic.' : 'Niets gevonden. Probeer een andere zoekterm of categorie.'}</div>`;
+        return;
+      }
+      const vids = items.filter(m => m.type === 'yt');
+      const pods = items.filter(m => m.type === 'sp');
+      const block = (title, arr, cols) => arr.length ? `
+        <div style="font-size:0.7rem;color:#555;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:4px 0 10px;">${title} · ${arr.length}</div>
+        <div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:14px 12px;margin-bottom:22px;">
+          ${arr.map(m => mediaCard(m, false)).join('')}
+        </div>` : '';
+      list.innerHTML = block(isEN ? 'Videos' : 'Video\'s', vids, 2) + block('Podcasts', pods, 3);
     }
 
     function mediaSetType(type) {
       mediaState.type = type;
-      mediaState.open = null;
-      document.querySelectorAll('[data-mtype]').forEach(b => {
-        const a = b.dataset.mtype === type;
-        b.style.background = a ? '#222' : 'transparent';
-        b.style.color = a ? '#fff' : '#666';
-      });
+      mediaStyleControls();
       renderMediaList();
     }
 
     function mediaSetTopic(topic) {
       mediaState.topic = topic;
-      mediaState.open = null;
-      const chip = document.getElementById('libraryList')?._chip;
-      document.querySelectorAll('[data-mtopic]').forEach(b => {
-        if (chip) b.setAttribute('style', chip(b.dataset.mtopic === topic));
-      });
+      mediaStyleControls();
       renderMediaList();
+      const strip = document.querySelector(`[data-mtopic="${topic}"]`);
+      if (strip) strip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
     }
 
-    function mediaToggle(key) {
-      mediaState.open = mediaState.open === key ? null : key;
-      renderMediaList();
+    // Bottom-sheet player
+    function mediaOpen(key) {
+      const m = mediaLibrary.find(x => mediaKey(x) === key);
+      if (!m) return;
+      mediaClose();
+      const isEN = lang === 'en';
+      const L = isEN ? 1 : 0;
+      const isYt = m.type === 'yt';
+      const accent = isYt ? '#ef4444' : '#1DB954';
+      const isDone = mediaDoneGet().has(key);
+      const topicLabel = (id) => { const tp = mediaTopics.find(x => x.id === id); return tp ? tp[isEN ? 'en' : 'nl'] : id; };
+
+      const sheet = document.createElement('div');
+      sheet.id = 'mediaSheet';
+      sheet.style.cssText = 'position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;background:#000c;';
+      sheet.innerHTML = `
+        <div style="width:100%;max-width:640px;max-height:92vh;overflow-y:auto;background:#0E0E0E;border:1px solid #1A1A1A;border-bottom:none;border-radius:18px 18px 0 0;padding:14px 16px max(18px, env(safe-area-inset-bottom));box-sizing:border-box;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:0.68rem;font-weight:800;letter-spacing:.06em;color:${accent};">${isYt ? '▶ VIDEO' : '🎧 PODCAST'}</span>
+            <button onclick="mediaClose()" aria-label="Sluiten" style="background:#1A1A1A;border:none;border-radius:50%;width:32px;height:32px;color:#AAA;font-size:1rem;cursor:pointer;">✕</button>
+          </div>
+          <div style="border-radius:12px;overflow:hidden;">${mediaEmbed(m)}</div>
+          <div style="font-size:1.02rem;font-weight:800;color:#fff;line-height:1.35;margin-top:14px;">${escapeHtml(m.t[L])}</div>
+          <div style="font-size:0.75rem;color:${accent};font-weight:600;margin-top:4px;">${escapeHtml(m.show)}</div>
+          <div style="font-size:0.85rem;color:#888;line-height:1.6;margin-top:10px;">${escapeHtml(m.d[L])}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">
+            ${m.c.map(c => `<span style="font-size:0.65rem;color:#666;border:1px solid #1A1A1A;border-radius:999px;padding:2px 8px;">${topicLabel(c)}</span>`).join('')}
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button id="mediaDoneBtn" onclick="mediaToggleDone('${key}')" style="flex:1;border-radius:10px;padding:11px;font-size:0.82rem;font-weight:700;cursor:pointer;"></button>
+            <a href="${mediaLink(m)}" target="_blank" rel="noopener" style="flex:1;text-align:center;border:1px solid ${accent}55;border-radius:10px;padding:11px;color:${accent};font-size:0.82rem;font-weight:700;text-decoration:none;">
+              ${isYt ? 'YouTube ↗' : 'Spotify ↗'}
+            </a>
+          </div>
+        </div>`;
+      sheet.addEventListener('click', (e) => { if (e.target === sheet) mediaClose(); });
+      document.body.appendChild(sheet);
+      document.body.style.overflow = 'hidden';
+      mediaStyleDoneBtn(isDone);
+    }
+
+    function mediaStyleDoneBtn(isDone) {
+      const b = document.getElementById('mediaDoneBtn');
+      if (!b) return;
+      const isEN = lang === 'en';
+      b.textContent = isDone ? (isEN ? '✓ Finished' : '✓ Afgerond') : (isEN ? 'Mark as finished' : 'Markeer als afgerond');
+      b.style.background = isDone ? '#C8F135' : 'transparent';
+      b.style.border = '1px solid ' + (isDone ? '#C8F135' : '#2a2a2a');
+      b.style.color = isDone ? '#0A0A0A' : '#AAA';
+    }
+
+    function mediaClose() {
+      const s = document.getElementById('mediaSheet');
+      if (s) s.remove(); // removing the iframe also stops playback
+      document.body.style.overflow = '';
     }
 
     function mediaToggleDone(key) {
       const done = mediaDoneGet();
       if (done.has(key)) done.delete(key); else done.add(key);
       mediaDoneSet(done);
-      const c = document.getElementById('mediaDoneCount');
-      if (c) c.textContent = done.size;
+      mediaStyleDoneBtn(done.has(key));
       renderMediaList();
-    }
-
-    function mediaPlayFeatured() {
-      const m = mediaLibrary.find(x => x.featured);
-      const box = document.getElementById('mediaFeatured');
-      if (!m || !box) return;
-      box.removeAttribute('onclick');
-      box.style.cursor = 'default';
-      box.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${m.id}?autoplay=1&rel=0" title="${escapeAttr(m.t[0])}" frameborder="0"
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen
-        style="position:absolute;inset:0;width:100%;height:100%;display:block;"></iframe>`;
     }
 
     // ── HIGHLIGHTS ────────────────────────────────────────
@@ -6089,7 +6134,21 @@
     })();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      // Check for a new version on load and whenever the app comes back to the foreground;
+      // reload once when a new service worker takes over so the latest portal is shown.
+      const hadController = !!navigator.serviceWorker.controller;
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController || reloaded) return;
+        reloaded = true;
+        location.reload();
+      });
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+        reg.update().catch(() => {});
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update().catch(() => {});
+        });
+      }).catch(() => {});
     }
 
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;

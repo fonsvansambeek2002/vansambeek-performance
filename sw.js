@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vsp-portal-v27';
+const CACHE_NAME = 'vsp-portal-v28';
 const PRECACHE_URLS = [
   '/',
   'index.html',
@@ -46,7 +46,7 @@ self.addEventListener('fetch', (event) => {
   // Network-first for HTML so users always get the latest version online.
   if (isFreshFirst(request, url)) {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((response) => {
           if (response.ok) {
             const clone = response.clone();
