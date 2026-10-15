@@ -1169,11 +1169,9 @@
 
       <section class="screen" id="screen-library">
         <div class="tabs" id="categoryTabs">
-          <button class="tab active" data-category="mindfulness">Mindfulness</button>
-          <button class="tab" data-category="ademhaling">Ademhaling</button>
+          <button class="tab active" data-category="ademhaling">Ademhaling & Mindfulness</button>
           <button class="tab" data-category="voeding">Voeding</button>
           <button class="tab" data-category="fysiek">Fysiek</button>
-          <button class="tab" data-category="highlights">Highlights</button>
         </div>
         <div id="libraryList"></div>
       </section>
@@ -1188,9 +1186,6 @@
           <button class="sgn-btn" data-screen="checkin" id="sgnCheckin">Check-in</button>
         </div>
         <div id="dagboekContent"></div>
-      </section>
-      <section class="screen" id="screen-highlights">
-        <div id="highlightsList"></div>
       </section>
 
       <section class="screen" id="screen-opdrachten">
@@ -1458,7 +1453,7 @@
         switchLang: 'Switch to English',
         tipTitle: 'Quote van de dag',
         noContent: 'Nog geen content beschikbaar.',
-        tabs: { mindfulness: 'Mindfulness', ademhaling: 'Ademhaling', voeding: 'Voeding', fysiek: 'Fysiek', highlights: 'Highlights' },
+        tabs: { ademhaling: 'Ademhaling & Mindfulness', voeding: 'Voeding', fysiek: 'Fysiek' },
         loading: 'Laden…',
         noCategory: 'Nog geen content in deze categorie.',
         watchVideo: 'Bekijk video →',
@@ -1633,7 +1628,7 @@
         switchLang: 'Wissel naar Nederlands',
         tipTitle: 'Quote of the day',
         noContent: 'No content available yet.',
-        tabs: { mindfulness: 'Mindfulness', ademhaling: 'Breathing', voeding: 'Nutrition', fysiek: 'Physical', highlights: 'Highlights' },
+        tabs: { ademhaling: 'Breathing & Mindfulness', voeding: 'Nutrition', fysiek: 'Physical' },
         loading: 'Loading…',
         noCategory: 'No content in this category yet.',
         watchVideo: 'Watch video →',
@@ -2250,12 +2245,9 @@
       const list = document.getElementById('libraryList');
 
       if (category === 'ademhaling') {
-        loadAdemhalingSection(list);
-        return;
-      }
-
-      if (category === 'highlights') {
-        loadHighlights(list);
+        list.innerHTML = `<div id="breathWrap"></div><div id="mindfulWrap"></div>`;
+        loadAdemhalingSection(document.getElementById('breathWrap'));
+        loadMindfulnessItems(document.getElementById('mindfulWrap'));
         return;
       }
 
@@ -2284,7 +2276,11 @@
         return;
       }
 
-      list.innerHTML = data.map((item) => {
+      list.innerHTML = renderContentItems(data, T);
+    }
+
+    function renderContentItems(data, T) {
+      return data.map((item) => {
         const title = (lang === 'en' && item.title_en) ? item.title_en : item.title;
         const desc  = (lang === 'en' && item.description_en) ? item.description_en : item.description;
         return `
@@ -2298,6 +2294,21 @@
           </div>
         `;
       }).join('');
+    }
+
+    async function loadMindfulnessItems(wrap) {
+      const T = i18n[lang];
+      const { data, error } = await supabaseClient
+        .from('content_items')
+        .select('*')
+        .eq('category', 'mindfulness')
+        .eq('published', true)
+        .order('sort_order', { ascending: true });
+      // tab may have been switched (wrap detached) while loading
+      if (!wrap.isConnected || error || !data || !data.length) return;
+      wrap.innerHTML = `
+        <h3 style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:.05em;color:#fff;margin:28px 0 12px;">Mindfulness</h3>
+        ${renderContentItems(data, T)}`;
     }
 
     function loadJournal() {
@@ -5549,6 +5560,7 @@
     const mediaTopics = [
       { id:'all',     nl:'Alles',               en:'All' },
       { id:'tennis',  nl:'🎾 Tennis',            en:'🎾 Tennis' },
+      { id:'klassiekers', nl:'🏆 Klassiekers',   en:'🏆 Classic matches' },
       { id:'druk',    nl:'🔥 Druk & zenuwen',    en:'🔥 Pressure & nerves' },
       { id:'focus',   nl:'🎯 Focus',             en:'🎯 Focus' },
       { id:'mindset', nl:'💪 Mindset',           en:'💪 Mindset' },
@@ -5883,11 +5895,11 @@
       },
       {
         players: 'Nadal vs Djokovic',
-        event: 'Roland Garros SF',
+        event: 'Roland Garros Quarterfinal',
         year: '2022',
         gradient: 'linear-gradient(135deg, #7c2d12, #c2410c)',
-        desc: 'Their final great rivalry match at Roland Garros. Nadal, carrying injuries, fights back from a set down to defeat Djokovic in four sets — a display of mental courage that defines his legend on clay.',
-        desc_nl: 'Hun laatste grote rivaliteitswedstrijd op Roland Garros. Nadal, geblesseerd, vecht terug van een set achterstand en wint van Djokovic in vier sets — een vertoning van mentale moed die zijn legende op gravel definieert.',
+        desc: 'Their last great battle at Roland Garros. Nadal, playing through a chronic foot injury, beats world No.1 Djokovic in four sets after more than four hours, finishing after 1 a.m. — a display of mental courage that defines his legend on clay.',
+        desc_nl: 'Hun laatste grote gevecht op Roland Garros. Nadal speelt door een chronische voetblessure heen en verslaat wereldnummer 1 Djokovic in vier sets, na ruim vier uur en pas na 1 uur ’s nachts. Een vertoning van mentale moed die zijn legende op gravel definieert.',
         search: 'Nadal Djokovic Roland Garros 2022 semifinal highlights',
       },
       {
@@ -5901,25 +5913,30 @@
       },
     ];
 
-    function loadHighlights(container) {
-      const T = i18n[lang];
-      const list = container || document.getElementById('highlightsList');
-      list.innerHTML = highlightMatches.map((h) => {
-        const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(h.players + ' ' + h.event + ' ' + h.year + ' highlights');
-        return `
-          <div class="highlight-card">
-            <div class="highlight-banner" style="background:${h.gradient};">
-              <div class="hl-tour-badge">${h.event.split(' ')[0]}</div>
-              <div class="hl-players">${h.players}</div>
-              <div class="hl-event">${h.event} &middot; ${h.year}</div>
-            </div>
-            <div class="highlight-body">
-              <p class="highlight-desc">${lang === 'nl' && h.desc_nl ? h.desc_nl : h.desc}</p>
-              <a href="${url}" target="_blank" rel="noopener" class="highlight-watch">${T.watchHighlights} →</a>
-            </div>
-          </div>`;
-      }).join('');
-    }
+    // Official highlight videos, verified via YouTube oEmbed. Shown in Media under "Klassiekers".
+    const highlightVideos = {
+      'Federer vs Nadal|2008':     ['f8YEiCAPAbg', 'Wimbledon'],
+      'Djokovic vs Federer|2019':  ['poiuL-HUyuc', 'Wimbledon'],
+      'Alcaraz vs Djokovic|2023':  ['dvBr9Wr8BCY', 'Wimbledon'],
+      'Djokovic vs Nadal|2012':    ['4Nk_whncZ20', 'Australian Open'],
+      'Nadal vs Verdasco|2009':    ['1tdcwgfNZA0', 'Australian Open'],
+      'Federer vs Nadal|2009':     ['IDqmPJYfSes', 'Australian Open'],
+      'Djokovic vs Federer|2010':  ['55tIwiOMszY', 'US Open'],
+      'Alcaraz vs Sinner|2022':    ['-SSd4pFPUXk', 'US Open'],
+      'Nadal vs Djokovic|2022':    ['bEPfMTfilIQ', 'Roland-Garros'],
+      'Djokovic vs Thiem|2020':    ['o9DLcoijwWc', 'Eurosport'],
+    };
+    const eventNL = { 'Final': 'finale', 'SF': 'halve finale', 'Semifinal': 'halve finale', 'Quarterfinal': 'kwartfinale' };
+    highlightMatches.forEach((m) => {
+      const v = highlightVideos[m.players + '|' + m.year];
+      if (!v) return;
+      const nlEvent = m.event.replace(/(Final|SF|Semifinal|Quarterfinal)$/, (x) => eventNL[x]);
+      mediaLibrary.push({
+        type: 'yt', id: v[0], show: v[1], c: ['klassiekers'],
+        t: [`${m.players} · ${nlEvent} ${m.year}`, `${m.players} · ${m.event} ${m.year}`],
+        d: [m.desc_nl || m.desc, m.desc],
+      });
+    });
 
     // ── CHECK-IN ──────────────────────────────────────────
 
