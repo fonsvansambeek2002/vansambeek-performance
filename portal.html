@@ -1073,8 +1073,8 @@
   <div id="installBanner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;z-index:9999;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:14px 16px;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6);">
     <img src="assets/logo.png" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;" />
     <div style="flex:1;min-width:0;">
-      <div style="font-size:13px;font-weight:700;color:#fff;">Installeer de app</div>
-      <div style="font-size:11px;color:#888;margin-top:2px;">Zet op je beginscherm voor snelle toegang</div>
+      <div id="instTitle" style="font-size:13px;font-weight:700;color:#fff;">Installeer de app</div>
+      <div id="instSub" style="font-size:11px;color:#888;margin-top:2px;">Zet op je beginscherm voor snelle toegang</div>
     </div>
     <button id="installBtn" style="background:#C8F135;color:#0A0A0A;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">Installeer</button>
     <button id="installDismiss" style="background:none;border:none;color:#555;font-size:20px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>
@@ -1087,8 +1087,8 @@
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
         <img src="assets/logo.png" style="width:52px;height:52px;border-radius:14px;" />
         <div>
-          <div style="font-size:16px;font-weight:700;color:#fff;">Installeer de app</div>
-          <div style="font-size:13px;color:#888;margin-top:2px;">VSP Coaching op je beginscherm</div>
+          <div id="iosTitle" style="font-size:16px;font-weight:700;color:#fff;">Installeer de app</div>
+          <div id="iosSub" style="font-size:13px;color:#888;margin-top:2px;">VSP Coaching op je beginscherm</div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;">
@@ -1096,22 +1096,22 @@
           <div style="width:36px;height:36px;border-radius:10px;background:#0a1a2e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" width="20" height="20"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
           </div>
-          <div style="font-size:14px;color:#ccc;line-height:1.5;">Tik op het <strong style="color:#fff;">deel-icoon</strong> <span style="font-size:16px;">⎋</span> onderaan je scherm</div>
+          <div id="iosStep1" style="font-size:14px;color:#ccc;line-height:1.5;">Tik op het <strong style="color:#fff;">deel-icoon</strong> <span style="font-size:16px;">⎋</span> onderaan je scherm</div>
         </div>
         <div style="display:flex;align-items:center;gap:14px;">
           <div style="width:36px;height:36px;border-radius:10px;background:#1a2e0a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg viewBox="0 0 24 24" fill="none" stroke="#C8F135" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           </div>
-          <div style="font-size:14px;color:#ccc;line-height:1.5;">Scroll naar beneden en kies <strong style="color:#fff;">"Zet op beginscherm"</strong></div>
+          <div id="iosStep2" style="font-size:14px;color:#ccc;line-height:1.5;">Scroll naar beneden en kies <strong style="color:#fff;">"Zet op beginscherm"</strong></div>
         </div>
         <div style="display:flex;align-items:center;gap:14px;">
           <div style="width:36px;height:36px;border-radius:10px;background:#1a0a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" width="20" height="20"><path d="M20 6L9 17l-5-5"/></svg>
           </div>
-          <div style="font-size:14px;color:#ccc;line-height:1.5;">Tik op <strong style="color:#fff;">"Voeg toe"</strong> — klaar!</div>
+          <div id="iosStep3" style="font-size:14px;color:#ccc;line-height:1.5;">Tik op <strong style="color:#fff;">"Voeg toe"</strong> — klaar!</div>
         </div>
       </div>
-      <div style="margin-top:24px;padding:12px 16px;background:#111;border-radius:12px;font-size:12px;color:#666;text-align:center;">
+      <div id="iosFoot" style="margin-top:24px;padding:12px 16px;background:#111;border-radius:12px;font-size:12px;color:#666;text-align:center;">
         De app werkt daarna volledig zonder browserbalk, net als een echte app.
       </div>
     </div>
@@ -1220,7 +1220,7 @@
         <div id="planList"></div>
 
         <div class="plan-form-card" id="planFormCard" style="display:none;">
-          <h3 style="margin-bottom:14px;">Toernooi toevoegen</h3>
+          <h3 id="planFormTitle" style="margin-bottom:14px;">Toernooi toevoegen</h3>
           <div class="field">
             <label id="planNameLabel">Naam toernooi *</label>
             <input type="text" id="planName" placeholder="bijv. ITS Rotterdam" />
@@ -1828,6 +1828,7 @@
       document.getElementById('ciSubmitBtn').textContent = T.ciSubmit;
       document.getElementById('ciHistoryTitle').textContent = T.ciHistoryTitle;
 
+      applyStaticText();
       if (currentUser) loadHome();
       if (libraryLoaded) {
         const activeCategory = document.querySelector('#categoryTabs .tab.active').dataset.category;
@@ -1852,6 +1853,27 @@
       if (document.getElementById('screen-video').classList.contains('active')) {
         loadVideoAnalyse();
       }
+    }
+
+    const staticText = {
+      instTitle:     ['Installeer de app', 'Install the app'],
+      instSub:       ['Zet op je beginscherm voor snelle toegang', 'Add it to your home screen for quick access'],
+      installBtn:    ['Installeer', 'Install'],
+      iosTitle:      ['Installeer de app', 'Install the app'],
+      iosSub:        ['VSP Coaching op je beginscherm', 'VSP Coaching on your home screen'],
+      iosStep1:      ['Tik op het <strong style="color:#fff;">deel-icoon</strong> <span style="font-size:16px;">⎋</span> onderaan je scherm', 'Tap the <strong style="color:#fff;">share icon</strong> <span style="font-size:16px;">⎋</span> at the bottom of your screen'],
+      iosStep2:      ['Scroll naar beneden en kies <strong style="color:#fff;">"Zet op beginscherm"</strong>', 'Scroll down and choose <strong style="color:#fff;">"Add to Home Screen"</strong>'],
+      iosStep3:      ['Tik op <strong style="color:#fff;">"Voeg toe"</strong> — klaar!', 'Tap <strong style="color:#fff;">"Add"</strong> — done!'],
+      iosFoot:       ['De app werkt daarna volledig zonder browserbalk, net als een echte app.', 'The app then runs full screen without the browser bar, just like a real app.'],
+      planFormTitle: ['Toernooi toevoegen', 'Add tournament'],
+    };
+
+    function applyStaticText() {
+      const i = lang === 'en' ? 1 : 0;
+      Object.entries(staticText).forEach(([id, t]) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = t[i];
+      });
     }
 
     function setPortalLang(l) {
@@ -5325,7 +5347,7 @@
         name.textContent = file.name + ` (${mb} MB)`;
       } else {
         area.classList.remove('selected');
-        name.textContent = 'Tik om video te kiezen';
+        name.textContent = i18n[lang].vidPickName;
       }
     });
 
@@ -5340,23 +5362,23 @@
       if (!file || !title) {
         msg.classList.remove('hidden');
         msg.className = 'error-msg';
-        msg.textContent = 'Kies een video en voer een titel in.';
+        msg.textContent = (lang === 'en' ? "Choose a video and enter a title." : "Kies een video en voer een titel in.");
         return;
       }
 
       if (file.size > 500 * 1024 * 1024) {
         msg.classList.remove('hidden');
         msg.className = 'error-msg';
-        msg.textContent = 'Video is te groot (max 500 MB). Trim de video in de Camera-app.';
+        msg.textContent = (lang === 'en' ? "Video is too large (max 500 MB). Trim it in your Camera app." : "Video is te groot (max 500 MB). Trim de video in de Camera-app.");
         return;
       }
 
       btn.disabled = true;
-      btn.textContent = 'Uploaden...';
+      btn.textContent = (lang === 'en' ? "Uploading..." : "Uploaden...");
       barWrap.style.display = 'block';
       msg.classList.remove('hidden');
       msg.className = 'muted';
-      msg.textContent = 'Video wordt geüpload — even geduld, dit kan een minuut duren…';
+      msg.textContent = (lang === 'en' ? "Uploading your video — hang on, this can take a minute…" : "Video wordt geüpload — even geduld, dit kan een minuut duren…");
 
       const ext = file.name.split('.').pop() || 'mp4';
       const storagePath = `${currentUser.id}/${Date.now()}.${ext}`;
@@ -5371,7 +5393,7 @@
 
       if (uploadError) {
         msg.className = 'error-msg';
-        msg.textContent = 'Upload mislukt: ' + uploadError.message;
+        msg.textContent = (lang === 'en' ? "Upload failed: " : "Upload mislukt: ") + uploadError.message;
         return;
       }
 
@@ -5396,7 +5418,7 @@
       msg.textContent = T.vidSaved;
       document.getElementById('vidFile').value = '';
       document.getElementById('vidPickArea').classList.remove('selected');
-      document.getElementById('vidPickName').textContent = 'Tik om video te kiezen';
+      document.getElementById('vidPickName').textContent = i18n[lang].vidPickName;
       document.getElementById('vidTitle').value = '';
       document.getElementById('vidDesc').value = '';
       fetchVideos();
