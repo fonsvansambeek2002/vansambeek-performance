@@ -1124,7 +1124,6 @@
         <span id="topbarTitle">Home</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
-        <a id="adminBtn" href="admin.html" class="btn-ghost-sm hidden">Beheer</a>
         <div class="lang-pill">
           <button id="langNL" type="button">NL</button>
           <div class="lp-div"></div>
@@ -1792,7 +1791,6 @@
 
       const activeScreen = document.querySelector('.nav-btn.active')?.dataset.screen || 'home';
       document.getElementById('topbarTitle').textContent = T.screenTitles[activeScreen];
-      document.getElementById('adminBtn').textContent = T.admin;
       document.getElementById('logoutBtn').title = T.logout;
 
       document.getElementById('subgreeting').textContent = T.subgreeting;
@@ -2003,7 +2001,6 @@
 
       const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', user.id).single();
       isAdmin = !!(profile && profile.is_admin);
-      document.getElementById('adminBtn').classList.toggle('hidden', !isAdmin);
       document.getElementById('navKlantenBtn').classList.toggle('hidden', !isAdmin);
 
       applyTranslations();
@@ -4005,12 +4002,15 @@
         { data: thisWeekCi                     },
         { data: allCompletions                 },
         { data: recentNotesRaw                 },
+        { data: videoRows                      },
       ] = await Promise.all([
         supabaseClient.from('client_programs').select('*, profiles(full_name)').order('start_date', { ascending: false }),
         supabaseClient.from('weekly_checkins').select('user_id,week_start').eq('week_start', getWeekStart()),
         supabaseClient.from('assignment_completions').select('user_id'),
         supabaseClient.from('coach_notes').select('client_id,session_date').order('session_date', { ascending: false }),
+        supabaseClient.from('video_submissions').select('id,feedback'),
       ]);
+      const videosOpen = (videoRows || []).filter(v => !v.feedback).length;
 
       if (pErr) {
         container.innerHTML = `<div style="padding:20px;color:#ef4444;font-size:0.85rem;line-height:1.6;">Fout bij laden: ${escapeHtml(pErr.message)}</div>`;
@@ -4124,7 +4124,7 @@
           flex:1;background:${active_?'#1E1E1E':'transparent'};border:none;border-radius:8px;
           color:${active_?'#DDD':'#555'};font-family:Inter,sans-serif;font-size:0.78rem;
           font-weight:${active_?700:500};padding:8px 4px;cursor:pointer;transition:all .15s;
-          position:relative;">${label}${id==='dash'&&noCheckin.length>0?`<span style="position:absolute;top:4px;right:4px;width:6px;height:6px;background:#3b82f6;border-radius:50%;"></span>`:''}
+          position:relative;">${label}${id==='vid'&&videosOpen>0?` <span style="background:#C8F135;color:#0A0A0A;border-radius:999px;padding:0 6px;font-size:0.65rem;font-weight:800;">${videosOpen}</span>`:''}${id==='dash'&&noCheckin.length>0?`<span style="position:absolute;top:4px;right:4px;width:6px;height:6px;background:#3b82f6;border-radius:50%;"></span>`:''}
         </button>`;
       }
 
@@ -4222,13 +4222,19 @@
           <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:4px;display:flex;gap:2px;margin-bottom:16px;">
             ${subTabBtn('dash','Dashboard',true)}
             ${subTabBtn('kl','Klanten',false)}
+            ${subTabBtn('vid',"Video's",false)}
+            ${subTabBtn('content','Content',false)}
           </div>
           <div id="bpanel-dash">${dashPanel}</div>
           <div id="bpanel-kl"  class="hidden">${klPanel}</div>
+          <div id="bpanel-vid" class="hidden"></div>
+          <div id="bpanel-content" class="hidden"></div>
         </div>`;
 
       window.beheerSubTab = function(tab) {
-        ['dash','kl'].forEach(t => {
+        if (tab === 'vid') beheerLoadVideos();
+        if (tab === 'content') beheerLoadContent();
+        ['dash','kl','vid','content'].forEach(t => {
           document.getElementById(`bpanel-${t}`)?.classList.toggle('hidden', t !== tab);
           const btn = document.getElementById(`bst-${t}`);
           if (btn) {
@@ -4288,6 +4294,178 @@
         .update({ status: 'active', total_weeks: (currentTotal || 10) + 10 }).eq('id', progId);
       if (error) { alert('Fout: ' + error.message); return; }
       loadBeheer();
+    }
+
+    // ── BEHEER: VIDEO FEEDBACK ────────────────────────────
+    async function beheerLoadVideos() {
+      const el = document.getElementById('bpanel-vid');
+      if (!el) return;
+      el.innerHTML = `<div class="empty-state">Laden…</div>`;
+      const [{ data: videos, error }, { data: profiles }] = await Promise.all([
+        supabaseClient.from('video_submissions').select('*').order('created_at', { ascending: false }),
+        supabaseClient.from('profiles').select('id, full_name'),
+      ]);
+      if (error) { el.innerHTML = `<div class="empty-state" style="color:#ef4444;">Fout: ${escapeHtml(error.message)}</div>`; return; }
+      if (!videos || !videos.length) { el.innerHTML = `<div class="empty-state">Nog geen video's ingestuurd.</div>`; return; }
+
+      const names = {};
+      (profiles || []).forEach(p => { names[p.id] = p.full_name || 'Onbekend'; });
+      const withUrls = await Promise.all(videos.map(async (v) => {
+        let url = null;
+        if (v.storage_path) {
+          const { data } = await supabaseClient.storage.from('player-videos').createSignedUrl(v.storage_path, 86400);
+          url = data?.signedUrl || null;
+        } else if (v.video_url && v.video_url.startsWith('http')) {
+          url = v.video_url;
+        }
+        return { ...v, url };
+      }));
+      // open feedback first
+      withUrls.sort((a, b) => (!a.feedback === !b.feedback ? 0 : !a.feedback ? -1 : 1));
+
+      const typeLabels = { training: 'Training', wedstrijd: 'Wedstrijd' };
+      el.innerHTML = withUrls.map(v => `
+        <div style="border:1px solid ${v.feedback ? '#1A1A1A' : '#C8F13533'};border-radius:14px;padding:14px 16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:0.9rem;font-weight:700;color:#DDD;">${escapeHtml(v.title)}</span>
+            ${v.video_type ? `<span style="font-size:0.62rem;font-weight:700;color:#3b82f6;background:#3b82f618;border:1px solid #3b82f633;border-radius:999px;padding:2px 7px;">${escapeHtml(typeLabels[v.video_type] || v.video_type)}</span>` : ''}
+            ${v.feedback
+              ? `<span style="font-size:0.62rem;font-weight:700;color:#22c55e;background:#22c55e18;border:1px solid #22c55e33;border-radius:999px;padding:2px 7px;">✓ Feedback gegeven</span>`
+              : `<span style="font-size:0.62rem;font-weight:700;color:#C8F135;background:#C8F13518;border:1px solid #C8F13533;border-radius:999px;padding:2px 7px;">Wacht op feedback</span>`}
+          </div>
+          <div style="font-size:0.73rem;color:#555;margin-top:4px;">${escapeHtml(names[v.user_id] || 'Onbekend')} · ${new Date(v.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}</div>
+          ${v.description ? `<div style="font-size:0.82rem;color:#888;margin-top:8px;line-height:1.5;">${escapeHtml(v.description)}</div>` : ''}
+          ${v.url
+            ? `<a href="${escapeAttr(v.url)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;color:#C8F135;font-size:0.82rem;font-weight:700;text-decoration:none;">▶ Video bekijken ↗</a>`
+            : `<div style="margin-top:10px;font-size:0.8rem;color:#555;">Geen video-link beschikbaar</div>`}
+          <textarea id="bfb-${escapeAttr(v.id)}" rows="3" placeholder="Schrijf je feedback… (de speler ziet dit bij Traject → Video)" style="width:100%;margin-top:12px;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.82rem;resize:vertical;box-sizing:border-box;line-height:1.5;">${escapeHtml(v.feedback || '')}</textarea>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+            <button onclick="beheerSaveFeedback('${escapeAttr(v.id)}')" style="background:#C8F135;color:#0A0A0A;border:none;border-radius:8px;padding:9px 16px;font-weight:700;font-size:0.82rem;cursor:pointer;">Feedback opslaan</button>
+            <span id="bfbmsg-${escapeAttr(v.id)}" style="font-size:0.78rem;"></span>
+          </div>
+        </div>`).join('');
+    }
+
+    async function beheerSaveFeedback(videoId) {
+      const feedback = document.getElementById('bfb-' + videoId).value.trim();
+      const msg = document.getElementById('bfbmsg-' + videoId);
+      const { error } = await supabaseClient.from('video_submissions').update({ feedback: feedback || null }).eq('id', videoId);
+      msg.style.color = error ? '#ef4444' : '#22c55e';
+      msg.textContent = error ? 'Opslaan mislukt: ' + error.message : '✓ Opgeslagen';
+    }
+
+    // ── BEHEER: CONTENT (mindfulness items) ───────────────
+    let beheerContentItems = [];
+    let beheerEditingId = null;
+
+    async function beheerLoadContent() {
+      const el = document.getElementById('bpanel-content');
+      if (!el) return;
+      const input = 'width:100%;background:#111;border:1px solid #1A1A1A;border-radius:8px;color:#CCC;padding:10px 12px;font-size:0.85rem;box-sizing:border-box;font-family:Inter,sans-serif;';
+      const label = 'font-size:0.73rem;color:#555;display:block;margin:10px 0 5px;';
+      el.innerHTML = `
+        <p style="font-size:0.8rem;color:#666;line-height:1.6;margin:0 0 12px;">Deze items staan bij <strong style="color:#AAA;">Off Court Training → Ademhaling &amp; Mindfulness</strong>, onder de ademhalingsoefeningen.</p>
+        <div style="border:1px solid #C8F13530;border-radius:14px;padding:16px;margin-bottom:16px;background:#C8F13506;">
+          <div id="bcFormTitle" style="font-size:0.72rem;font-weight:700;color:#C8F135;letter-spacing:.06em;text-transform:uppercase;">Nieuw mindfulness-item</div>
+          <label style="${label}">Titel (NL) *</label><input id="bcTitle" style="${input}" />
+          <label style="${label}">Omschrijving (NL)</label><textarea id="bcDesc" rows="3" style="${input}resize:vertical;"></textarea>
+          <label style="${label}">Titel (EN)</label><input id="bcTitleEn" style="${input}" />
+          <label style="${label}">Omschrijving (EN)</label><textarea id="bcDescEn" rows="3" style="${input}resize:vertical;"></textarea>
+          <label style="${label}">Video- of audiolink (optioneel)</label><input id="bcUrl" type="url" placeholder="https://..." style="${input}" />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><label style="${label}">Zichtbaar</label><select id="bcPublished" style="${input}"><option value="true">Ja</option><option value="false">Nee (verborgen)</option></select></div>
+            <div><label style="${label}">Volgorde</label><input id="bcSort" type="number" value="0" step="1" style="${input}" /></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button id="bcSubmit" onclick="beheerSaveContent()" style="flex:1;background:#C8F135;color:#0A0A0A;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:0.88rem;cursor:pointer;">Toevoegen</button>
+            <button id="bcCancel" onclick="beheerCancelEdit()" class="hidden" style="background:transparent;border:1px solid #1A1A1A;border-radius:10px;color:#777;padding:11px 16px;cursor:pointer;font-size:0.85rem;">Annuleren</button>
+          </div>
+          <div id="bcMsg" style="font-size:0.78rem;margin-top:8px;min-height:1em;"></div>
+        </div>
+        <div id="bcList"><div class="empty-state">Laden…</div></div>`;
+      beheerRenderContentList();
+    }
+
+    async function beheerRenderContentList() {
+      const list = document.getElementById('bcList');
+      if (!list) return;
+      const { data, error } = await supabaseClient.from('content_items').select('*')
+        .eq('category', 'mindfulness').order('sort_order', { ascending: true });
+      if (error) { list.innerHTML = `<div class="empty-state" style="color:#ef4444;">Fout: ${escapeHtml(error.message)}</div>`; return; }
+      beheerContentItems = data || [];
+      if (!beheerContentItems.length) { list.innerHTML = `<div class="empty-state">Nog geen mindfulness-items.</div>`; return; }
+      list.innerHTML = beheerContentItems.map(item => `
+        <div style="border:1px solid #1A1A1A;border-radius:12px;padding:12px 14px;margin-bottom:8px;${item.published ? '' : 'opacity:.55;'}">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:0.88rem;font-weight:700;color:#DDD;">${escapeHtml(item.title)}</span>
+            ${item.published ? '' : `<span style="font-size:0.6rem;font-weight:700;color:#888;border:1px solid #333;border-radius:999px;padding:1px 7px;">VERBORGEN</span>`}
+            <span style="font-size:0.65rem;color:#444;margin-left:auto;">#${item.sort_order ?? 0}</span>
+          </div>
+          ${item.description ? `<div style="font-size:0.78rem;color:#666;margin-top:4px;line-height:1.5;">${escapeHtml(item.description)}</div>` : ''}
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button onclick="beheerEditContent('${escapeAttr(item.id)}')" style="background:transparent;border:1px solid #2a2a2a;border-radius:8px;color:#AAA;font-size:0.75rem;padding:6px 12px;cursor:pointer;">Bewerken</button>
+            <button onclick="beheerDeleteContent('${escapeAttr(item.id)}')" style="background:transparent;border:1px solid #ef444433;border-radius:8px;color:#ef4444;font-size:0.75rem;padding:6px 12px;cursor:pointer;">Verwijderen</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function beheerEditContent(id) {
+      const item = beheerContentItems.find(i => i.id === id);
+      if (!item) return;
+      beheerEditingId = id;
+      document.getElementById('bcTitle').value = item.title || '';
+      document.getElementById('bcDesc').value = item.description || '';
+      document.getElementById('bcTitleEn').value = item.title_en || '';
+      document.getElementById('bcDescEn').value = item.description_en || '';
+      document.getElementById('bcUrl').value = item.video_url || '';
+      document.getElementById('bcPublished').value = item.published ? 'true' : 'false';
+      document.getElementById('bcSort').value = item.sort_order ?? 0;
+      document.getElementById('bcFormTitle').textContent = 'Item bewerken';
+      document.getElementById('bcSubmit').textContent = 'Bijwerken';
+      document.getElementById('bcCancel').classList.remove('hidden');
+      document.getElementById('bcFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function beheerCancelEdit() {
+      beheerEditingId = null;
+      ['bcTitle', 'bcDesc', 'bcTitleEn', 'bcDescEn', 'bcUrl'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('bcPublished').value = 'true';
+      document.getElementById('bcSort').value = 0;
+      document.getElementById('bcFormTitle').textContent = 'Nieuw mindfulness-item';
+      document.getElementById('bcSubmit').textContent = 'Toevoegen';
+      document.getElementById('bcCancel').classList.add('hidden');
+    }
+
+    async function beheerSaveContent() {
+      const msg = document.getElementById('bcMsg');
+      const payload = {
+        category: 'mindfulness',
+        title: document.getElementById('bcTitle').value.trim(),
+        description: document.getElementById('bcDesc').value.trim() || null,
+        title_en: document.getElementById('bcTitleEn').value.trim() || null,
+        description_en: document.getElementById('bcDescEn').value.trim() || null,
+        video_url: document.getElementById('bcUrl').value.trim() || null,
+        published: document.getElementById('bcPublished').value === 'true',
+        sort_order: Number(document.getElementById('bcSort').value) || 0,
+      };
+      if (!payload.title) { msg.style.color = '#ef4444'; msg.textContent = 'Vul een titel in.'; return; }
+      const wasEditing = !!beheerEditingId;
+      const { error } = wasEditing
+        ? await supabaseClient.from('content_items').update(payload).eq('id', beheerEditingId)
+        : await supabaseClient.from('content_items').insert(payload);
+      if (error) { msg.style.color = '#ef4444'; msg.textContent = 'Opslaan mislukt: ' + error.message; return; }
+      msg.style.color = '#22c55e';
+      msg.textContent = wasEditing ? '✓ Bijgewerkt' : '✓ Toegevoegd';
+      beheerCancelEdit();
+      beheerRenderContentList();
+    }
+
+    async function beheerDeleteContent(id) {
+      if (!confirm('Dit item verwijderen?')) return;
+      const { error } = await supabaseClient.from('content_items').delete().eq('id', id);
+      if (error) { alert('Verwijderen mislukt: ' + error.message); return; }
+      if (beheerEditingId === id) beheerCancelEdit();
+      beheerRenderContentList();
     }
 
     async function beheerSaveNote(clientId) {
