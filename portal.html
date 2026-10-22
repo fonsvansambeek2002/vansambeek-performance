@@ -151,6 +151,8 @@
       background: #000;
     }
 
+    .bottom-nav:has(#navKlantenBtn:not(.hidden)) .nav-btn { font-size: 9.5px; }
+    .nav-btn span { white-space: nowrap; }
     .bottom-nav {
       background: #0A0A0A;
       border-top: 1px solid #1A1A1A;
@@ -2563,7 +2565,7 @@
       const st = ldStats(sessions);
       const locale = isNL ? 'nl-NL' : 'en-GB';
       const mins = st.last7.reduce((a, s) => a + s.duration_min, 0);
-      const hm = `${Math.floor(mins / 60)}u ${mins % 60}m`.replace(/^0u /, '');
+      const hm = [Math.floor(mins / 60) && `${Math.floor(mins / 60)}u`, mins % 60 && `${mins % 60}m`].filter(Boolean).join(' ');
       const delta = st.prev > 0 ? Math.round(((st.acute - st.prev) / st.prev) * 100) : null;
       const zone = st.acwr !== null ? ldZone(st.acwr, isNL) : null;
 
@@ -2598,7 +2600,7 @@
         </div>`).join('');
 
       const types = ldTypes(isNL);
-      const rows = sessions.slice(0, 20).map((s) => {
+      const rowHtml = (s) => {
         const t = types[s.session_type] || types.overig;
         const d = new Date(s.session_date + 'T00:00:00').toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
         return `
@@ -2611,7 +2613,13 @@
             <div style="font-weight:700;color:#fff;font-size:0.95rem;">${ldFmt(s.duration_min * s.rpe, isNL)}</div>
             ${editable ? `<button class="ld-del" onclick="deleteLoadSession('${escapeAttr(s.id)}')" aria-label="${isNL ? 'Verwijderen' : 'Delete'}">×</button>` : ''}
           </div>`;
-      }).join('');
+      };
+      const recent = sessions.slice(0, 20);
+      const rows = recent.slice(0, 5).map(rowHtml).join('') + (recent.length > 5 ? `
+        <details class="ld-info" style="margin-top:0;">
+          <summary>${isNL ? 'Toon alle sessies' : 'Show all sessions'} (${recent.length})</summary>
+          <div style="margin-top:8px;">${recent.slice(5).map(rowHtml).join('')}</div>
+        </details>` : '');
 
       const bottom = `
         <div class="card">
