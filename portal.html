@@ -1051,6 +1051,21 @@
     .sl-table tr.sl-click { cursor: pointer; }
     .sl-cell { display: inline-block; min-width: 34px; padding: 3px 6px; border-radius: 6px; font-weight: 700; }
 
+    /* ── SCOUTING ── */
+    .sc-top { display: flex; gap: 8px; margin-bottom: 14px; }
+    .sc-top input {
+      flex: 1; min-width: 0; background: #111; border: 1px solid #2A2A2A; border-radius: 8px;
+      color: #fff; font-family: 'Inter', sans-serif; font-size: 16px; padding: 9px 12px;
+    }
+    .sc-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      background: #1E1E1E; color: #C8F135; font-weight: 800; font-size: 0.95rem;
+    }
+    .sc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .sc-tag { font-size: 0.7rem; font-weight: 600; color: #AAA; background: #1A1A1A; border: 1px solid #262626; border-radius: 999px; padding: 3px 9px; }
+    .sc-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #1A1A1A; }
+    .sc-form-label { font-size: 0.78rem; color: #AAA; margin: 0 0 8px; display: block; }
+
     /* ── DAGBOEK ── */
     .dj-type-toggle {
       display: flex; gap: 0; background: #111; border: 1px solid #2A2A2A;
@@ -1282,6 +1297,7 @@
         <div class="sgn-bar">
           <button class="sgn-btn active" data-screen="planning">Planning</button>
           <button class="sgn-btn" data-screen="video">Video</button>
+          <button class="sgn-btn" data-screen="scouting">Scouting</button>
         </div>
         <div class="plan-year-nav">
           <button class="icon-btn" id="planPrevYear" style="font-size:1.4rem;padding:4px 10px;">‹</button>
@@ -1334,10 +1350,20 @@
         </div>
       </section>
 
+      <section class="screen" id="screen-scouting">
+        <div class="sgn-bar">
+          <button class="sgn-btn" data-screen="planning">Planning</button>
+          <button class="sgn-btn" data-screen="video">Video</button>
+          <button class="sgn-btn active" data-screen="scouting">Scouting</button>
+        </div>
+        <div id="scoutingContent"></div>
+      </section>
+
       <section class="screen" id="screen-video">
         <div class="sgn-bar">
           <button class="sgn-btn" data-screen="planning">Planning</button>
           <button class="sgn-btn active" data-screen="video">Video</button>
+          <button class="sgn-btn" data-screen="scouting">Scouting</button>
         </div>
         <div class="card" style="margin-bottom:20px;">
           <h3 style="margin-bottom:6px;" id="vidFormTitle">Video insturen</h3>
@@ -1507,7 +1533,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', scouting: 'Scouting', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
         sgnWedstrijden: 'Dagboek',
@@ -1684,7 +1710,7 @@
         djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', scouting: 'Scouting', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
         sgnWedstrijden: 'Journal',
@@ -1938,6 +1964,9 @@
         planLoaded = false;
         loadPlanning();
       }
+      if (document.getElementById('screen-scouting').classList.contains('active')) {
+        loadScouting();
+      }
       if (document.getElementById('screen-video').classList.contains('active')) {
         loadVideoAnalyse();
       }
@@ -1988,7 +2017,7 @@
     // swipe left/right between sgn-bar sub-screens
     const sgnGroups = [
       ['wedstrijden', 'checkin', 'belasting', 'slaap'],
-      ['planning', 'video'],
+      ['planning', 'video', 'scouting'],
     ];
     (function initSwipe() {
       let tx = 0, ty = 0, ignore = false;
@@ -2034,7 +2063,7 @@
 
     const screenNavGroup = {
       wedstrijden: 'reflectie', checkin: 'reflectie', belasting: 'reflectie', slaap: 'reflectie',
-      planning: 'traject', video: 'traject',
+      planning: 'traject', video: 'traject', scouting: 'traject',
     };
 
     function switchScreen(name) {
@@ -2087,6 +2116,9 @@
       }
       if (name === 'video') {
         loadVideoAnalyse();
+      }
+      if (name === 'scouting') {
+        loadScouting();
       }
     }
 
@@ -3165,6 +3197,236 @@
       dateEl.value = date;
       dateEl.dispatchEvent(new Event('change'));
       document.getElementById('slFormCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── SCOUTING ──────────────────────────────────────────
+    // opponent cards; past matches are matched by name from the journal (daily_journal.opponent)
+
+    function scStyles(isNL) {
+      return {
+        aanvaller: isNL ? 'Aanvallend' : 'Attacking',
+        baseliner: 'Baseliner',
+        counter: 'Counterpuncher',
+        netspeler: isNL ? 'Netspeler' : 'Serve & volley',
+        allround: 'Allround',
+      };
+    }
+    function scNorm(s) { return (s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+    function scMatchesFor(name, matches) {
+      const n = scNorm(name);
+      return matches.filter((m) => {
+        const o = scNorm(m.opponent);
+        return o && (o === n || (n.length >= 3 && o.length >= 3 && (o.includes(n) || n.includes(o))));
+      });
+    }
+    function scQueries(userId) {
+      return [
+        supabaseClient.from('opponent_scouts').select('*').eq('user_id', userId).order('updated_at', { ascending: false }),
+        supabaseClient.from('daily_journal').select('entry_date,opponent,match_score,mental_score').eq('user_id', userId)
+          .eq('type', 'match').not('opponent', 'is', null).order('entry_date', { ascending: false }).limit(200),
+      ];
+    }
+
+    function scCardsHtml(scouts, matches, isNL, editable) {
+      const locale = isNL ? 'nl-NL' : 'en-GB';
+      const styles = scStyles(isNL);
+      return scouts.map((s) => {
+        const cid = 'scc-' + s.id.replace(/[^a-z0-9]/gi, '');
+        const past = scMatchesFor(s.name, matches);
+        const sub = [s.club, s.ranking].filter(Boolean).map(escapeHtml).join(' · ');
+        const tags = [
+          s.play_style && styles[s.play_style],
+          s.hand && (s.hand === 'links' ? (isNL ? 'Linkshandig' : 'Left-handed') : (isNL ? 'Rechtshandig' : 'Right-handed')),
+          s.backhand && (s.backhand === 'enkel' ? (isNL ? 'Enkele backhand' : 'One-handed backhand') : (isNL ? 'Dubbele backhand' : 'Two-handed backhand')),
+        ].filter(Boolean);
+        const sections = [
+          [isNL ? 'Sterke punten' : 'Strengths', '#C8F135', s.strengths],
+          [isNL ? 'Zwakke punten' : 'Weaknesses', '#EEAA33', s.weaknesses],
+          [isNL ? 'Tactiek' : 'Game plan', '#3b82f6', s.game_plan],
+        ].filter((x) => x[2]);
+
+        return `
+          <div class="dj-card" id="${cid}">
+            <div class="dj-card-header" onclick="document.getElementById('${cid}').classList.toggle('open')">
+              <div class="sc-avatar">${escapeHtml(s.name.trim().charAt(0).toUpperCase())}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:0.95rem;font-weight:700;color:#EEE;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(s.name)}</div>
+                ${sub ? `<div style="font-size:0.75rem;color:#666;margin-top:1px;">${sub}</div>` : ''}
+              </div>
+              ${past.length ? `<span style="font-size:0.7rem;color:#a855f7;font-weight:600;flex-shrink:0;">${past.length}× ${isNL ? 'gespeeld' : 'played'}</span>` : ''}
+              <svg class="dj-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="dj-card-body">
+              ${tags.length ? `<div class="sc-tags">${tags.map((t) => `<span class="sc-tag">${t}</span>`).join('')}</div>` : ''}
+              ${sections.map(([label, color, text]) => `
+                <div class="dj-field-group">
+                  <span class="dj-q-label" style="color:${color};">${label}</span>
+                  <p class="dj-q-text">${escapeHtml(text)}</p>
+                </div>`).join('') || `<p class="muted" style="font-size:0.84rem;">${isNL ? 'Nog geen aantekeningen.' : 'No notes yet.'}</p>`}
+              ${past.length ? `
+                <div class="dj-field-group">
+                  <span class="dj-q-label" style="color:#a855f7;">${isNL ? 'Eerdere wedstrijden' : 'Previous matches'}</span>
+                  ${past.map((m) => `<div style="font-size:0.82rem;color:#AAA;margin-top:4px;">${new Date(m.entry_date + 'T00:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}${m.match_score ? ' · <span style="color:#DDD;font-weight:600;">' + escapeHtml(m.match_score) + '</span>' : ''}</div>`).join('')}
+                </div>` : ''}
+              ${editable ? `
+                <div class="sc-actions">
+                  <button class="btn-ghost-sm" style="flex:1;" onclick="scOpenForm('${escapeAttr(s.id)}')">${isNL ? 'Bewerken' : 'Edit'}</button>
+                  <button class="btn-ghost-sm" style="color:#EE6666;" onclick="scDelete('${escapeAttr(s.id)}')">${isNL ? 'Verwijderen' : 'Delete'}</button>
+                </div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    let scScouts = [];
+    let scMatches = [];
+
+    async function loadScouting() {
+      const T = i18n[lang];
+      const isNL = lang === 'nl';
+      const container = document.getElementById('scoutingContent');
+      container.innerHTML = `<div class="empty-state">${T.loading}</div>`;
+
+      const [{ data, error }, { data: matches }] = await Promise.all(scQueries(currentUser.id));
+      if (error) {
+        container.innerHTML = `<div class="empty-state">${isNL ? 'Scouting kon niet geladen worden: ' : 'Could not load scouting: '}${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      scScouts = data || [];
+      scMatches = matches || [];
+
+      container.innerHTML = `
+        <div class="sc-top">
+          <input type="search" id="scSearch" placeholder="${isNL ? 'Zoek tegenstander…' : 'Search opponent…'}" />
+          <button class="btn-ghost-sm" style="color:#C8F135;border-color:#C8F13555;flex-shrink:0;" onclick="scOpenForm()">+ ${isNL ? 'Tegenstander' : 'Opponent'}</button>
+        </div>
+        <div id="scFormWrap"></div>
+        <div id="scList"></div>`;
+
+      const renderList = () => {
+        const q = scNorm(document.getElementById('scSearch').value);
+        const shown = q ? scScouts.filter((s) => scNorm([s.name, s.club].join(' ')).includes(q)) : scScouts;
+        document.getElementById('scList').innerHTML = shown.length
+          ? scCardsHtml(shown, scMatches, isNL, true)
+          : `<div class="empty-state">${q ? (isNL ? 'Geen tegenstander gevonden.' : 'No opponent found.')
+              : (isNL ? 'Nog geen tegenstanders gescout. Schrijf na of voor een wedstrijd op wat je opviel, dan heb je het de volgende keer paraat.' : 'No opponents scouted yet. Write down what you noticed before or after a match, so you are ready next time.')}</div>`;
+      };
+      document.getElementById('scSearch').addEventListener('input', renderList);
+      renderList();
+    }
+
+    function scOpenForm(id) {
+      const isNL = lang === 'nl';
+      const T = i18n[lang];
+      const s = (id && scScouts.find((x) => x.id === id)) || {};
+      const styles = scStyles(isNL);
+      const chips = (group, options, value) => `
+        <div class="ld-chips" data-group="${group}" style="margin-bottom:16px;">
+          ${Object.entries(options).map(([k, label]) => `<button type="button" class="ld-chip${value === k ? ' active' : ''}" data-val="${k}">${label}</button>`).join('')}
+        </div>`;
+      const area = (fid, label, value, ph) => `
+        <div class="field">
+          <label>${label}</label>
+          <textarea id="${fid}" style="min-height:80px;" placeholder="${ph}">${escapeHtml(value || '')}</textarea>
+        </div>`;
+
+      const wrap = document.getElementById('scFormWrap');
+      wrap.innerHTML = `
+        <div class="card" id="scFormCard">
+          <h3 style="margin:0 0 14px;">${id ? (isNL ? 'Tegenstander bewerken' : 'Edit opponent') : (isNL ? 'Nieuwe tegenstander' : 'New opponent')}</h3>
+          <div class="field">
+            <label>${isNL ? 'Naam' : 'Name'} *</label>
+            <input type="text" id="scName" maxlength="80" value="${escapeAttr(s.name || '')}" />
+          </div>
+          <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;">
+            <div class="field">
+              <label>${isNL ? 'Club' : 'Club'}</label>
+              <input type="text" id="scClub" maxlength="60" value="${escapeAttr(s.club || '')}" />
+            </div>
+            <div class="field">
+              <label>${isNL ? 'Speelsterkte' : 'Rating'}</label>
+              <input type="text" id="scRanking" maxlength="30" placeholder="${isNL ? 'bijv. 6' : 'e.g. UTR 8'}" value="${escapeAttr(s.ranking || '')}" />
+            </div>
+          </div>
+          <span class="sc-form-label">${isNL ? 'Speelstijl' : 'Playing style'}</span>
+          ${chips('play_style', styles, s.play_style)}
+          <span class="sc-form-label">${isNL ? 'Speelhand' : 'Plays'}</span>
+          ${chips('hand', { rechts: isNL ? 'Rechts' : 'Right', links: isNL ? 'Links' : 'Left' }, s.hand)}
+          <span class="sc-form-label">Backhand</span>
+          ${chips('backhand', { enkel: isNL ? 'Enkel' : 'One-handed', dubbel: isNL ? 'Dubbel' : 'Two-handed' }, s.backhand)}
+          ${area('scStrengths', isNL ? 'Sterke punten' : 'Strengths', s.strengths, isNL ? 'bijv. harde forehand cross, sterke eerste service' : 'e.g. big cross-court forehand, strong first serve')}
+          ${area('scWeaknesses', isNL ? 'Zwakke punten' : 'Weaknesses', s.weaknesses, isNL ? 'bijv. hoge ballen op de backhand, wordt ongeduldig in lange rallies' : 'e.g. high balls to the backhand, gets impatient in long rallies')}
+          ${area('scPlan', isNL ? 'Mijn tactiek tegen deze speler' : 'My game plan against this player', s.game_plan, isNL ? 'bijv. hoog en diep op de backhand, rallies lang maken' : 'e.g. high and deep to the backhand, make rallies long')}
+          <button class="btn-accent" id="scSaveBtn">${T.djSave}</button>
+          <button class="btn-ghost" id="scCancelBtn">${isNL ? 'Annuleren' : 'Cancel'}</button>
+          <p id="scMessage" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
+        </div>`;
+
+      // chips act as a single-select that can be cleared by tapping the active one again
+      wrap.querySelectorAll('.ld-chips').forEach((group) => {
+        group.querySelectorAll('.ld-chip').forEach((chip) => {
+          chip.addEventListener('click', () => {
+            const wasActive = chip.classList.contains('active');
+            group.querySelectorAll('.ld-chip').forEach((c) => c.classList.remove('active'));
+            if (!wasActive) chip.classList.add('active');
+          });
+        });
+      });
+      document.getElementById('scCancelBtn').addEventListener('click', () => { wrap.innerHTML = ''; });
+      document.getElementById('scSaveBtn').addEventListener('click', () => scSave(id));
+      document.getElementById('scFormCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!id) document.getElementById('scName').focus();
+    }
+
+    async function scSave(id) {
+      const T = i18n[lang];
+      const isNL = lang === 'nl';
+      const msg = document.getElementById('scMessage');
+      const btn = document.getElementById('scSaveBtn');
+      const val = (fid) => document.getElementById(fid).value.trim() || null;
+      const chip = (group) => document.querySelector(`#scFormWrap [data-group="${group}"] .ld-chip.active`)?.dataset.val || null;
+
+      const payload = {
+        name: val('scName'),
+        club: val('scClub'),
+        ranking: val('scRanking'),
+        play_style: chip('play_style'),
+        hand: chip('hand'),
+        backhand: chip('backhand'),
+        strengths: val('scStrengths'),
+        weaknesses: val('scWeaknesses'),
+        game_plan: val('scPlan'),
+        updated_at: new Date().toISOString(),
+      };
+      msg.classList.remove('hidden', 'error-msg', 'success-msg');
+      if (!payload.name) {
+        msg.classList.add('error-msg');
+        msg.textContent = isNL ? 'Vul een naam in.' : 'Enter a name.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = T.opdrachtSaving;
+      const { error } = id
+        ? await supabaseClient.from('opponent_scouts').update(payload).eq('id', id)
+        : await supabaseClient.from('opponent_scouts').insert({ ...payload, user_id: currentUser.id });
+      btn.disabled = false;
+      btn.textContent = T.djSave;
+      if (error) {
+        msg.classList.add('error-msg');
+        msg.textContent = T.djSaveFailed + error.message;
+        return;
+      }
+      await loadScouting();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function scDelete(id) {
+      const s = scScouts.find((x) => x.id === id);
+      if (!confirm(lang === 'nl' ? `${s ? s.name : 'Deze tegenstander'} verwijderen?` : `Delete ${s ? s.name : 'this opponent'}?`)) return;
+      const { error } = await supabaseClient.from('opponent_scouts').delete().eq('id', id);
+      if (error) { alert(error.message); return; }
+      loadScouting();
     }
 
     // ── VOEDING ───────────────────────────────────────────
@@ -5128,6 +5390,8 @@
         { data: tournaments },
         { data: loadSessions },
         { data: wellness },
+        { data: scouts },
+        { data: scoutMatches },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('*').eq('user_id', userId).order('assignment_num'),
         supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(20),
@@ -5135,6 +5399,7 @@
         supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date', { ascending: false }).limit(20),
         ldQuery(userId),
         slQuery(userId),
+        ...scQueries(userId),
       ]);
 
       const doneMap = {};
@@ -5164,7 +5429,7 @@
 
         <!-- TABS -->
         <div style="display:flex;gap:0;border-bottom:1px solid #1A1A1A;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;">
-          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-sleep','Slaap'],['kltab-plan','Planning']].map(([id,label],i)=>`
+          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-sleep','Slaap'],['kltab-scout','Scouting'],['kltab-plan','Planning']].map(([id,label],i)=>`
             <button id="${id}" onclick="klTab('${uid}','${id}')" style="flex-shrink:0;background:none;border:none;border-bottom:2px solid ${i===0?'#C8F135':'transparent'};color:${i===0?'#fff':'#555'};font-family:Inter,sans-serif;font-size:0.82rem;font-weight:600;padding:8px 14px;cursor:pointer;transition:all .15s;">${label}</button>`).join('')}
         </div>`;
 
@@ -5260,6 +5525,11 @@
       // ── TAB: SLAAP ────────────────────────────────────────
       html += `<div id="klpanel-sleep-${uid}" class="hidden">${slOverviewHtml(wellness || [], true, false)}</div>`;
 
+      // ── TAB: SCOUTING ─────────────────────────────────────
+      html += `<div id="klpanel-scout-${uid}" class="hidden">${(scouts || []).length
+        ? scCardsHtml(scouts, scoutMatches || [], true, false)
+        : '<div class="empty-state">Nog geen tegenstanders gescout.</div>'}</div>`;
+
       // ── TAB: PLANNING ─────────────────────────────────────
       html += `<div id="klpanel-plan-${uid}" class="hidden">`;
       if (tournaments && tournaments.length) {
@@ -5285,7 +5555,7 @@
     }
 
     function klTab(uid, activeId) {
-      const panels = ['opd','ci','ref','load','sleep','plan'];
+      const panels = ['opd','ci','ref','load','sleep','scout','plan'];
       panels.forEach((p) => {
         const panel = document.getElementById(`klpanel-${p}-${uid}`);
         const tab = document.getElementById(`kltab-${p}`);
