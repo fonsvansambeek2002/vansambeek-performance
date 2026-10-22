@@ -943,35 +943,6 @@
     #ciMessage.error-msg   { color: #ff4444; font-size: 0.9rem; margin-top: 10px; }
 
     /* ── TODAY HERO CARD ── */
-    .today-hero {
-      background: #111;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 14px;
-      border: 1px solid #1E1E1E;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .today-hero-ghost {
-      position: absolute;
-      right: -8px; top: -14px;
-      font-family: 'Bebas Neue', cursive;
-      font-size: 6rem;
-      opacity: .04;
-      line-height: 1;
-      pointer-events: none;
-      user-select: none;
-    }
-    .today-hero-top { display: flex; align-items: flex-start; gap: 14px; }
-    .today-hero-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .today-hero-meta { flex: 1; min-width: 0; }
-    .today-hero-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #444; margin-bottom: 4px; }
-    .today-hero-name { font-family: 'Bebas Neue', cursive; font-size: 1.9rem; letter-spacing: .04em; line-height: 1; margin-bottom: 4px; }
-    .today-hero-sub { font-size: 0.8rem; color: #666; line-height: 1.4; }
-    .today-hero-cta { margin-top: 14px; padding-top: 12px; border-top: 1px solid #1E1E1E; display: flex; align-items: center; gap: 6px; font-size: 0.83rem; font-weight: 600; color: #C8F135; }
-    .today-hero.rest { cursor: default; }
-    .today-hero.rest .today-hero-cta { display: none; }
 
     /* ── PROGRESS RING ── */
     .opr-ring-wrap {
@@ -1245,7 +1216,6 @@
           </div>
         </div>
 
-        <div id="homeToday" class="hidden"></div>
         <div id="homeWeekBanner" class="hidden"></div>
         <div id="homeCoachNote" class="hidden"></div>
 
@@ -2342,46 +2312,6 @@
             <p style="font-size:0.85rem;color:#CCC;line-height:1.65;margin:0;">${escapeHtml(latestNote.content)}</p>
           </div>`;
       }
-
-      // ── today's training ──────────────────────────────────
-      const todayEl = document.getElementById('homeToday');
-      const dow = new Date().getDay(); // 0=Sun,1=Mon,...
-      const dayNamesNL = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
-      const dayNamesEN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      const dayLabel = isEN ? dayNamesEN[dow] : dayNamesNL[dow];
-      const trainMap = {
-        1: { label: 'Workout A', sub: isEN ? 'Lower Body & Explosiveness' : 'Onderlichaam & Explosiviteit', color: '#C8F135', screen: 'library', cat: 'fysiek' },
-        2: { label: isEN ? 'Rest' : 'Rustdag', sub: isEN ? 'Recovery & mobility' : 'Herstel & mobiliteit', color: '#555', screen: null },
-        3: { label: 'Workout B', sub: isEN ? 'Upper Body, Core & Rotation' : 'Bovenlichaam, Core & Rotatie', color: '#3b82f6', screen: 'library', cat: 'fysiek' },
-        4: { label: 'Workout C', sub: isEN ? 'Agility, Balance & Court Movement' : 'Agility, Balans & Baanbeweging', color: '#a855f7', screen: 'library', cat: 'fysiek' },
-        5: { label: 'Workout A', sub: isEN ? 'Lower Body & Explosiveness' : 'Onderlichaam & Explosiviteit', color: '#C8F135', screen: 'library', cat: 'fysiek' },
-        6: { label: isEN ? 'Rest' : 'Rustdag', sub: isEN ? 'Light walk or nothing' : 'Licht wandelen of niets', color: '#555', screen: null },
-        0: { label: isEN ? 'Rest' : 'Rustdag', sub: isEN ? 'Prepare mentally for the week' : 'Mentaal voorbereiden op de week', color: '#555', screen: null },
-      };
-      const t = trainMap[dow];
-      const workoutIcon = t.screen
-        ? `<svg viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-width="2" width="26" height="26"><path d="M6.5 6.5h11M6.5 17.5h11M12 2v20M2 12h4M18 12h4"/></svg>`
-        : `<svg viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-width="1.8" width="26" height="26"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-      todayEl.classList.remove('hidden');
-      todayEl.innerHTML = `
-        <div class="today-hero${t.screen ? '' : ' rest'}" ${t.screen ? `onclick="switchScreen('${t.screen}')${t.cat ? `;setTimeout(()=>{document.querySelector('[data-category=\\'${t.cat}\\']')?.click()},200)` : ''}"` : ''}>
-          <div class="today-hero-ghost">${t.screen ? t.label.replace(' ','') : 'REST'}</div>
-          <div class="today-hero-top">
-            <div class="today-hero-icon" style="background:${t.color}15;border:1px solid ${t.color}30;">
-              ${workoutIcon}
-            </div>
-            <div class="today-hero-meta">
-              <div class="today-hero-label">${dayLabel} · ${isEN ? 'Today' : 'Vandaag'}</div>
-              <div class="today-hero-name" style="color:${t.color};">${t.label}</div>
-              <div class="today-hero-sub">${t.sub}</div>
-            </div>
-          </div>
-          ${t.screen ? `
-          <div class="today-hero-cta">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path d="M9 18l6-6-6-6"/></svg>
-            ${isEN ? 'Open workout' : 'Open workout'}
-          </div>` : ''}
-        </div>`;
 
       // ── welcome / action cards ────────────────────────────
       const welcomeCard = document.getElementById('welcomeCard');
