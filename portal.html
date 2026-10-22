@@ -1066,6 +1066,37 @@
     .sc-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #1A1A1A; }
     .sc-form-label { font-size: 0.78rem; color: #AAA; margin: 0 0 8px; display: block; }
 
+    /* ── FOCUS ── */
+    .fc-cat {
+      background: #111; border: 1px solid #1E1E1E; border-left: 3px solid #333; border-radius: 12px;
+      padding: 10px 12px 10px 14px; margin-bottom: 8px;
+    }
+    .fc-head { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+    .fc-name { font-weight: 700; font-size: 0.92rem; flex: 1; }
+    .fc-count { font-size: 0.7rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; }
+    .fc-add-btn {
+      width: 30px; height: 30px; border-radius: 8px; background: #1A1A1A; border: 1px solid #2A2A2A;
+      color: #AAA; font-size: 1.1rem; line-height: 1; cursor: pointer; flex-shrink: 0;
+    }
+    .fc-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0 2px; }
+    .fc-check {
+      width: 22px; height: 22px; border-radius: 6px; border: 2px solid #444; background: transparent;
+      color: #0A0A0A; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; cursor: pointer; margin-top: 1px; padding: 0;
+    }
+    .fc-text { flex: 1; min-width: 0; font-size: 0.88rem; color: #DDD; line-height: 1.45; cursor: pointer; overflow-wrap: anywhere; }
+    .fc-item.done .fc-text { color: #555; text-decoration: line-through; }
+    .fc-coach {
+      display: inline-block; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      color: #C8F135; background: #C8F13515; border-radius: 4px; padding: 1px 5px; margin-left: 4px; vertical-align: 1px;
+    }
+    .fc-add { display: flex; gap: 8px; margin-top: 8px; }
+    .fc-add input {
+      flex: 1; min-width: 0; background: #0D0D0D; border: 1px solid #2A2A2A; border-radius: 8px;
+      color: #fff; font-family: 'Inter', sans-serif; font-size: 16px; padding: 8px 10px;
+    }
+    .fc-done { margin-top: 6px; font-size: 0.78rem; }
+    .fc-done summary { color: #555; cursor: pointer; padding: 4px 0; }
+
     /* ── DAGBOEK ── */
     .dj-type-toggle {
       display: flex; gap: 0; background: #111; border: 1px solid #2A2A2A;
@@ -1298,6 +1329,7 @@
           <button class="sgn-btn active" data-screen="planning">Planning</button>
           <button class="sgn-btn" data-screen="video">Video</button>
           <button class="sgn-btn" data-screen="scouting">Scouting</button>
+          <button class="sgn-btn" data-screen="focus">Focus</button>
         </div>
         <div class="plan-year-nav">
           <button class="icon-btn" id="planPrevYear" style="font-size:1.4rem;padding:4px 10px;">‹</button>
@@ -1355,8 +1387,19 @@
           <button class="sgn-btn" data-screen="planning">Planning</button>
           <button class="sgn-btn" data-screen="video">Video</button>
           <button class="sgn-btn active" data-screen="scouting">Scouting</button>
+          <button class="sgn-btn" data-screen="focus">Focus</button>
         </div>
         <div id="scoutingContent"></div>
+      </section>
+
+      <section class="screen" id="screen-focus">
+        <div class="sgn-bar">
+          <button class="sgn-btn" data-screen="planning">Planning</button>
+          <button class="sgn-btn" data-screen="video">Video</button>
+          <button class="sgn-btn" data-screen="scouting">Scouting</button>
+          <button class="sgn-btn active" data-screen="focus">Focus</button>
+        </div>
+        <div id="focusContent"></div>
       </section>
 
       <section class="screen" id="screen-video">
@@ -1364,6 +1407,7 @@
           <button class="sgn-btn" data-screen="planning">Planning</button>
           <button class="sgn-btn active" data-screen="video">Video</button>
           <button class="sgn-btn" data-screen="scouting">Scouting</button>
+          <button class="sgn-btn" data-screen="focus">Focus</button>
         </div>
         <div class="card" style="margin-bottom:20px;">
           <h3 style="margin-bottom:6px;" id="vidFormTitle">Video insturen</h3>
@@ -1533,7 +1577,7 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', scouting: 'Scouting', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
         sgnWedstrijden: 'Dagboek',
@@ -1710,7 +1754,7 @@
         djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', scouting: 'Scouting', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
         sgnWedstrijden: 'Journal',
@@ -1967,6 +2011,9 @@
       if (document.getElementById('screen-scouting').classList.contains('active')) {
         loadScouting();
       }
+      if (document.getElementById('screen-focus').classList.contains('active')) {
+        loadFocus('focusContent', currentUser.id);
+      }
       if (document.getElementById('screen-video').classList.contains('active')) {
         loadVideoAnalyse();
       }
@@ -2017,7 +2064,7 @@
     // swipe left/right between sgn-bar sub-screens
     const sgnGroups = [
       ['wedstrijden', 'checkin', 'belasting', 'slaap'],
-      ['planning', 'video', 'scouting'],
+      ['planning', 'video', 'scouting', 'focus'],
     ];
     (function initSwipe() {
       let tx = 0, ty = 0, ignore = false;
@@ -2063,7 +2110,7 @@
 
     const screenNavGroup = {
       wedstrijden: 'reflectie', checkin: 'reflectie', belasting: 'reflectie', slaap: 'reflectie',
-      planning: 'traject', video: 'traject', scouting: 'traject',
+      planning: 'traject', video: 'traject', scouting: 'traject', focus: 'traject',
     };
 
     function switchScreen(name) {
@@ -2119,6 +2166,9 @@
       }
       if (name === 'scouting') {
         loadScouting();
+      }
+      if (name === 'focus') {
+        loadFocus('focusContent', currentUser.id);
       }
     }
 
@@ -2215,6 +2265,7 @@
         { data: coachNotes },
         { data: allCheckins },
         { data: recentLoad },
+        { data: focusOpen },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
         supabaseClient.from('weekly_checkins').select('id').eq('user_id', currentUser.id).eq('week_start', getWeekStart()),
@@ -2224,11 +2275,14 @@
         supabaseClient.from('coach_notes').select('content,session_date').eq('client_id', currentUser.id).order('session_date', { ascending: false }).limit(1),
         supabaseClient.from('weekly_checkins').select('week_start').eq('user_id', currentUser.id).order('week_start', { ascending: false }).limit(20),
         supabaseClient.from('training_load').select('duration_min,rpe').eq('user_id', currentUser.id).gte('session_date', localDateStr(ldDaysAgo(6))),
+        supabaseClient.from('focus_points').select('category').eq('user_id', currentUser.id).eq('done', false),
       ]);
 
       const asData = getAssignments();
       const loadSessions = recentLoad || [];
       const loadTotal = loadSessions.reduce((a, s) => a + s.duration_min * s.rpe, 0);
+      const focusList = focusOpen || [];
+      const focusCats = fcCategories(!isEN).filter(([k]) => focusList.some((f) => f.category === k)).map(([, label]) => label);
       const doneCount = (completions || []).length;
       const allDone = doneCount >= asData.length;
       const checkinDone = (checkins || []).length > 0;
@@ -2384,6 +2438,20 @@
             <div class="action-card-label">${isEN ? 'Training load · 7 days' : 'Belasting · 7 dagen'}</div>
             <div class="action-card-title">${loadSessions.length ? ldFmt(loadTotal, !isEN) + ' AU' : (isEN ? 'Log your training' : 'Log je training')}</div>
             ${loadSessions.length ? `<div class="action-card-sub">${loadSessions.length} ${isEN ? (loadSessions.length === 1 ? 'session' : 'sessions') : (loadSessions.length === 1 ? 'sessie' : 'sessies')}</div>` : ''}
+          </div>
+          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <div class="action-card" onclick="switchScreen('focus')">
+          <div class="action-card-icon" style="background:#2a0a1e;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-card-label">Focus</div>
+            <div class="action-card-title">${focusList.length
+              ? `${focusList.length} ${isEN ? (focusList.length === 1 ? 'focus point' : 'focus points') : (focusList.length === 1 ? 'aandachtspunt' : 'aandachtspunten')}`
+              : (isEN ? 'Write down your focus points' : 'Schrijf je aandachtspunten op')}</div>
+            ${focusCats.length ? `<div class="action-card-sub">${focusCats.join(' · ')}</div>` : ''}
           </div>
           <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -3427,6 +3495,149 @@
       const { error } = await supabaseClient.from('opponent_scouts').delete().eq('id', id);
       if (error) { alert(error.message); return; }
       loadScouting();
+    }
+
+    // ── FOCUS ─────────────────────────────────────────────
+    // focus points per stroke/area; the athlete and the coach can both add, tick off and edit them.
+    // state is kept per container so the same UI works on the athlete screen and in the coach's client view.
+
+    function fcCategories(isNL) {
+      return [
+        ['forehand', 'Forehand', '#C8F135'],
+        ['backhand', 'Backhand', '#88BB44'],
+        ['service', isNL ? 'Service' : 'Serve', '#3b82f6'],
+        ['return', 'Return', '#06b6d4'],
+        ['volley', 'Volleys', '#a855f7'],
+        ['tactisch', isNL ? 'Tactisch' : 'Tactical', '#f59e0b'],
+        ['fysiek', isNL ? 'Fysiek' : 'Physical', '#f97316'],
+        ['mentaal', isNL ? 'Mentaal' : 'Mental', '#ec4899'],
+      ];
+    }
+
+    const fcState = {};
+
+    async function loadFocus(cid, userId, coachView) {
+      const el = document.getElementById(cid);
+      if (!el) return;
+      const prev = fcState[cid];
+      const st = fcState[cid] = {
+        userId,
+        coachView: !!coachView,
+        items: prev && prev.userId === userId ? prev.items : null,
+        openAdd: prev && prev.userId === userId ? prev.openAdd : null,
+      };
+      if (!st.items) el.innerHTML = `<div class="empty-state">${i18n[lang].loading}</div>`;
+
+      const { data, error } = await supabaseClient
+        .from('focus_points')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+      if (error) {
+        el.innerHTML = `<div class="empty-state">${st.coachView || lang === 'nl' ? 'Focus kon niet geladen worden: ' : 'Could not load focus: '}${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      st.items = data || [];
+      fcRender(cid);
+    }
+
+    function fcItemHtml(cid, i, color, st, isNL) {
+      const byCoach = i.created_by && i.created_by !== st.userId;
+      return `
+        <div class="fc-item${i.done ? ' done' : ''}">
+          <button class="fc-check" style="${i.done ? `background:${color};border-color:${color};` : `border-color:${color}99;`}" onclick="fcToggle('${cid}','${i.id}')" aria-label="${isNL ? 'Afvinken' : 'Tick off'}">${i.done ? '✓' : ''}</button>
+          <span class="fc-text" onclick="fcEdit('${cid}','${i.id}')">${escapeHtml(i.text)}${byCoach ? '<span class="fc-coach">coach</span>' : ''}</span>
+          <button class="ld-del" onclick="fcDelete('${cid}','${i.id}')" aria-label="${isNL ? 'Verwijderen' : 'Delete'}">×</button>
+        </div>`;
+    }
+
+    function fcRender(cid) {
+      const st = fcState[cid];
+      const el = document.getElementById(cid);
+      if (!st || !el) return;
+      const isNL = st.coachView || lang === 'nl';
+      const activeCount = st.items.filter((i) => !i.done).length;
+
+      el.innerHTML = `
+        <p class="ld-tip" style="margin-bottom:6px;">${st.coachView
+          ? 'Aandachtspunten van deze klant. Je kunt hier zelf punten toevoegen; de klant ziet ze met een coach-label.'
+          : (isNL ? 'Waar werken we aan in de trainingen? Schrijf per onderdeel je aandachtspunten op en vink ze af zodra ze erin zitten.'
+                  : 'What are we working on in training? Write down your focus points per area and tick them off once they stick.')}</p>
+        <p style="font-size:0.74rem;color:#555;margin:0 2px 14px;">${activeCount} ${isNL ? (activeCount === 1 ? 'actief aandachtspunt' : 'actieve aandachtspunten') : (activeCount === 1 ? 'active focus point' : 'active focus points')}</p>
+        ${fcCategories(isNL).map(([key, label, color]) => {
+          const items = st.items.filter((i) => i.category === key);
+          const act = items.filter((i) => !i.done);
+          const done = items.filter((i) => i.done);
+          return `
+            <div class="fc-cat" style="border-left-color:${act.length ? color : '#2A2A2A'};">
+              <div class="fc-head">
+                <span class="fc-name" style="color:${act.length ? color : '#777'};">${label}</span>
+                ${act.length ? `<span class="fc-count" style="background:${color}22;color:${color};">${act.length}</span>` : ''}
+                <button class="fc-add-btn" onclick="fcShowAdd('${cid}','${key}')" aria-label="${isNL ? 'Toevoegen' : 'Add'}">${st.openAdd === key ? '−' : '+'}</button>
+              </div>
+              ${act.map((i) => fcItemHtml(cid, i, color, st, isNL)).join('')}
+              ${st.openAdd === key ? `
+                <div class="fc-add">
+                  <input type="text" id="fcInput-${cid}" maxlength="160" placeholder="${isNL ? 'Nieuw aandachtspunt…' : 'New focus point…'}" onkeydown="if(event.key==='Enter')fcAdd('${cid}','${key}')" />
+                  <button class="btn-ghost-sm" style="color:#C8F135;" onclick="fcAdd('${cid}','${key}')">${isNL ? 'Toevoegen' : 'Add'}</button>
+                </div>` : ''}
+              ${done.length ? `
+                <details class="fc-done">
+                  <summary>✓ ${done.length} ${isNL ? 'behaald' : 'achieved'}</summary>
+                  ${done.map((i) => fcItemHtml(cid, i, color, st, isNL)).join('')}
+                </details>` : ''}
+            </div>`;
+        }).join('')}
+        <div style="height:16px;"></div>`;
+
+      if (st.openAdd) document.getElementById('fcInput-' + cid)?.focus();
+    }
+
+    function fcShowAdd(cid, cat) {
+      const st = fcState[cid];
+      st.openAdd = st.openAdd === cat ? null : cat;
+      fcRender(cid);
+    }
+
+    async function fcAdd(cid, cat) {
+      const st = fcState[cid];
+      const input = document.getElementById('fcInput-' + cid);
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+      input.disabled = true;
+      const { error } = await supabaseClient.from('focus_points').insert({ user_id: st.userId, category: cat, text });
+      if (error) { alert(error.message); input.disabled = false; return; }
+      loadFocus(cid, st.userId, st.coachView); // keeps the input open for the next point
+    }
+
+    async function fcToggle(cid, id) {
+      const st = fcState[cid];
+      const item = st.items.find((i) => i.id === id);
+      if (!item) return;
+      const done = !item.done;
+      const { error } = await supabaseClient.from('focus_points')
+        .update({ done, done_at: done ? new Date().toISOString() : null }).eq('id', id);
+      if (error) { alert(error.message); return; }
+      loadFocus(cid, st.userId, st.coachView);
+    }
+
+    async function fcEdit(cid, id) {
+      const st = fcState[cid];
+      const item = st.items.find((i) => i.id === id);
+      if (!item) return;
+      const text = prompt(st.coachView || lang === 'nl' ? 'Aandachtspunt aanpassen' : 'Edit focus point', item.text);
+      if (text === null || !text.trim() || text.trim() === item.text) return;
+      const { error } = await supabaseClient.from('focus_points').update({ text: text.trim().slice(0, 160) }).eq('id', id);
+      if (error) { alert(error.message); return; }
+      loadFocus(cid, st.userId, st.coachView);
+    }
+
+    async function fcDelete(cid, id) {
+      const st = fcState[cid];
+      if (!confirm(st.coachView || lang === 'nl' ? 'Dit aandachtspunt verwijderen?' : 'Delete this focus point?')) return;
+      const { error } = await supabaseClient.from('focus_points').delete().eq('id', id);
+      if (error) { alert(error.message); return; }
+      loadFocus(cid, st.userId, st.coachView);
     }
 
     // ── VOEDING ───────────────────────────────────────────
@@ -5429,7 +5640,7 @@
 
         <!-- TABS -->
         <div style="display:flex;gap:0;border-bottom:1px solid #1A1A1A;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;">
-          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-sleep','Slaap'],['kltab-scout','Scouting'],['kltab-plan','Planning']].map(([id,label],i)=>`
+          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-sleep','Slaap'],['kltab-focus','Focus'],['kltab-scout','Scouting'],['kltab-plan','Planning']].map(([id,label],i)=>`
             <button id="${id}" onclick="klTab('${uid}','${id}')" style="flex-shrink:0;background:none;border:none;border-bottom:2px solid ${i===0?'#C8F135':'transparent'};color:${i===0?'#fff':'#555'};font-family:Inter,sans-serif;font-size:0.82rem;font-weight:600;padding:8px 14px;cursor:pointer;transition:all .15s;">${label}</button>`).join('')}
         </div>`;
 
@@ -5525,6 +5736,9 @@
       // ── TAB: SLAAP ────────────────────────────────────────
       html += `<div id="klpanel-sleep-${uid}" class="hidden">${slOverviewHtml(wellness || [], true, false)}</div>`;
 
+      // ── TAB: FOCUS (filled by loadFocus after render) ─────
+      html += `<div id="klpanel-focus-${uid}" class="hidden"><div id="klfocus-${uid}"></div></div>`;
+
       // ── TAB: SCOUTING ─────────────────────────────────────
       html += `<div id="klpanel-scout-${uid}" class="hidden">${(scouts || []).length
         ? scCardsHtml(scouts, scoutMatches || [], true, false)
@@ -5552,10 +5766,11 @@
       html += `</div><div style="height:20px;"></div>`;
 
       container.innerHTML = html;
+      loadFocus(`klfocus-${uid}`, userId, true);
     }
 
     function klTab(uid, activeId) {
-      const panels = ['opd','ci','ref','load','sleep','scout','plan'];
+      const panels = ['opd','ci','ref','load','sleep','focus','scout','plan'];
       panels.forEach((p) => {
         const panel = document.getElementById(`klpanel-${p}-${uid}`);
         const tab = document.getElementById(`kltab-${p}`);
