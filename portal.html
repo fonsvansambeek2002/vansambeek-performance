@@ -995,6 +995,46 @@
     .spark-label { font-size: 0.7rem; color: #555; width: 54px; flex-shrink: 0; }
     .spark-val { font-size: 0.9rem; font-weight: 700; width: 20px; text-align: right; flex-shrink: 0; }
 
+    /* ── BELASTING ── */
+    .ld-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .ld-stat { background: #111; border: 1px solid #1E1E1E; border-radius: 14px; padding: 14px; min-width: 0; }
+    .ld-stat-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #555; }
+    .ld-stat-val { font-family: 'Bebas Neue', cursive; font-size: 2.1rem; line-height: 1; margin-top: 6px; color: #fff; letter-spacing: .02em; }
+    .ld-stat-unit { font-family: 'Inter', sans-serif; font-size: 0.72rem; color: #555; margin-left: 4px; letter-spacing: 0; }
+    .ld-stat-sub { font-size: 0.72rem; color: #666; margin-top: 4px; }
+    .ld-gauge {
+      position: relative; height: 6px; border-radius: 999px; margin-top: 10px;
+      background: linear-gradient(90deg, #3b82f6 0 20%, #C8F135 20% 53.3%, #EEAA33 53.3% 66.7%, #EE4444 66.7% 100%);
+    }
+    .ld-gauge-dot {
+      position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+      background: #fff; border: 2px solid #0A0A0A; transform: translate(-50%, -50%);
+    }
+    .ld-tip { font-size: 0.8rem; color: #888; line-height: 1.55; margin: 0 2px 14px; }
+    .ld-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+    .ld-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+    .ld-bar { width: 100%; max-width: 30px; border-radius: 5px 5px 2px 2px; min-height: 2px; }
+    .ld-bar-val { font-size: 0.6rem; color: #666; margin-bottom: 4px; white-space: nowrap; }
+    .ld-bar-lbl { font-size: 0.62rem; color: #555; margin-top: 6px; white-space: nowrap; }
+    .ld-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ld-chip {
+      background: #1a1a1a; border: 1px solid #2A2A2A; border-radius: 999px; color: #888;
+      font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; padding: 7px 13px; cursor: pointer;
+    }
+    .ld-chip.active { background: #C8F135; border-color: #C8F135; color: #0A0A0A; }
+    .ld-preview {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+      background: #0D0D0D; border: 1px solid #1E1E1E; border-radius: 10px; padding: 12px 14px; margin: 4px 0 14px;
+    }
+    .ld-row {
+      display: flex; align-items: center; gap: 10px; padding: 11px 12px 11px 14px;
+      background: #111; border: 1px solid #1E1E1E; border-radius: 12px; margin-bottom: 8px;
+    }
+    .ld-del { background: none; border: none; color: #444; font-size: 1.2rem; line-height: 1; cursor: pointer; padding: 4px 6px; }
+    .ld-info { margin: 6px 2px 24px; font-size: 0.82rem; color: #777; }
+    .ld-info summary { cursor: pointer; color: #999; font-weight: 600; padding: 6px 0; }
+    .ld-info p { line-height: 1.6; margin: 8px 0 0; }
+
     /* ── DAGBOEK ── */
     .dj-type-toggle {
       display: flex; gap: 0; background: #111; border: 1px solid #2A2A2A;
@@ -1183,8 +1223,18 @@
         <div class="sgn-bar" id="sgn-reflectie">
           <button class="sgn-btn active" data-screen="wedstrijden" id="sgnDagboek">Dagboek</button>
           <button class="sgn-btn" data-screen="checkin" id="sgnCheckin">Check-in</button>
+          <button class="sgn-btn" data-screen="belasting">Belasting</button>
         </div>
         <div id="dagboekContent"></div>
+      </section>
+
+      <section class="screen" id="screen-belasting">
+        <div class="sgn-bar">
+          <button class="sgn-btn" data-screen="wedstrijden">Dagboek</button>
+          <button class="sgn-btn" data-screen="checkin">Check-in</button>
+          <button class="sgn-btn active" data-screen="belasting">Belasting</button>
+        </div>
+        <div id="belastingContent"></div>
       </section>
 
       <section class="screen" id="screen-opdrachten">
@@ -1309,6 +1359,7 @@
         <div class="sgn-bar">
           <button class="sgn-btn" data-screen="wedstrijden" id="sgnCheckinBack">Dagboek</button>
           <button class="sgn-btn active" data-screen="checkin">Check-in</button>
+          <button class="sgn-btn" data-screen="belasting">Belasting</button>
         </div>
         <div class="card">
           <h3 id="ciTitle">Wekelijkse check-in</h3>
@@ -1427,11 +1478,12 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
-        sgnWedstrijden: 'Wedstrijden',
+        sgnWedstrijden: 'Dagboek',
         sgnCheckin: 'Check-in',
+        sgnBelasting: 'Belasting',
         sgnHighlights: 'Highlights',
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
@@ -1602,11 +1654,12 @@
         djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
-        sgnWedstrijden: 'Matches',
+        sgnWedstrijden: 'Journal',
         sgnCheckin: 'Check-in',
+        sgnBelasting: 'Load',
         sgnHighlights: 'Highlights',
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
@@ -1805,7 +1858,7 @@
         const key = navKeys[btn.dataset.screen];
         if (key) btn.querySelector('span').textContent = T[key];
       });
-      const sgnKeys = { wedstrijden: 'sgnWedstrijden', checkin: 'sgnCheckin', highlights: 'sgnHighlights', planning: 'sgnPlanning', video: 'sgnVideo' };
+      const sgnKeys = { wedstrijden: 'sgnWedstrijden', checkin: 'sgnCheckin', belasting: 'sgnBelasting', highlights: 'sgnHighlights', planning: 'sgnPlanning', video: 'sgnVideo' };
       document.querySelectorAll('.sgn-btn').forEach((btn) => {
         const key = sgnKeys[btn.dataset.screen];
         if (key) btn.textContent = T[key];
@@ -1837,6 +1890,9 @@
       }
       if (document.getElementById('screen-checkin').classList.contains('active')) {
         loadCheckin();
+      }
+      if (document.getElementById('screen-belasting').classList.contains('active')) {
+        loadBelasting();
       }
       if (document.getElementById('screen-opdrachten').classList.contains('active')) {
         loadOpdrachten();
@@ -1897,7 +1953,7 @@
 
     // swipe left/right between sgn-bar sub-screens
     const sgnGroups = [
-      ['wedstrijden', 'checkin'],
+      ['wedstrijden', 'checkin', 'belasting'],
       ['planning', 'video'],
     ];
     (function initSwipe() {
@@ -1943,7 +1999,7 @@
     // journal submit wired up inside loadJournal()
 
     const screenNavGroup = {
-      wedstrijden: 'reflectie', checkin: 'reflectie',
+      wedstrijden: 'reflectie', checkin: 'reflectie', belasting: 'reflectie',
       planning: 'traject', video: 'traject',
     };
 
@@ -1976,6 +2032,9 @@
       }
       if (name === 'checkin') {
         loadCheckin();
+      }
+      if (name === 'belasting') {
+        loadBelasting();
       }
       if (name === 'opdrachten') {
         loadOpdrachten();
@@ -2086,6 +2145,7 @@
         { data: myPrograms },
         { data: coachNotes },
         { data: allCheckins },
+        { data: recentLoad },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
         supabaseClient.from('weekly_checkins').select('id').eq('user_id', currentUser.id).eq('week_start', getWeekStart()),
@@ -2094,9 +2154,12 @@
         supabaseClient.from('client_programs').select('id,start_date,status,total_weeks').eq('user_id', currentUser.id).eq('status','active').order('start_date', { ascending: false }).limit(1),
         supabaseClient.from('coach_notes').select('content,session_date').eq('client_id', currentUser.id).order('session_date', { ascending: false }).limit(1),
         supabaseClient.from('weekly_checkins').select('week_start').eq('user_id', currentUser.id).order('week_start', { ascending: false }).limit(20),
+        supabaseClient.from('training_load').select('duration_min,rpe').eq('user_id', currentUser.id).gte('session_date', localDateStr(ldDaysAgo(6))),
       ]);
 
       const asData = getAssignments();
+      const loadSessions = recentLoad || [];
+      const loadTotal = loadSessions.reduce((a, s) => a + s.duration_min * s.rpe, 0);
       const doneCount = (completions || []).length;
       const allDone = doneCount >= asData.length;
       const checkinDone = (checkins || []).length > 0;
@@ -2242,6 +2305,18 @@
             <div class="action-card-title">${checkinDone ? T.homeCheckinDone : T.homeCheckinOpen}</div>
           </div>
           ${!checkinDone ? `<svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>` : ''}
+        </div>
+
+        <div class="action-card" onclick="switchScreen('belasting')">
+          <div class="action-card-icon" style="background:#2a1a05;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#EEAA33" stroke-width="2" width="22" height="22"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-card-label">${isEN ? 'Training load · 7 days' : 'Belasting · 7 dagen'}</div>
+            <div class="action-card-title">${loadSessions.length ? ldFmt(loadTotal, !isEN) + ' AU' : (isEN ? 'Log your training' : 'Log je training')}</div>
+            ${loadSessions.length ? `<div class="action-card-sub">${loadSessions.length} ${isEN ? (loadSessions.length === 1 ? 'session' : 'sessions') : (loadSessions.length === 1 ? 'sessie' : 'sessies')}</div>` : ''}
+          </div>
+          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
         </div>
 
         <div class="action-card" onclick="switchScreen('planning')">
@@ -2585,6 +2660,299 @@
 
       // auto-open first
       document.querySelector('.dj-card')?.classList.add('open');
+    }
+
+    // ── BELASTING (sRPE) ──────────────────────────────────
+    // load = minutes × RPE (1-10), in arbitrary units (AU).
+    // ratio (ACWR) = last 7 days ÷ average week of the last 28 days.
+
+    function localDateStr(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function ldDaysAgo(n) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - n);
+      return d;
+    }
+    function ldFmt(n, isNL) {
+      return Math.round(n).toLocaleString(isNL ? 'nl-NL' : 'en-GB');
+    }
+    function ldFmtShort(n, isNL) {
+      if (n < 1000) return String(Math.round(n));
+      return (n / 1000).toFixed(1).replace('.', isNL ? ',' : '.') + 'k';
+    }
+
+    const ldRpeScale = {
+      nl: ['', 'Zeer licht', 'Licht', 'Rustig', 'Matig', 'Stevig', 'Zwaar', 'Erg zwaar', 'Zeer zwaar', 'Extreem zwaar', 'Maximaal'],
+      en: ['', 'Very light', 'Light', 'Easy', 'Moderate', 'Somewhat hard', 'Hard', 'Very hard', 'Very, very hard', 'Extremely hard', 'Maximal'],
+    };
+    function ldRpeColor(v) {
+      return v >= 9 ? '#EE4444' : v >= 7 ? '#EEAA33' : v >= 4 ? '#C8F135' : '#3b82f6';
+    }
+    function ldTypes(isNL) {
+      return {
+        tennis: { label: 'Tennis', color: '#C8F135' },
+        match:  { label: isNL ? 'Wedstrijd' : 'Match', color: '#a855f7' },
+        fysiek: { label: isNL ? 'Fysiek' : 'Fitness', color: '#3b82f6' },
+        overig: { label: isNL ? 'Overig' : 'Other', color: '#888' },
+      };
+    }
+    function ldZone(r, isNL) {
+      if (r < 0.8) return { color: '#3b82f6', label: isNL ? 'Onderbelast' : 'Underloaded',
+        tip: isNL ? 'Je traint minder dan je gewend bent. Prima voor een rustweek; wil je fit blijven, bouw dan rustig weer op.' : 'You are training less than usual. Fine for a recovery week; otherwise build back up gradually.' };
+      if (r <= 1.3) return { color: '#C8F135', label: isNL ? 'Optimaal' : 'Optimal',
+        tip: isNL ? 'Je belasting past bij wat je lichaam gewend is. Zo bouw je veilig fitheid op.' : 'Your load matches what your body is used to. This is how you build fitness safely.' };
+      if (r <= 1.5) return { color: '#EEAA33', label: isNL ? 'Let op' : 'Caution',
+        tip: isNL ? 'Je belasting stijgt snel. Bouw deze week niet verder op en let op herstel.' : 'Your load is rising quickly. Hold it steady this week and focus on recovery.' };
+      return { color: '#EE4444', label: isNL ? 'Hoog risico' : 'High risk',
+        tip: isNL ? 'Flinke piek ten opzichte van je gemiddelde: verhoogd blessurerisico. Plan een lichtere dag of rust in.' : 'Big spike compared to your average: higher injury risk. Plan a lighter day or rest.' };
+    }
+
+    function ldQuery(userId) {
+      return supabaseClient
+        .from('training_load')
+        .select('id,session_date,session_type,duration_min,rpe,notes')
+        .eq('user_id', userId)
+        .gte('session_date', localDateStr(ldDaysAgo(60)))
+        .order('session_date', { ascending: false })
+        .order('created_at', { ascending: false });
+    }
+
+    function ldStats(sessions) {
+      const load = (s) => s.duration_min * s.rpe;
+      const inRange = (s, from, to) => s.session_date >= localDateStr(ldDaysAgo(from)) && s.session_date <= localDateStr(ldDaysAgo(to));
+      const sum = (from, to) => sessions.filter((s) => inRange(s, from, to)).reduce((a, s) => a + load(s), 0);
+
+      const last7 = sessions.filter((s) => inRange(s, 6, 0));
+      const acute = sum(6, 0);
+      const prev = sum(13, 7);
+      const chronicWeek = sum(27, 0) / 4;
+      const oldest = sessions.length ? sessions[sessions.length - 1].session_date : null;
+      const enoughHistory = oldest && oldest <= localDateStr(ldDaysAgo(21));
+      const acwr = enoughHistory && chronicWeek > 0 ? acute / chronicWeek : null;
+
+      const monday = ldDaysAgo((new Date().getDay() + 6) % 7);
+      const weeks = [];
+      for (let i = 7; i >= 0; i--) {
+        const start = new Date(monday);
+        start.setDate(start.getDate() - i * 7);
+        const end = new Date(start);
+        end.setDate(end.getDate() + 6);
+        const a = localDateStr(start), b = localDateStr(end);
+        weeks.push({
+          start,
+          current: i === 0,
+          total: sessions.filter((s) => s.session_date >= a && s.session_date <= b).reduce((t, s) => t + load(s), 0),
+        });
+      }
+      return { last7, acute, prev, acwr, weeks };
+    }
+
+    // top: summary tiles; bottom: weekly chart + session list. The athlete's form goes in between.
+    function ldOverviewParts(sessions, isNL, editable) {
+      const st = ldStats(sessions);
+      const locale = isNL ? 'nl-NL' : 'en-GB';
+      const mins = st.last7.reduce((a, s) => a + s.duration_min, 0);
+      const hm = `${Math.floor(mins / 60)}u ${mins % 60}m`.replace(/^0u /, '');
+      const delta = st.prev > 0 ? Math.round(((st.acute - st.prev) / st.prev) * 100) : null;
+      const zone = st.acwr !== null ? ldZone(st.acwr, isNL) : null;
+
+      const ratioHtml = zone
+        ? `<div class="ld-stat-val" style="color:${zone.color};">${st.acwr.toFixed(2).replace('.', isNL ? ',' : '.')}</div>
+           <div class="ld-stat-sub" style="color:${zone.color};font-weight:600;">${zone.label}</div>
+           <div class="ld-gauge"><div class="ld-gauge-dot" style="left:${Math.min(Math.max((st.acwr - 0.5) / 1.5, 0), 1) * 100}%;"></div></div>`
+        : `<div class="ld-stat-val" style="color:#333;">—</div>
+           <div class="ld-stat-sub">${isNL ? 'Zichtbaar na 3 weken loggen' : 'Shows after 3 weeks of logging'}</div>`;
+
+      const top = `
+        <div class="ld-hero">
+          <div class="ld-stat">
+            <div class="ld-stat-label">${isNL ? 'Laatste 7 dagen' : 'Last 7 days'}</div>
+            <div class="ld-stat-val">${ldFmt(st.acute, isNL)}<span class="ld-stat-unit">AU</span></div>
+            <div class="ld-stat-sub">${st.last7.length} ${isNL ? (st.last7.length === 1 ? 'sessie' : 'sessies') : (st.last7.length === 1 ? 'session' : 'sessions')}${mins ? ' · ' + (isNL ? hm : hm.replace('u', 'h')) : ''}</div>
+            ${delta !== null ? `<div class="ld-stat-sub"><span style="color:${delta > 30 ? '#EEAA33' : '#888'};font-weight:600;">${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta)}%</span> ${isNL ? 'vs week ervoor' : 'vs week before'}</div>` : ''}
+          </div>
+          <div class="ld-stat">
+            <div class="ld-stat-label">${isNL ? 'Belastingsratio' : 'Load ratio'}</div>
+            ${ratioHtml}
+          </div>
+        </div>
+        ${zone ? `<p class="ld-tip">${zone.tip}</p>` : '<div style="height:6px;"></div>'}`;
+
+      const max = Math.max(...st.weeks.map((w) => w.total), 1);
+      const chart = st.weeks.map((w) => `
+        <div class="ld-bar-col">
+          <div class="ld-bar-val" style="${w.current ? 'color:#C8F135;font-weight:700;' : ''}">${w.total ? ldFmtShort(w.total, isNL) : ''}</div>
+          <div class="ld-bar" style="height:${Math.max(Math.round((w.total / max) * 80), 2)}px;background:${w.current ? '#C8F135' : '#3A4A1A'};"></div>
+          <div class="ld-bar-lbl" style="${w.current ? 'color:#C8F135;' : ''}">${w.current ? (isNL ? 'nu' : 'now') : w.start.getDate() + '/' + (w.start.getMonth() + 1)}</div>
+        </div>`).join('');
+
+      const types = ldTypes(isNL);
+      const rows = sessions.slice(0, 20).map((s) => {
+        const t = types[s.session_type] || types.overig;
+        const d = new Date(s.session_date + 'T00:00:00').toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
+        return `
+          <div class="ld-row">
+            <span style="width:8px;height:8px;border-radius:50%;background:${t.color};flex-shrink:0;"></span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.86rem;color:#DDD;font-weight:600;">${t.label} <span style="color:#555;font-weight:400;font-size:0.76rem;">· ${d}</span></div>
+              <div style="font-size:0.74rem;color:#666;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.duration_min} min × <span style="color:${ldRpeColor(s.rpe)};font-weight:600;">${s.rpe}</span>${s.notes ? ' · ' + escapeHtml(s.notes) : ''}</div>
+            </div>
+            <div style="font-weight:700;color:#fff;font-size:0.95rem;">${ldFmt(s.duration_min * s.rpe, isNL)}</div>
+            ${editable ? `<button class="ld-del" onclick="deleteLoadSession('${escapeAttr(s.id)}')" aria-label="${isNL ? 'Verwijderen' : 'Delete'}">×</button>` : ''}
+          </div>`;
+      }).join('');
+
+      const bottom = `
+        <div class="card">
+          <h3 style="margin:0 0 16px;">${isNL ? 'Belasting per week' : 'Load per week'}</h3>
+          <div class="ld-chart">${chart}</div>
+        </div>
+        <h4 style="font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#444;font-size:1rem;margin:4px 0 10px;">${isNL ? 'Recente sessies' : 'Recent sessions'}</h4>
+        ${rows || `<div class="empty-state">${isNL ? 'Nog geen sessies gelogd.' : 'No sessions logged yet.'}</div>`}`;
+
+      return { top, bottom };
+    }
+
+    async function loadBelasting() {
+      const T = i18n[lang];
+      const isNL = lang === 'nl';
+      const container = document.getElementById('belastingContent');
+      container.innerHTML = `<div class="empty-state">${T.loading}</div>`;
+
+      const { data, error } = await ldQuery(currentUser.id);
+      if (error) {
+        container.innerHTML = `<div class="empty-state">${isNL ? 'Belasting kon niet geladen worden: ' : 'Could not load training load: '}${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      const sessions = data || [];
+      const parts = ldOverviewParts(sessions, isNL, true);
+      const types = ldTypes(isNL);
+      const today = localDateStr(new Date());
+      let selType = sessions[0]?.session_type || 'tennis';
+
+      container.innerHTML = parts.top + `
+        <div class="card">
+          <h3 style="margin:0 0 4px;">${isNL ? 'Sessie loggen' : 'Log a session'}</h3>
+          <p class="muted" style="font-size:0.8rem;margin:0 0 14px;">${isNL ? 'Vul dit ±30 minuten na je training in.' : 'Fill this in about 30 minutes after training.'}</p>
+
+          <div class="ld-chips" id="ldTypeChips" style="margin-bottom:16px;">
+            ${Object.entries(types).map(([k, t]) => `<button type="button" class="ld-chip${k === selType ? ' active' : ''}" data-type="${k}">${t.label}</button>`).join('')}
+          </div>
+
+          <div class="field">
+            <label>${T.djDateLabel}</label>
+            <input type="date" id="ldDate" value="${today}" max="${today}" />
+          </div>
+
+          <div class="field" style="margin-bottom:8px;">
+            <label>${isNL ? 'Duur (minuten)' : 'Duration (minutes)'}</label>
+            <input type="number" id="ldMinutes" inputmode="numeric" min="1" max="600" placeholder="${isNL ? 'bijv. 90' : 'e.g. 90'}" />
+          </div>
+          <div class="ld-chips" id="ldMinChips" style="margin-bottom:18px;">
+            ${[30, 45, 60, 90, 120].map((m) => `<button type="button" class="ld-chip" data-min="${m}">${m}</button>`).join('')}
+          </div>
+
+          <div class="slider-field">
+            <div class="slider-label">
+              <span>${isNL ? 'Hoe zwaar voelde het?' : 'How hard did it feel?'} <span id="ldRpeDesc" style="color:#666;"></span></span>
+              <span class="slider-val" id="valLdRpe">5</span>
+            </div>
+            <input type="range" min="1" max="10" value="5" id="ldRpe" />
+          </div>
+
+          <div class="field">
+            <label>${isNL ? 'Notitie (optioneel)' : 'Note (optional)'}</label>
+            <input type="text" id="ldNotes" maxlength="120" placeholder="${isNL ? 'bijv. baantraining met coach' : 'e.g. court session with coach'}" />
+          </div>
+
+          <div class="ld-preview">
+            <span id="ldPreviewCalc" style="font-size:0.82rem;color:#888;"></span>
+            <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#C8F135;letter-spacing:.02em;"><span id="ldPreviewVal">—</span><span class="ld-stat-unit">AU</span></span>
+          </div>
+
+          <button class="btn-accent" id="ldSaveBtn">${T.djSave}</button>
+          <p id="ldMessage" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
+        </div>` + parts.bottom + `
+        <details class="ld-info">
+          <summary>${isNL ? 'Hoe werkt dit?' : 'How does this work?'}</summary>
+          <p>${isNL
+            ? 'Belasting = minuten × hoe zwaar het voelde (1-10). Een training van 90 minuten die als een 6 voelde is 540 AU (arbitrary units). Zo tellen een lange rustige training en een korte zware training eerlijk mee.'
+            : 'Load = minutes × how hard it felt (1-10). A 90-minute session that felt like a 6 is 540 AU (arbitrary units). That way a long easy session and a short hard one both count fairly.'}</p>
+          <p>${isNL
+            ? 'De belastingsratio vergelijkt je laatste 7 dagen met je gemiddelde week over de laatste 4 weken. Tussen 0,8 en 1,3 zit je goed. Boven 1,5 ga je sneller omhoog dan je lichaam gewend is en stijgt het blessurerisico. Log ook wedstrijden en fysieke trainingen, anders klopt het beeld niet.'
+            : 'The load ratio compares your last 7 days with your average week over the last 4 weeks. Between 0.8 and 1.3 is the sweet spot. Above 1.5 you are ramping up faster than your body is used to and injury risk goes up. Log matches and fitness sessions too, or the picture will be off.'}</p>
+        </details>`;
+
+      const minEl = document.getElementById('ldMinutes');
+      const rpeEl = document.getElementById('ldRpe');
+
+      function updatePreview() {
+        const m = Number(minEl.value) || 0;
+        const r = Number(rpeEl.value);
+        const valEl = document.getElementById('valLdRpe');
+        valEl.textContent = r;
+        valEl.style.color = ldRpeColor(r);
+        document.getElementById('ldRpeDesc').textContent = '· ' + ldRpeScale[lang][r];
+        document.getElementById('ldPreviewCalc').textContent = m ? `${m} min × ${r}` : (isNL ? 'Vul je minuten in' : 'Enter your minutes');
+        document.getElementById('ldPreviewVal').textContent = m ? ldFmt(m * r, isNL) : '—';
+        document.querySelectorAll('#ldMinChips .ld-chip').forEach((c) => c.classList.toggle('active', Number(c.dataset.min) === m));
+      }
+
+      document.querySelectorAll('#ldTypeChips .ld-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          selType = chip.dataset.type;
+          document.querySelectorAll('#ldTypeChips .ld-chip').forEach((c) => c.classList.toggle('active', c === chip));
+        });
+      });
+      document.querySelectorAll('#ldMinChips .ld-chip').forEach((chip) => {
+        chip.addEventListener('click', () => { minEl.value = chip.dataset.min; updatePreview(); });
+      });
+      minEl.addEventListener('input', updatePreview);
+      rpeEl.addEventListener('input', updatePreview);
+      updatePreview();
+
+      document.getElementById('ldSaveBtn').addEventListener('click', async () => {
+        const msg = document.getElementById('ldMessage');
+        const btn = document.getElementById('ldSaveBtn');
+        const minutes = Math.round(Number(minEl.value));
+        const date = document.getElementById('ldDate').value;
+        msg.classList.remove('hidden', 'error-msg', 'success-msg');
+        if (!minutes || minutes < 1 || minutes > 600 || !date) {
+          msg.classList.add('error-msg');
+          msg.textContent = isNL ? 'Vul een datum en een duur tussen 1 en 600 minuten in.' : 'Enter a date and a duration between 1 and 600 minutes.';
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = T.opdrachtSaving;
+        const { error } = await supabaseClient.from('training_load').insert({
+          user_id: currentUser.id,
+          session_date: date,
+          session_type: selType,
+          duration_min: minutes,
+          rpe: Number(rpeEl.value),
+          notes: document.getElementById('ldNotes').value.trim() || null,
+        });
+        btn.disabled = false;
+        btn.textContent = T.djSave;
+
+        if (error) {
+          msg.classList.add('error-msg');
+          msg.textContent = T.djSaveFailed + error.message;
+          return;
+        }
+        await loadBelasting();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    async function deleteLoadSession(id) {
+      if (!confirm(lang === 'nl' ? 'Deze sessie verwijderen?' : 'Delete this session?')) return;
+      const { error } = await supabaseClient.from('training_load').delete().eq('id', id);
+      if (error) { alert(error.message); return; }
+      loadBelasting();
     }
 
     // ── VOEDING ───────────────────────────────────────────
@@ -4546,11 +4914,13 @@
         { data: checkins },
         { data: reflections },
         { data: tournaments },
+        { data: loadSessions },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('*').eq('user_id', userId).order('assignment_num'),
         supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(20),
         supabaseClient.from('match_reflections').select('*').eq('user_id', userId).order('datum', { ascending: false }).limit(20),
         supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date', { ascending: false }).limit(20),
+        ldQuery(userId),
       ]);
 
       const doneMap = {};
@@ -4580,7 +4950,7 @@
 
         <!-- TABS -->
         <div style="display:flex;gap:0;border-bottom:1px solid #1A1A1A;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;">
-          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-plan','Planning']].map(([id,label],i)=>`
+          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-plan','Planning']].map(([id,label],i)=>`
             <button id="${id}" onclick="klTab('${uid}','${id}')" style="flex-shrink:0;background:none;border:none;border-bottom:2px solid ${i===0?'#C8F135':'transparent'};color:${i===0?'#fff':'#555'};font-family:Inter,sans-serif;font-size:0.82rem;font-weight:600;padding:8px 14px;cursor:pointer;transition:all .15s;">${label}</button>`).join('')}
         </div>`;
 
@@ -4663,6 +5033,16 @@
       }
       html += `</div>`;
 
+      // ── TAB: BELASTING ────────────────────────────────────
+      html += `<div id="klpanel-load-${uid}" class="hidden">`;
+      if (loadSessions && loadSessions.length) {
+        const parts = ldOverviewParts(loadSessions, true, false);
+        html += parts.top + parts.bottom;
+      } else {
+        html += `<div class="empty-state">Nog geen belasting gelogd.</div>`;
+      }
+      html += `</div>`;
+
       // ── TAB: PLANNING ─────────────────────────────────────
       html += `<div id="klpanel-plan-${uid}" class="hidden">`;
       if (tournaments && tournaments.length) {
@@ -4688,7 +5068,7 @@
     }
 
     function klTab(uid, activeId) {
-      const panels = ['opd','ci','ref','plan'];
+      const panels = ['opd','ci','ref','load','plan'];
       panels.forEach((p) => {
         const panel = document.getElementById(`klpanel-${p}-${uid}`);
         const tab = document.getElementById(`kltab-${p}`);
