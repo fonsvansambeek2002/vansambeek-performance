@@ -1035,6 +1035,22 @@
     .ld-info summary { cursor: pointer; color: #999; font-weight: 600; padding: 6px 0; }
     .ld-info p { line-height: 1.6; margin: 8px 0 0; }
 
+    /* ── SLAAP ── */
+    .sl-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 6px; }
+    .sl-tile { background: #111; border: 1px solid #1E1E1E; border-radius: 12px; padding: 10px 4px; text-align: center; min-width: 0; }
+    .sl-tile .ld-stat-label { font-size: 0.56rem; letter-spacing: .05em; }
+    .sl-tile-val { font-family: 'Bebas Neue', cursive; font-size: 1.7rem; line-height: 1; margin-top: 6px; letter-spacing: .02em; }
+    .sl-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .sl-table th {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #555;
+      text-align: center; padding: 11px 4px; border-bottom: 1px solid #222;
+    }
+    .sl-table td { text-align: center; padding: 7px 4px; border-bottom: 1px solid #1E1E1E; color: #AAA; white-space: nowrap; }
+    .sl-table th:first-child, .sl-table td:first-child { text-align: left; padding-left: 14px; }
+    .sl-table tr:last-child td { border-bottom: none; }
+    .sl-table tr.sl-click { cursor: pointer; }
+    .sl-cell { display: inline-block; min-width: 34px; padding: 3px 6px; border-radius: 6px; font-weight: 700; }
+
     /* ── DAGBOEK ── */
     .dj-type-toggle {
       display: flex; gap: 0; background: #111; border: 1px solid #2A2A2A;
@@ -1224,6 +1240,7 @@
           <button class="sgn-btn active" data-screen="wedstrijden" id="sgnDagboek">Dagboek</button>
           <button class="sgn-btn" data-screen="checkin" id="sgnCheckin">Check-in</button>
           <button class="sgn-btn" data-screen="belasting">Belasting</button>
+          <button class="sgn-btn" data-screen="slaap">Slaap</button>
         </div>
         <div id="dagboekContent"></div>
       </section>
@@ -1233,8 +1250,19 @@
           <button class="sgn-btn" data-screen="wedstrijden">Dagboek</button>
           <button class="sgn-btn" data-screen="checkin">Check-in</button>
           <button class="sgn-btn active" data-screen="belasting">Belasting</button>
+          <button class="sgn-btn" data-screen="slaap">Slaap</button>
         </div>
         <div id="belastingContent"></div>
+      </section>
+
+      <section class="screen" id="screen-slaap">
+        <div class="sgn-bar">
+          <button class="sgn-btn" data-screen="wedstrijden">Dagboek</button>
+          <button class="sgn-btn" data-screen="checkin">Check-in</button>
+          <button class="sgn-btn" data-screen="belasting">Belasting</button>
+          <button class="sgn-btn active" data-screen="slaap">Slaap</button>
+        </div>
+        <div id="slaapContent"></div>
       </section>
 
       <section class="screen" id="screen-opdrachten">
@@ -1360,6 +1388,7 @@
           <button class="sgn-btn" data-screen="wedstrijden" id="sgnCheckinBack">Dagboek</button>
           <button class="sgn-btn active" data-screen="checkin">Check-in</button>
           <button class="sgn-btn" data-screen="belasting">Belasting</button>
+          <button class="sgn-btn" data-screen="slaap">Slaap</button>
         </div>
         <div class="card">
           <h3 id="ciTitle">Wekelijkse check-in</h3>
@@ -1478,12 +1507,13 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
         sgnWedstrijden: 'Dagboek',
         sgnCheckin: 'Check-in',
         sgnBelasting: 'Belasting',
+        sgnSlaap: 'Slaap',
         sgnHighlights: 'Highlights',
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
@@ -1654,12 +1684,13 @@
         djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
         sgnWedstrijden: 'Journal',
         sgnCheckin: 'Check-in',
         sgnBelasting: 'Load',
+        sgnSlaap: 'Sleep',
         sgnHighlights: 'Highlights',
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
@@ -1858,7 +1889,7 @@
         const key = navKeys[btn.dataset.screen];
         if (key) btn.querySelector('span').textContent = T[key];
       });
-      const sgnKeys = { wedstrijden: 'sgnWedstrijden', checkin: 'sgnCheckin', belasting: 'sgnBelasting', highlights: 'sgnHighlights', planning: 'sgnPlanning', video: 'sgnVideo' };
+      const sgnKeys = { wedstrijden: 'sgnWedstrijden', checkin: 'sgnCheckin', belasting: 'sgnBelasting', slaap: 'sgnSlaap', highlights: 'sgnHighlights', planning: 'sgnPlanning', video: 'sgnVideo' };
       document.querySelectorAll('.sgn-btn').forEach((btn) => {
         const key = sgnKeys[btn.dataset.screen];
         if (key) btn.textContent = T[key];
@@ -1893,6 +1924,9 @@
       }
       if (document.getElementById('screen-belasting').classList.contains('active')) {
         loadBelasting();
+      }
+      if (document.getElementById('screen-slaap').classList.contains('active')) {
+        loadSlaap();
       }
       if (document.getElementById('screen-opdrachten').classList.contains('active')) {
         loadOpdrachten();
@@ -1953,7 +1987,7 @@
 
     // swipe left/right between sgn-bar sub-screens
     const sgnGroups = [
-      ['wedstrijden', 'checkin', 'belasting'],
+      ['wedstrijden', 'checkin', 'belasting', 'slaap'],
       ['planning', 'video'],
     ];
     (function initSwipe() {
@@ -1999,7 +2033,7 @@
     // journal submit wired up inside loadJournal()
 
     const screenNavGroup = {
-      wedstrijden: 'reflectie', checkin: 'reflectie', belasting: 'reflectie',
+      wedstrijden: 'reflectie', checkin: 'reflectie', belasting: 'reflectie', slaap: 'reflectie',
       planning: 'traject', video: 'traject',
     };
 
@@ -2035,6 +2069,9 @@
       }
       if (name === 'belasting') {
         loadBelasting();
+      }
+      if (name === 'slaap') {
+        loadSlaap();
       }
       if (name === 'opdrachten') {
         loadOpdrachten();
@@ -2953,6 +2990,181 @@
       const { error } = await supabaseClient.from('training_load').delete().eq('id', id);
       if (error) { alert(error.message); return; }
       loadBelasting();
+    }
+
+    // ── SLAAP & WELZIJN ───────────────────────────────────
+    // one entry per day: hours slept + 1-10 scores for sleep quality, mood and body
+
+    function slColor(v) {
+      return v >= 8 ? '#C8F135' : v >= 6 ? '#88BB44' : v >= 4 ? '#EEAA33' : '#EE4444';
+    }
+    function slHoursColor(h) {
+      return h >= 8 ? '#C8F135' : h >= 7 ? '#88BB44' : h >= 6 ? '#EEAA33' : '#EE4444';
+    }
+    function slFmt(n, isNL) {
+      return Number(n).toFixed(1).replace(/\.0$/, '').replace('.', isNL ? ',' : '.');
+    }
+
+    function slQuery(userId) {
+      return supabaseClient
+        .from('daily_wellness')
+        .select('entry_date,sleep_hours,sleep_quality,mood,body')
+        .eq('user_id', userId)
+        .gte('entry_date', localDateStr(ldDaysAgo(27)))
+        .order('entry_date', { ascending: false });
+    }
+
+    function slOverviewHtml(entries, isNL, editable) {
+      const locale = isNL ? 'nl-NL' : 'en-GB';
+      const week = entries.filter((e) => e.entry_date >= localDateStr(ldDaysAgo(6)));
+      const avg = (k) => (week.length ? week.reduce((a, e) => a + Number(e[k]), 0) / week.length : null);
+      const cols = [
+        ['sleep_hours', isNL ? 'Uren' : 'Hours', slHoursColor],
+        ['sleep_quality', isNL ? 'Slaap' : 'Sleep', slColor],
+        ['mood', 'Mood', slColor],
+        ['body', isNL ? 'Lichaam' : 'Body', slColor],
+      ];
+
+      const tiles = cols.map(([k, label, color]) => {
+        const v = avg(k);
+        return `
+          <div class="sl-tile">
+            <div class="ld-stat-label">${label}</div>
+            <div class="sl-tile-val" style="color:${v === null ? '#333' : color(v)};">${v === null ? '—' : slFmt(v, isNL)}</div>
+          </div>`;
+      }).join('');
+
+      const rows = entries.slice(0, 14).map((e) => {
+        const d = new Date(e.entry_date + 'T00:00:00').toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
+        return `
+          <tr${editable ? ` class="sl-click" onclick="slEdit('${e.entry_date}')"` : ''}>
+            <td>${d}</td>
+            ${cols.map(([k, , color]) => {
+              const c = color(Number(e[k]));
+              return `<td><span class="sl-cell" style="color:${c};background:${c}1A;">${slFmt(e[k], isNL)}</span></td>`;
+            }).join('')}
+          </tr>`;
+      }).join('');
+
+      return `
+        <div class="sl-tiles">${tiles}</div>
+        <p class="ld-tip" style="font-size:0.74rem;color:#555;">${isNL ? 'Gemiddelde laatste 7 dagen' : 'Average last 7 days'} · ${week.length}/7 ${isNL ? 'dagen ingevuld' : 'days logged'}</p>
+        ${rows ? `
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="sl-table">
+            <thead><tr><th>${isNL ? 'Datum' : 'Date'}</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        ${editable ? `<p class="muted" style="font-size:0.74rem;margin:-6px 2px 24px;">${isNL ? 'Tik op een dag om hem aan te passen.' : 'Tap a day to edit it.'}</p>` : ''}`
+        : `<div class="empty-state">${isNL ? 'Nog niets ingevuld.' : 'Nothing logged yet.'}</div>`}`;
+    }
+
+    let slEntries = {};
+
+    async function loadSlaap() {
+      const T = i18n[lang];
+      const isNL = lang === 'nl';
+      const container = document.getElementById('slaapContent');
+      container.innerHTML = `<div class="empty-state">${T.loading}</div>`;
+
+      const { data, error } = await slQuery(currentUser.id);
+      if (error) {
+        container.innerHTML = `<div class="empty-state">${isNL ? 'Slaapgegevens konden niet geladen worden: ' : 'Could not load sleep data: '}${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      const entries = data || [];
+      slEntries = {};
+      entries.forEach((e) => { slEntries[e.entry_date] = e; });
+      const today = localDateStr(new Date());
+
+      const slider = (id, label, min, max, step) => `
+        <div class="slider-field">
+          <div class="slider-label">
+            <span>${label}</span>
+            <span class="slider-val" id="val${id}"></span>
+          </div>
+          <input type="range" min="${min}" max="${max}" step="${step}" id="${id}" />
+        </div>`;
+
+      container.innerHTML = `
+        <div class="card" id="slFormCard">
+          <h3 style="margin:0 0 4px;">${isNL ? 'Hoe heb je geslapen?' : 'How did you sleep?'}</h3>
+          <p class="muted" style="font-size:0.8rem;margin:0 0 14px;">${isNL ? 'Vul dit elke ochtend in, het kost 10 seconden.' : 'Fill this in every morning, it takes 10 seconds.'}</p>
+          <div class="field">
+            <label>${T.djDateLabel}</label>
+            <input type="date" id="slDate" value="${today}" max="${today}" />
+          </div>
+          ${slider('slHours', isNL ? 'Uren geslapen' : 'Hours slept', 3, 12, 0.5)}
+          ${slider('slQuality', isNL ? 'Kwaliteit van je slaap' : 'Sleep quality', 1, 10, 1)}
+          ${slider('slMood', isNL ? 'Mood' : 'Mood', 1, 10, 1)}
+          ${slider('slBody', isNL ? 'Lichaam (fris, geen spierpijn)' : 'Body (fresh, no soreness)', 1, 10, 1)}
+          <button class="btn-accent" id="slSaveBtn"></button>
+          <p id="slMessage" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
+        </div>
+        ${slOverviewHtml(entries, isNL, true)}`;
+
+      const fields = [
+        ['slHours', 'sleep_hours', 8, (v) => slFmt(v, isNL) + (isNL ? ' u' : ' h'), slHoursColor],
+        ['slQuality', 'sleep_quality', 7, String, slColor],
+        ['slMood', 'mood', 7, String, slColor],
+        ['slBody', 'body', 7, String, slColor],
+      ];
+      const showVal = ([id, , , fmt, color]) => {
+        const v = Number(document.getElementById(id).value);
+        const el = document.getElementById('val' + id);
+        el.textContent = fmt(v);
+        el.style.color = color(v);
+      };
+      function fillForm() {
+        const existing = slEntries[document.getElementById('slDate').value];
+        fields.forEach((f) => {
+          document.getElementById(f[0]).value = existing ? existing[f[1]] : f[2];
+          showVal(f);
+        });
+        document.getElementById('slSaveBtn').textContent = existing ? (isNL ? 'Bijwerken' : 'Update') : T.djSave;
+      }
+      fields.forEach((f) => document.getElementById(f[0]).addEventListener('input', () => showVal(f)));
+      document.getElementById('slDate').addEventListener('change', fillForm);
+      fillForm();
+
+      document.getElementById('slSaveBtn').addEventListener('click', async () => {
+        const msg = document.getElementById('slMessage');
+        const btn = document.getElementById('slSaveBtn');
+        const date = document.getElementById('slDate').value;
+        msg.classList.remove('hidden', 'error-msg', 'success-msg');
+        if (!date) {
+          msg.classList.add('error-msg');
+          msg.textContent = isNL ? 'Kies een datum.' : 'Pick a date.';
+          return;
+        }
+        const payload = { user_id: currentUser.id, entry_date: date };
+        fields.forEach(([id, col]) => { payload[col] = Number(document.getElementById(id).value); });
+
+        btn.disabled = true;
+        btn.textContent = T.opdrachtSaving;
+        const { error } = await supabaseClient.from('daily_wellness').upsert(payload, { onConflict: 'user_id,entry_date' });
+        btn.disabled = false;
+        if (error) {
+          fillForm();
+          msg.classList.add('error-msg');
+          msg.textContent = T.djSaveFailed + error.message;
+          return;
+        }
+        await loadSlaap();
+        const ok = document.getElementById('slMessage');
+        ok.classList.remove('hidden');
+        ok.classList.add('success-msg');
+        ok.textContent = isNL ? '✓ Opgeslagen' : '✓ Saved';
+      });
+    }
+
+    function slEdit(date) {
+      const dateEl = document.getElementById('slDate');
+      if (!dateEl) return;
+      dateEl.value = date;
+      dateEl.dispatchEvent(new Event('change'));
+      document.getElementById('slFormCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // ── VOEDING ───────────────────────────────────────────
@@ -4915,12 +5127,14 @@
         { data: reflections },
         { data: tournaments },
         { data: loadSessions },
+        { data: wellness },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('*').eq('user_id', userId).order('assignment_num'),
         supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(20),
         supabaseClient.from('match_reflections').select('*').eq('user_id', userId).order('datum', { ascending: false }).limit(20),
         supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date', { ascending: false }).limit(20),
         ldQuery(userId),
+        slQuery(userId),
       ]);
 
       const doneMap = {};
@@ -4950,7 +5164,7 @@
 
         <!-- TABS -->
         <div style="display:flex;gap:0;border-bottom:1px solid #1A1A1A;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;">
-          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-plan','Planning']].map(([id,label],i)=>`
+          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-sleep','Slaap'],['kltab-plan','Planning']].map(([id,label],i)=>`
             <button id="${id}" onclick="klTab('${uid}','${id}')" style="flex-shrink:0;background:none;border:none;border-bottom:2px solid ${i===0?'#C8F135':'transparent'};color:${i===0?'#fff':'#555'};font-family:Inter,sans-serif;font-size:0.82rem;font-weight:600;padding:8px 14px;cursor:pointer;transition:all .15s;">${label}</button>`).join('')}
         </div>`;
 
@@ -5043,6 +5257,9 @@
       }
       html += `</div>`;
 
+      // ── TAB: SLAAP ────────────────────────────────────────
+      html += `<div id="klpanel-sleep-${uid}" class="hidden">${slOverviewHtml(wellness || [], true, false)}</div>`;
+
       // ── TAB: PLANNING ─────────────────────────────────────
       html += `<div id="klpanel-plan-${uid}" class="hidden">`;
       if (tournaments && tournaments.length) {
@@ -5068,7 +5285,7 @@
     }
 
     function klTab(uid, activeId) {
-      const panels = ['opd','ci','ref','load','plan'];
+      const panels = ['opd','ci','ref','load','sleep','plan'];
       panels.forEach((p) => {
         const panel = document.getElementById(`klpanel-${p}-${uid}`);
         const tab = document.getElementById(`kltab-${p}`);
