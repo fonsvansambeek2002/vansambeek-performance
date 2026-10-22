@@ -1210,10 +1210,6 @@
             <p class="greeting" id="homeGreeting" style="margin:0;font-size:1.05rem;"></p>
             <p class="subgreeting" id="subgreeting" style="margin:0;font-size:0.78rem;"></p>
           </div>
-          <div id="homeStreakBadge" class="hidden" style="flex-shrink:0;text-align:center;background:#C8F13510;border:1px solid #C8F13530;border-radius:10px;padding:5px 10px;">
-            <div id="homeStreakNum" style="font-size:1.1rem;font-weight:800;color:#C8F135;line-height:1;"></div>
-            <div style="font-size:0.55rem;color:#555;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-top:1px;">streak</div>
-          </div>
         </div>
 
         <div id="homeWeekBanner" class="hidden"></div>
@@ -1221,7 +1217,7 @@
 
         <div id="welcomeCard" class="welcome-card hidden">
           <h3 id="welcomeTitle">Welkom bij je coaching portal</h3>
-          <p id="welcomeBody">Hier vind je alles voor je mentale ontwikkeling als sporter. Begin met je eerste opdracht, doe je wekelijkse check-in en bekijk de content in de bibliotheek.</p>
+          <p id="welcomeBody">Hier vind je alles voor je mentale ontwikkeling als sporter. Begin met je eerste opdracht en bekijk de content in de bibliotheek.</p>
           <button class="btn-accent" onclick="switchScreen('opdrachten')" id="welcomeBtn">Start met opdracht 1 →</button>
         </div>
         <div class="action-cards" id="homeActions"></div>
@@ -1255,8 +1251,7 @@
 
       <section class="screen" id="screen-wedstrijden">
         <div class="sgn-bar" id="sgn-reflectie">
-          <button class="sgn-btn active" data-screen="wedstrijden" id="sgnDagboek">Dagboek</button>
-          <button class="sgn-btn" data-screen="checkin" id="sgnCheckin">Check-in</button>
+          <button class="sgn-btn active" data-screen="wedstrijden" id="sgnDagboek">Wedstrijd</button>
           <button class="sgn-btn" data-screen="slaap">Slaap</button>
         </div>
         <div id="dagboekContent"></div>
@@ -1268,8 +1263,7 @@
 
       <section class="screen" id="screen-slaap">
         <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="wedstrijden">Dagboek</button>
-          <button class="sgn-btn" data-screen="checkin">Check-in</button>
+          <button class="sgn-btn" data-screen="wedstrijden">Wedstrijd</button>
           <button class="sgn-btn active" data-screen="slaap">Slaap</button>
         </div>
         <div id="slaapContent"></div>
@@ -1417,90 +1411,6 @@
         <div id="vidList"></div>
       </section>
 
-      <section class="screen" id="screen-checkin">
-        <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="wedstrijden" id="sgnCheckinBack">Dagboek</button>
-          <button class="sgn-btn active" data-screen="checkin">Check-in</button>
-          <button class="sgn-btn" data-screen="slaap">Slaap</button>
-        </div>
-        <div class="card">
-          <h3 id="ciTitle">Wekelijkse check-in</h3>
-          <p class="muted" id="ciWeekLabel" style="margin: -4px 0 16px; font-size: 0.85rem;"></p>
-          <div id="ciAlreadyNotice" class="ci-already hidden"></div>
-
-          <form id="checkinForm">
-            <div class="slider-field">
-              <div class="slider-label">
-                <span id="ciLabelOverall">Hoe was je week overall?</span>
-                <span class="slider-val" id="valOverall">7</span>
-              </div>
-              <input type="range" min="1" max="10" value="7" id="ciOverall" />
-            </div>
-
-            <div class="field">
-              <label id="ciLabelSessions">Aantal trainingen deze week</label>
-              <input type="number" min="0" max="20" id="ciSessions" placeholder="bijv. 5" />
-            </div>
-
-            <div class="slider-field">
-              <div class="slider-label">
-                <span id="ciLabelMentalTraining">Mentale focus tijdens trainingen</span>
-                <span class="slider-val" id="valMentalTraining">7</span>
-              </div>
-              <input type="range" min="1" max="10" value="7" id="ciMentalTraining" />
-            </div>
-
-            <div class="field" style="margin-bottom: 10px;">
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #AAA; font-size: 0.82rem;">
-                <input type="checkbox" id="ciNoMatches" style="width: auto; accent-color: #C8F135; width: 16px; height: 16px;" />
-                <span id="ciLabelNoMatches">Geen wedstrijden gespeeld deze week</span>
-              </label>
-            </div>
-            <div class="slider-field" id="ciMatchesWrap">
-              <div class="slider-label">
-                <span id="ciLabelMentalMatches">Mentale performance tijdens wedstrijden</span>
-                <span class="slider-val" id="valMentalMatches">7</span>
-              </div>
-              <input type="range" min="1" max="10" value="7" id="ciMentalMatches" />
-            </div>
-
-            <div class="slider-field">
-              <div class="slider-label">
-                <span id="ciLabelEnergy">Energie & fysiek niveau</span>
-                <span class="slider-val" id="valEnergy">7</span>
-              </div>
-              <input type="range" min="1" max="10" value="7" id="ciEnergy" />
-            </div>
-
-            <div class="slider-field">
-              <div class="slider-label">
-                <span id="ciLabelSleep">Slaap & herstel</span>
-                <span class="slider-val" id="valSleep">7</span>
-              </div>
-              <input type="range" min="1" max="10" value="7" id="ciSleep" />
-            </div>
-
-            <div class="field">
-              <label id="ciLabelWentWell">Wat ging er goed deze week?</label>
-              <textarea id="ciWentWell" style="min-height: 80px;"></textarea>
-            </div>
-            <div class="field">
-              <label id="ciLabelChallenging">Wat was uitdagend?</label>
-              <textarea id="ciChallenging" style="min-height: 80px;"></textarea>
-            </div>
-            <div class="field">
-              <label id="ciLabelFocus">Waar wil je volgende week op focussen?</label>
-              <textarea id="ciFocus" style="min-height: 80px;"></textarea>
-            </div>
-
-            <button type="submit" class="btn-accent" id="ciSubmitBtn">Check-in opslaan</button>
-            <p id="ciMessage" class="hidden"></p>
-          </form>
-        </div>
-
-        <h3 id="ciHistoryTitle" style="margin: 24px 0 12px;">Vorige check-ins</h3>
-        <div id="ciHistoryList"></div>
-      </section>
     </main>
 
     <nav class="bottom-nav">
@@ -1540,10 +1450,10 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Dagboek', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Reflectie', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Opdrachten', klanten: 'Klanten' },
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
-        sgnWedstrijden: 'Dagboek',
+        sgnWedstrijden: 'Wedstrijd',
         sgnCheckin: 'Check-in',
         sgnBelasting: 'Belasting',
         sgnSlaap: 'Slaap',
@@ -1551,7 +1461,7 @@
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
         welcomeTitle: 'Welkom bij je coaching portal',
-        welcomeBody: 'Hier vind je alles voor je mentale ontwikkeling als sporter. Begin met je eerste opdracht, doe je wekelijkse check-in en bekijk de content in de bibliotheek.',
+        welcomeBody: 'Hier vind je alles voor je mentale ontwikkeling als sporter. Begin met je eerste opdracht en bekijk de content in de bibliotheek.',
         welcomeBtn: 'Start met opdracht 1 →',
         homeNextAssignment: 'Volgende opdracht',
         homeAllDone: 'Alle opdrachten klaar',
@@ -1702,27 +1612,30 @@
         djEnergyLabel: 'Energie',
         djFocusLabel: 'Focus & concentratie tijdens training',
         djWorkedOnLabel: 'Waar heb je vandaag aan gewerkt?',
-        djWentWellLabel: 'Wat ging er goed (mentaal)?',
-        djChallengingLabel: 'Wat was uitdagend?',
-        djTakeawayLabel: 'Wat neem je mee naar de volgende training?',
+        djWentWellLabel: 'Wat ging goed?',
+        djChallengingLabel: 'Wat maakte je tegenstander lastig voor je?',
+        djTakeawayLabel: 'Wat neem je mee naar de volgende wedstrijd?',
         djOpponentLabel: 'Tegenstander',
         djScoreLabel: 'Score',
         djMentalPerfLabel: 'Mentale performance',
-        djPressureLabel: 'Hoe ging je om met drukke momenten?',
-        djImproveLabel: 'Wat wil je de volgende keer verbeteren?',
+        djPressureLabel: 'Hoe speelde je de belangrijke punten?',
+        djImproveLabel: 'Wat kan beter?',
         djSave: 'Opslaan',
-        djSaveSuccess: 'Entry opgeslagen!',
+        djSaveSuccess: 'Reflectie opgeslagen!',
+        djFormTitle: 'Hoe ging je wedstrijd?',
+        djFormIntro: 'Vul dit in na je wedstrijd, als het nog vers is.',
+        djNeedOpponent: 'Vul een datum en je tegenstander in.',
         djSaveFailed: 'Opslaan mislukt: ',
-        djHistoryTitle: 'Eerdere entries',
-        djNoHistory: 'Nog geen dagboekentries.',
+        djHistoryTitle: 'Eerdere wedstrijden',
+        djNoHistory: 'Nog geen wedstrijden gereflecteerd.',
         djTrainingLabel: 'Training',
         djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Journal', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Reflect', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Assignments', klanten: 'Clients' },
         navReflectie: 'Reflect',
         navTraject: 'Journey',
-        sgnWedstrijden: 'Journal',
+        sgnWedstrijden: 'Match',
         sgnCheckin: 'Check-in',
         sgnBelasting: 'Load',
         sgnSlaap: 'Sleep',
@@ -1730,7 +1643,7 @@
         sgnPlanning: 'Planning',
         sgnVideo: 'Video',
         welcomeTitle: 'Welcome to your coaching portal',
-        welcomeBody: 'Here you\'ll find everything for your mental development as an athlete. Start with your first assignment, do your weekly check-in and explore the content library.',
+        welcomeBody: 'Here you\'ll find everything for your mental development as an athlete. Start with your first assignment and explore the content library.',
         welcomeBtn: 'Start assignment 1 →',
         homeNextAssignment: 'Next assignment',
         homeAllDone: 'All assignments done',
@@ -1881,19 +1794,22 @@
         djEnergyLabel: 'Energy',
         djFocusLabel: 'Focus & concentration during training',
         djWorkedOnLabel: 'What did you work on today?',
-        djWentWellLabel: 'What went well (mentally)?',
-        djChallengingLabel: 'What was challenging?',
-        djTakeawayLabel: 'What do you take into the next session?',
+        djWentWellLabel: 'What went well?',
+        djChallengingLabel: 'What did your opponent make difficult for you?',
+        djTakeawayLabel: 'What do you take into your next match?',
         djOpponentLabel: 'Opponent',
         djScoreLabel: 'Score',
         djMentalPerfLabel: 'Mental performance',
-        djPressureLabel: 'How did you handle pressure moments?',
-        djImproveLabel: 'What do you want to improve next time?',
+        djPressureLabel: 'How did you play the big points?',
+        djImproveLabel: 'What could be better?',
         djSave: 'Save entry',
-        djSaveSuccess: 'Entry saved!',
+        djSaveSuccess: 'Reflection saved!',
+        djFormTitle: 'How did your match go?',
+        djFormIntro: 'Fill this in after your match, while it is still fresh.',
+        djNeedOpponent: 'Enter a date and your opponent.',
         djSaveFailed: 'Save failed: ',
-        djHistoryTitle: 'Previous entries',
-        djNoHistory: 'No journal entries yet.',
+        djHistoryTitle: 'Previous matches',
+        djNoHistory: 'No match reflections yet.',
         djTrainingLabel: 'Training',
         djMatchLabel: 'Match',
       },
@@ -1933,20 +1849,6 @@
       });
       document.getElementById('vidHistoryTitle').textContent = T.vidHistoryTitle;
 
-      document.getElementById('ciTitle').textContent = T.ciTitle;
-      document.getElementById('ciLabelOverall').textContent = T.ciLabelOverall;
-      document.getElementById('ciLabelSessions').textContent = T.ciLabelSessions;
-      document.getElementById('ciLabelMentalTraining').textContent = T.ciLabelMentalTraining;
-      document.getElementById('ciLabelNoMatches').textContent = T.ciLabelNoMatches;
-      document.getElementById('ciLabelMentalMatches').textContent = T.ciLabelMentalMatches;
-      document.getElementById('ciLabelEnergy').textContent = T.ciLabelEnergy;
-      document.getElementById('ciLabelSleep').textContent = T.ciLabelSleep;
-      document.getElementById('ciLabelWentWell').textContent = T.ciLabelWentWell;
-      document.getElementById('ciLabelChallenging').textContent = T.ciLabelChallenging;
-      document.getElementById('ciLabelFocus').textContent = T.ciLabelFocus;
-      document.getElementById('ciSubmitBtn').textContent = T.ciSubmit;
-      document.getElementById('ciHistoryTitle').textContent = T.ciHistoryTitle;
-
       applyStaticText();
       if (currentUser) loadHome();
       if (libraryLoaded) {
@@ -1955,9 +1857,6 @@
       }
       if (document.getElementById('screen-wedstrijden').classList.contains('active')) {
         loadJournal();
-      }
-      if (document.getElementById('screen-checkin').classList.contains('active')) {
-        loadCheckin();
       }
       if (document.getElementById('screen-belasting').classList.contains('active')) {
         loadBelasting();
@@ -2030,7 +1929,7 @@
 
     // swipe left/right between sgn-bar sub-screens
     const sgnGroups = [
-      ['wedstrijden', 'checkin', 'slaap'],
+      ['wedstrijden', 'slaap'],
       ['library', 'media'],
       ['planning', 'focus', 'scouting', 'video'],
     ];
@@ -2077,7 +1976,7 @@
     // journal submit wired up inside loadJournal()
 
     const screenNavGroup = {
-      wedstrijden: 'reflectie', checkin: 'reflectie', slaap: 'reflectie',
+      wedstrijden: 'reflectie', slaap: 'reflectie',
       library: 'offcourt', media: 'offcourt',
       planning: 'traject', video: 'traject', scouting: 'traject', focus: 'traject',
     };
@@ -2108,9 +2007,6 @@
       }
       if (name === 'wedstrijden') {
         loadJournal();
-      }
-      if (name === 'checkin') {
-        loadCheckin();
       }
       if (name === 'belasting') {
         loadBelasting();
@@ -2228,21 +2124,17 @@
       const today = new Date().toISOString().split('T')[0];
       const [
         { data: completions },
-        { data: checkins },
         { data: tournaments },
         { data: myPrograms },
         { data: coachNotes },
-        { data: allCheckins },
         { data: recentLoad },
         { data: focusOpen },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
-        supabaseClient.from('weekly_checkins').select('id').eq('user_id', currentUser.id).eq('week_start', getWeekStart()),
         supabaseClient.from('tournaments').select('name,start_date,end_date').eq('user_id', currentUser.id)
           .or(`end_date.gte.${today},start_date.gte.${today}`).order('start_date').limit(1),
         supabaseClient.from('client_programs').select('id,start_date,status,total_weeks').eq('user_id', currentUser.id).eq('status','active').order('start_date', { ascending: false }).limit(1),
         supabaseClient.from('coach_notes').select('content,session_date').eq('client_id', currentUser.id).order('session_date', { ascending: false }).limit(1),
-        supabaseClient.from('weekly_checkins').select('week_start').eq('user_id', currentUser.id).order('week_start', { ascending: false }).limit(20),
         supabaseClient.from('training_load').select('duration_min,rpe').eq('user_id', currentUser.id).gte('session_date', localDateStr(ldDaysAgo(6))),
         supabaseClient.from('focus_points').select('category').eq('user_id', currentUser.id),
       ]);
@@ -2254,25 +2146,9 @@
       const focusCats = fcCategories(!isEN).filter(([k]) => focusList.some((f) => f.category === k)).map(([, label]) => label);
       const doneCount = (completions || []).length;
       const allDone = doneCount >= asData.length;
-      const checkinDone = (checkins || []).length > 0;
       const nextTournament = (tournaments || [])[0] || null;
       const activeProgram = (myPrograms || [])[0] || null;
       const latestNote = (coachNotes || [])[0] || null;
-
-      // streak: consecutive weeks with check-in
-      let streak = 0;
-      const ciWeeks = (allCheckins || []).map(c => c.week_start).sort((a,b) => b.localeCompare(a));
-      for (let i = 0; i < ciWeeks.length; i++) {
-        const expected = new Date(getWeekStart());
-        expected.setDate(expected.getDate() - i * 7);
-        const exp = expected.toISOString().split('T')[0];
-        if (ciWeeks[i] === exp) streak++;
-        else break;
-      }
-      if (streak > 1) {
-        document.getElementById('homeStreakBadge').classList.remove('hidden');
-        document.getElementById('homeStreakNum').textContent = streak + 'w';
-      }
 
       // ── week banner ───────────────────────────────────────
       const bannerEl = document.getElementById('homeWeekBanner');
@@ -2347,17 +2223,6 @@
             <div class="action-card-title" style="color:#888;">${T.homeAllDone}</div>
           </div>
         </div>`}
-
-        <div class="action-card${checkinDone ? ' done' : ''}" onclick="switchScreen('checkin')">
-          <div class="action-card-icon" style="background:${checkinDone ? '#1a1a1a' : '#0a1a2e'};">
-            <svg viewBox="0 0 24 24" fill="none" stroke="${checkinDone ? '#888' : '#3b82f6'}" stroke-width="2" width="22" height="22"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M14 2H18a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
-          </div>
-          <div class="action-card-body">
-            <div class="action-card-label">${T.homeCheckinLabel}</div>
-            <div class="action-card-title">${checkinDone ? T.homeCheckinDone : T.homeCheckinOpen}</div>
-          </div>
-          ${!checkinDone ? `<svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>` : ''}
-        </div>
 
         <div class="action-card" onclick="switchScreen('belasting')">
           <div class="action-card-icon" style="background:#2a1a05;">
@@ -2471,188 +2336,121 @@
         ${renderContentItems(data, T)}`;
     }
 
+    // match-day reflection; stored in daily_journal with type 'match'
+    function djQuestions(T) {
+      return [
+        ['djWentWell', 'went_well', T.djWentWellLabel, '#C8F135'],
+        ['djImprove', 'improve', T.djImproveLabel, '#a855f7'],
+        ['djChallenging', 'challenging', T.djChallengingLabel, '#EEAA33'],
+        ['djPressure', 'pressure', T.djPressureLabel, '#3b82f6'],
+        ['djTakeaway', 'takeaway', T.djTakeawayLabel, '#06b6d4'],
+      ];
+    }
+
     function loadJournal() {
       const T = i18n[lang];
       const container = document.getElementById('dagboekContent');
-      const today = new Date().toISOString().split('T')[0];
-
-      function moodColor(v) {
-        return v >= 8 ? '#C8F135' : v >= 6 ? '#88BB44' : v >= 4 ? '#EEAA33' : '#EE4444';
-      }
+      const today = localDateStr(new Date());
 
       container.innerHTML = `
         <div class="card" style="margin-bottom:20px;">
-          <div class="dj-type-toggle">
-            <button class="dj-type-btn active" id="djTypeTrain">${T.djTypeTrain}</button>
-            <button class="dj-type-btn" id="djTypeMatch">${T.djTypeMatch}</button>
-          </div>
+          <h3 style="margin:0 0 4px;">${T.djFormTitle}</h3>
+          <p class="muted" style="font-size:0.8rem;margin:0 0 14px;">${T.djFormIntro}</p>
 
           <div class="field">
             <label>${T.djDateLabel}</label>
-            <input type="date" id="djDate" value="${today}" />
+            <input type="date" id="djDate" value="${today}" max="${today}" />
           </div>
-
-          <span class="dj-section-label">${T.djSectionGeneral}</span>
-
-          <div class="slider-field">
-            <div class="slider-label">
-              <span>${T.djMoodLabel}</span>
-              <span class="slider-val" id="valDjMood">7</span>
-            </div>
-            <input type="range" min="1" max="10" value="7" id="djMood" />
-          </div>
-          <div class="slider-field">
-            <div class="slider-label">
-              <span>${T.djEnergyLabel}</span>
-              <span class="slider-val" id="valDjEnergy">7</span>
-            </div>
-            <input type="range" min="1" max="10" value="7" id="djEnergy" />
-          </div>
-
-          <!-- TRAINING FIELDS -->
-          <div id="djTrainFields">
-            <span class="dj-section-label">${T.djSectionTraining}</span>
-            <div class="slider-field">
-              <div class="slider-label">
-                <span>${T.djFocusLabel}</span>
-                <span class="slider-val" id="valDjFocus">7</span>
-              </div>
-              <input type="range" min="1" max="10" value="7" id="djFocus" />
-            </div>
-            <div class="field">
-              <label>${T.djWorkedOnLabel}</label>
-              <textarea id="djWorkedOn" style="min-height:80px;"></textarea>
-            </div>
-            <div class="field">
-              <label>${T.djWentWellLabel}</label>
-              <textarea id="djWentWell" style="min-height:80px;"></textarea>
-            </div>
-            <div class="field">
-              <label>${T.djChallengingLabel}</label>
-              <textarea id="djChallenging" style="min-height:80px;"></textarea>
-            </div>
-            <div class="field">
-              <label>${T.djTakeawayLabel}</label>
-              <textarea id="djTakeaway" style="min-height:70px;"></textarea>
-            </div>
-          </div>
-
-          <!-- MATCH FIELDS -->
-          <div id="djMatchFields" style="display:none;">
-            <span class="dj-section-label">${T.djSectionMatch}</span>
+          <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;">
             <div class="field">
               <label>${T.djOpponentLabel}</label>
-              <input type="text" id="djOpponent" />
+              <input type="text" id="djOpponent" maxlength="80" />
             </div>
             <div class="field">
               <label>${T.djScoreLabel}</label>
-              <input type="text" id="djScore" placeholder="bijv. 6-3 6-4" />
-            </div>
-            <div class="slider-field">
-              <div class="slider-label">
-                <span>${T.djMentalPerfLabel}</span>
-                <span class="slider-val" id="valDjMentalPerf">7</span>
-              </div>
-              <input type="range" min="1" max="10" value="7" id="djMentalPerf" />
-            </div>
-            <div class="field">
-              <label>${T.djPressureLabel}</label>
-              <textarea id="djPressure" style="min-height:80px;"></textarea>
-            </div>
-            <div class="field">
-              <label>${T.djWentWellLabel}</label>
-              <textarea id="djMatchWentWell" style="min-height:80px;"></textarea>
-            </div>
-            <div class="field">
-              <label>${T.djImproveLabel}</label>
-              <textarea id="djImprove" style="min-height:80px;"></textarea>
+              <input type="text" id="djScore" maxlength="40" placeholder="${lang === 'nl' ? 'bijv. 6-3 6-4' : 'e.g. 6-3 6-4'}" />
             </div>
           </div>
+
+          ${djQuestions(T).map(([id, , label]) => `
+            <div class="field">
+              <label>${label}</label>
+              <textarea id="${id}" style="min-height:70px;"></textarea>
+            </div>`).join('')}
 
           <button class="btn-accent" id="djSubmitBtn">${T.djSave}</button>
           <p id="djMessage" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
         </div>
 
-        <h4 style="font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#444;font-size:1rem;margin:0 0 10px;" id="djHistoryHeading">${T.djHistoryTitle}</h4>
+        <h4 style="font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#444;font-size:1rem;margin:0 0 10px;">${T.djHistoryTitle}</h4>
         <div id="djList"><div class="empty-state">${T.loading}</div></div>
       `;
 
-      // Toggle training / match fields
-      let djType = 'training';
-      document.getElementById('djTypeTrain').addEventListener('click', () => {
-        djType = 'training';
-        document.getElementById('djTypeTrain').classList.add('active');
-        document.getElementById('djTypeMatch').classList.remove('active');
-        document.getElementById('djTrainFields').style.display = '';
-        document.getElementById('djMatchFields').style.display = 'none';
-      });
-      document.getElementById('djTypeMatch').addEventListener('click', () => {
-        djType = 'match';
-        document.getElementById('djTypeMatch').classList.add('active');
-        document.getElementById('djTypeTrain').classList.remove('active');
-        document.getElementById('djTrainFields').style.display = 'none';
-        document.getElementById('djMatchFields').style.display = '';
-      });
-
-      // Slider live values
-      ['djMood','djEnergy','djFocus','djMentalPerf'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', function() {
-          document.getElementById('val' + id.charAt(0).toUpperCase() + id.slice(1)).textContent = this.value;
-        });
-      });
-
-      // Submit
       document.getElementById('djSubmitBtn').addEventListener('click', async () => {
-        const T = i18n[lang];
         const msg = document.getElementById('djMessage');
         const btn = document.getElementById('djSubmitBtn');
-        btn.disabled = true;
-        btn.textContent = T.opdrachtSaving;
-
+        const val = (id) => document.getElementById(id).value.trim() || null;
         const payload = {
           user_id: currentUser.id,
           entry_date: document.getElementById('djDate').value,
-          type: djType,
-          mood: Number(document.getElementById('djMood').value),
-          energy: Number(document.getElementById('djEnergy').value),
+          type: 'match',
+          opponent: val('djOpponent'),
+          match_score: val('djScore'),
         };
+        djQuestions(T).forEach(([id, col]) => { payload[col] = val(id); });
 
-        if (djType === 'training') {
-          payload.mental_score  = Number(document.getElementById('djFocus').value);
-          payload.worked_on     = document.getElementById('djWorkedOn').value.trim() || null;
-          payload.went_well     = document.getElementById('djWentWell').value.trim() || null;
-          payload.challenging   = document.getElementById('djChallenging').value.trim() || null;
-          payload.takeaway      = document.getElementById('djTakeaway').value.trim() || null;
-        } else {
-          payload.opponent      = document.getElementById('djOpponent').value.trim() || null;
-          payload.match_score   = document.getElementById('djScore').value.trim() || null;
-          payload.mental_score  = Number(document.getElementById('djMentalPerf').value);
-          payload.pressure      = document.getElementById('djPressure').value.trim() || null;
-          payload.went_well     = document.getElementById('djMatchWentWell').value.trim() || null;
-          payload.improve       = document.getElementById('djImprove').value.trim() || null;
+        msg.classList.remove('hidden', 'error-msg', 'success-msg');
+        if (!payload.entry_date || !payload.opponent) {
+          msg.classList.add('error-msg');
+          msg.textContent = T.djNeedOpponent;
+          return;
         }
 
+        btn.disabled = true;
+        btn.textContent = T.opdrachtSaving;
         const { error } = await supabaseClient.from('daily_journal').insert(payload);
         btn.disabled = false;
         btn.textContent = T.djSave;
-        msg.classList.remove('hidden', 'error-msg', 'success-msg');
 
         if (error) {
           msg.classList.add('error-msg');
           msg.textContent = T.djSaveFailed + error.message;
           return;
         }
-
+        ['djOpponent', 'djScore', ...djQuestions(T).map((q) => q[0])].forEach((id) => { document.getElementById(id).value = ''; });
         msg.classList.add('success-msg');
         msg.textContent = T.djSaveSuccess;
-        loadJournalHistory(T, moodColor);
+        loadJournalHistory(T);
       });
 
-      loadJournalHistory(T, moodColor);
+      loadJournalHistory(T);
     }
 
-    async function loadJournalHistory(T, moodColor) {
+    function djEntriesHtml(entries, T, isNL) {
+      return entries.map((e, idx) => {
+        const dateStr = new Date(e.entry_date + 'T00:00:00').toLocaleDateString(isNL ? 'nl-NL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        const body = djQuestions(T).filter(([, col]) => e[col]).map(([, col, label, color]) => `
+          <div class="dj-field-group">
+            <span class="dj-q-label" style="color:${color};">${label}</span>
+            <p class="dj-q-text">${escapeHtml(e[col])}</p>
+          </div>`).join('') || `<p class="muted" style="font-size:0.84rem;">${isNL ? 'Geen aantekeningen.' : 'No notes.'}</p>`;
+        const cid = 'djc-' + (e.id ? String(e.id).replace(/[^a-z0-9]/gi, '') : idx);
+        return `
+          <div class="dj-card" id="${cid}">
+            <div class="dj-card-header" onclick="document.getElementById('${cid}').classList.toggle('open')">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:0.92rem;font-weight:700;color:#EEE;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.opponent ? escapeHtml(e.opponent) : (isNL ? 'Wedstrijd' : 'Match')}</div>
+                <div style="font-size:0.76rem;color:#666;margin-top:2px;">${dateStr}</div>
+              </div>
+              ${e.match_score ? `<span style="font-size:0.85rem;font-weight:700;color:#C8F135;flex-shrink:0;">${escapeHtml(e.match_score)}</span>` : ''}
+              <svg class="dj-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="dj-card-body">${body}</div>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadJournalHistory(T) {
       const list = document.getElementById('djList');
       if (!list) return;
       list.innerHTML = `<div class="empty-state">${T.loading}</div>`;
@@ -2661,6 +2459,7 @@
         .from('daily_journal')
         .select('*')
         .eq('user_id', currentUser.id)
+        .eq('type', 'match')
         .order('entry_date', { ascending: false })
         .limit(40);
 
@@ -2668,64 +2467,8 @@
         list.innerHTML = `<div class="empty-state">${T.djNoHistory}</div>`;
         return;
       }
-
-      const isNL = lang === 'nl';
-      list.innerHTML = data.map((e, idx) => {
-        const dateStr = new Date(e.entry_date + 'T00:00:00').toLocaleDateString(isNL ? 'nl-NL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-        const isMatch = e.type === 'match';
-        const badgeClass = isMatch ? 'dj-badge-match' : 'dj-badge-training';
-        const badgeLabel = isMatch ? T.djMatchLabel : T.djTrainingLabel;
-        const mc = moodColor(e.mood || 5);
-
-        const bodyParts = [];
-        if (e.worked_on)      bodyParts.push({ label: T.djWorkedOnLabel,   color: '#C8F135', text: e.worked_on });
-        if (e.went_well)      bodyParts.push({ label: T.djWentWellLabel,   color: '#C8F135', text: e.went_well });
-        if (e.challenging)    bodyParts.push({ label: T.djChallengingLabel, color: '#EEAA33', text: e.challenging });
-        if (e.takeaway)       bodyParts.push({ label: T.djTakeawayLabel,   color: '#3b82f6', text: e.takeaway });
-        if (e.pressure)       bodyParts.push({ label: T.djPressureLabel,   color: '#EEAA33', text: e.pressure });
-        if (e.improve)        bodyParts.push({ label: T.djImproveLabel,    color: '#a855f7', text: e.improve });
-
-        const bodyHtml = bodyParts.map(p => `
-          <div class="dj-field-group">
-            <span class="dj-q-label" style="color:${p.color};">${p.label}</span>
-            <p class="dj-q-text">${escapeHtml(p.text)}</p>
-          </div>`).join('') || `<p class="muted" style="font-size:0.84rem;">${isNL ? 'Geen aantekeningen.' : 'No notes.'}</p>`;
-
-        const scoreRow = isMatch && e.opponent
-          ? `<div style="font-size:0.78rem;color:#888;margin-top:1px;">${escapeHtml(e.opponent)}${e.match_score ? ' · ' + escapeHtml(e.match_score) : ''}</div>`
-          : '';
-
-        const mentalBadge = e.mental_score
-          ? `<div style="margin-left:auto;font-size:0.72rem;color:#555;">mentaal <span style="color:${moodColor(e.mental_score)};font-weight:700;">${e.mental_score}</span></div>`
-          : '';
-
-        return `
-          <div class="dj-card" id="djc-${idx}">
-            <div class="dj-card-header" onclick="document.getElementById('djc-${idx}').classList.toggle('open')">
-              <div class="dj-score-pill" style="background:${mc}20;color:${mc};">${e.mood || '?'}</div>
-              <div style="flex:1;min-width:0;">
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <span class="dj-type-badge ${badgeClass}">${badgeLabel}</span>
-                  <span style="font-size:0.78rem;color:#555;">${dateStr}</span>
-                </div>
-                ${scoreRow}
-              </div>
-              ${mentalBadge}
-              <svg class="dj-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M6 9l6 6 6-6"/></svg>
-            </div>
-            <div class="dj-card-body">
-              <div style="display:flex;gap:16px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1A1A1A;">
-                ${[['Stemming', e.mood], [isNL ? 'Energie' : 'Energy', e.energy], [isNL ? 'Mentaal' : 'Mental', e.mental_score]].filter(x=>x[1]).map(x => `
-                  <div><div style="font-size:0.62rem;color:#444;font-weight:700;text-transform:uppercase;letter-spacing:.07em;">${x[0]}</div>
-                  <div style="font-size:1rem;font-weight:700;color:${moodColor(x[1])};">${x[1]}<span style="font-size:0.68rem;color:#333;">/10</span></div></div>`).join('')}
-              </div>
-              ${bodyHtml}
-            </div>
-          </div>`;
-      }).join('');
-
-      // auto-open first
-      document.querySelector('.dj-card')?.classList.add('open');
+      list.innerHTML = djEntriesHtml(data, T, lang === 'nl');
+      list.querySelector('.dj-card')?.classList.add('open');
     }
 
     // ── BELASTING (sRPE) ──────────────────────────────────
@@ -4966,7 +4709,10 @@
         { data: videoRows                      },
       ] = await Promise.all([
         supabaseClient.from('client_programs').select('*, profiles(full_name)').order('start_date', { ascending: false }),
-        supabaseClient.from('weekly_checkins').select('user_id,week_start').eq('week_start', getWeekStart()),
+        Promise.all(['training_load:session_date', 'daily_wellness:entry_date', 'daily_journal:entry_date'].map((tc) => {
+          const [t, c] = tc.split(':');
+          return supabaseClient.from(t).select('user_id').gte(c, localDateStr(ldDaysAgo(6)));
+        })).then((rs) => ({ data: rs.flatMap((r) => r.data || []) })),
         supabaseClient.from('assignment_completions').select('user_id'),
         supabaseClient.from('coach_notes').select('client_id,session_date').order('session_date', { ascending: false }),
         supabaseClient.from('video_submissions').select('id,feedback'),
@@ -4979,6 +4725,7 @@
       }
 
       const progs = programs || [];
+      // active = logged load, sleep or a journal entry in the last 7 days
       const ciThisWeek = new Set((thisWeekCi || []).map(c => c.user_id));
       const completionsByUser = {};
       (allCompletions || []).forEach(c => { completionsByUser[c.user_id] = (completionsByUser[c.user_id] || 0) + 1; });
@@ -5014,7 +4761,7 @@
         const assPct        = Math.min(Math.round(((completionsByUser[uid] || 0) / asTotal) * 100), 100);
         const lastNoteDate  = lastNoteDateByClient[uid];
         const engColor      = didCiThisWeek ? '#22c55e' : '#f59e0b';
-        const engLabel      = didCiThisWeek ? '✓ Check-in gedaan' : '⚠ Geen check-in deze week';
+        const engLabel      = didCiThisWeek ? '✓ Actief deze week' : '⚠ Niets gelogd deze week';
 
         return `
           <div style="border:1px solid #1A1A1A;border-radius:14px;overflow:hidden;margin-bottom:10px;" id="bprog-${prog.id}">
@@ -5098,7 +4845,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
           ${[
             { label:'Actieve klanten',       val: active.length,                   color:'#C8F135', sub: `${progs.length} ${progs.length!==1?"programma's":'programma'} totaal` },
-            { label:'Check-ins deze week',   val: `${ciDone}/${active.length}`,    color: noCheckin.length ? '#f59e0b' : '#22c55e', sub: noCheckin.length ? `${noCheckin.length} nog open` : 'Iedereen gedaan' },
+            { label:'Actief deze week',   val: `${ciDone}/${active.length}`,    color: noCheckin.length ? '#f59e0b' : '#22c55e', sub: noCheckin.length ? `${noCheckin.length} niets gelogd` : 'Iedereen actief' },
             { label:'Opdrachten gemiddeld',  val: `${avgAss}%`,                    color:'#a855f7', sub: 'van actieve klanten' },
             { label:'Notities (7 dagen)',    val: notesThisWeek,                   color:'#3b82f6', sub: 'sessienotities verstuurd' },
           ].map(s=>`
@@ -5111,7 +4858,7 @@
 
         ${noCheckin.length ? `
         <div style="background:#3b82f608;border:1px solid #3b82f625;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
-          ${sectionHead('💬 Nog geen check-in deze week', '#3b82f6')}
+          ${sectionHead('💬 Niets gelogd in de laatste 7 dagen', '#3b82f6')}
           ${noCheckin.map(prog => {
             const name = prog.profiles?.full_name || 'Onbekend';
             const assPct = Math.min(Math.round(((completionsByUser[prog.user_id]||0) / asTotal) * 100), 100);
@@ -5128,7 +4875,7 @@
         <div style="background:#C8F13508;border:1px solid #C8F13525;border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;">
           <div style="font-size:1.2rem;margin-bottom:6px;">✓</div>
           <div style="font-size:0.85rem;font-weight:700;color:#C8F135;">Alles op orde</div>
-          <div style="font-size:0.75rem;color:#444;margin-top:4px;">Alle actieve klanten hebben deze week ingecheckt.</div>
+          <div style="font-size:0.75rem;color:#444;margin-top:4px;">Alle actieve klanten hebben deze week iets gelogd.</div>
         </div>`}
 
         <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:14px 16px;">
@@ -5454,10 +5201,9 @@
       const container = document.getElementById('klantenContent');
       container.innerHTML = `<div class="empty-state">Laden…</div>`;
 
-      const [{ data: profiles }, { data: completions }, { data: checkins }] = await Promise.all([
+      const [{ data: profiles }, { data: completions }] = await Promise.all([
         supabaseClient.from('profiles').select('id, full_name, is_admin'),
         supabaseClient.from('assignment_completions').select('user_id'),
-        supabaseClient.from('weekly_checkins').select('user_id, week_start').eq('week_start', getWeekStart()),
       ]);
 
       const athletes = (profiles || []).filter((p) => !p.is_admin);
@@ -5468,13 +5214,11 @@
 
       const doneMap = {};
       (completions || []).forEach((c) => { doneMap[c.user_id] = (doneMap[c.user_id] || 0) + 1; });
-      const checkinSet = new Set((checkins || []).map((c) => c.user_id));
       const total = getAssignments().length;
 
       container.innerHTML = athletes.map((a) => {
         const done = doneMap[a.id] || 0;
         const pct = Math.round((done / total) * 100);
-        const hasCheckin = checkinSet.has(a.id);
         return `
           <div class="action-card" style="margin-bottom:12px;" onclick="loadKlantDetail('${escapeAttr(a.id)}', '${escapeAttr(a.full_name || a.id)}')">
             <div class="action-card-icon" style="background:#0d1a2e;">
@@ -5487,7 +5231,6 @@
                   <div style="height:100%;background:#C8F135;border-radius:999px;width:${pct}%;"></div>
                 </div>
                 <span style="font-size:0.72rem;color:#555;white-space:nowrap;">${done}/${total} opdrachten</span>
-                <span style="font-size:0.72rem;font-weight:600;${hasCheckin ? 'color:#C8F135;' : 'color:#333;'}">${hasCheckin ? '✓ check-in' : '— check-in'}</span>
               </div>
             </div>
             <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
@@ -5504,7 +5247,6 @@
 
       const [
         { data: completions },
-        { data: checkins },
         { data: reflections },
         { data: tournaments },
         { data: loadSessions },
@@ -5513,8 +5255,7 @@
         { data: scoutMatches },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('*').eq('user_id', userId).order('assignment_num'),
-        supabaseClient.from('weekly_checkins').select('*').eq('user_id', userId).order('week_start', { ascending: false }).limit(20),
-        supabaseClient.from('match_reflections').select('*').eq('user_id', userId).order('datum', { ascending: false }).limit(20),
+        supabaseClient.from('daily_journal').select('*').eq('user_id', userId).eq('type', 'match').order('entry_date', { ascending: false }).limit(40),
         supabaseClient.from('tournaments').select('*').eq('user_id', userId).order('start_date', { ascending: false }).limit(20),
         ldQuery(userId),
         slQuery(userId),
@@ -5533,10 +5274,9 @@
         <button onclick="loadKlanten()" style="background:none;border:none;color:#C8F135;font-size:0.85rem;font-weight:600;cursor:pointer;padding:0 0 14px;display:flex;align-items:center;gap:6px;">← Alle klanten</button>
         <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:16px;">${escapeHtml(name)}</h2>
 
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;">
           ${[
             ['Opdrachten', `${doneCount}/${asData.length}`, '#C8F135'],
-            ['Check-ins', (checkins||[]).length, '#3b82f6'],
             ['Reflecties', (reflections||[]).length, '#a855f7'],
             ['Toernooien', (tournaments||[]).length, '#f59e0b'],
           ].map(([label, val, color]) => `
@@ -5548,7 +5288,7 @@
 
         <!-- TABS -->
         <div style="display:flex;gap:0;border-bottom:1px solid #1A1A1A;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;">
-          ${[['kltab-opd','Opdrachten'],['kltab-ci','Check-ins'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-sleep','Slaap'],['kltab-focus','Focus'],['kltab-scout','Scouting'],['kltab-plan','Planning']].map(([id,label],i)=>`
+          ${[['kltab-opd','Opdrachten'],['kltab-ref','Reflecties'],['kltab-load','Belasting'],['kltab-sleep','Slaap'],['kltab-focus','Focus'],['kltab-scout','Scouting'],['kltab-plan','Planning']].map(([id,label],i)=>`
             <button id="${id}" onclick="klTab('${uid}','${id}')" style="flex-shrink:0;background:none;border:none;border-bottom:2px solid ${i===0?'#C8F135':'transparent'};color:${i===0?'#fff':'#555'};font-family:Inter,sans-serif;font-size:0.82rem;font-weight:600;padding:8px 14px;cursor:pointer;transition:all .15s;">${label}</button>`).join('')}
         </div>`;
 
@@ -5575,61 +5315,10 @@
       });
       html += `</div>`;
 
-      // ── TAB: CHECK-INS ────────────────────────────────────
-      html += `<div id="klpanel-ci-${uid}" class="hidden">`;
-      if (checkins && checkins.length) {
-        checkins.forEach((c) => {
-          const detId = `kci${uid}${c.week_start.replace(/-/g,'')}`;
-          const dateStr = new Date(c.week_start+'T00:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
-          html += `
-            <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;" onclick="document.getElementById('${detId}').classList.toggle('hidden')">
-                <span style="flex:1;font-size:0.85rem;color:#CCC;">Week van ${dateStr}</span>
-                <span style="font-size:1rem;font-weight:700;color:${ratingColor(c.overall_rating)}">${c.overall_rating??'—'}</span>
-                <span style="font-size:0.7rem;color:#555;">overall ▾</span>
-              </div>
-              <div id="${detId}" class="hidden" style="padding:0 14px 12px;border-top:1px solid #111;">
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 8px;">
-                  ${[['Ment. T',c.mental_training],['Ment. W',c.mental_matches],['Energie',c.energy_level],['Slaap',c.sleep_recovery]].map(([l,v])=>`
-                    <div style="background:#0D0D0D;border:1px solid #1A1A1A;border-radius:6px;padding:6px;text-align:center;">
-                      <div style="font-size:0.62rem;color:#444;">${l}</div>
-                      <div style="font-size:1rem;font-weight:700;color:${v!=null?ratingColor(v):'#333'};margin-top:2px;">${v??'—'}</div>
-                    </div>`).join('')}
-                </div>
-                <div style="font-size:0.75rem;color:#444;margin-bottom:6px;">${c.training_sessions??0} trainingen</div>
-                ${c.went_well?`<p style="font-size:0.82rem;color:#666;margin-top:5px;line-height:1.6;"><span style="color:#555;font-weight:600;">Goed: </span>${escapeHtml(c.went_well)}</p>`:''}
-                ${c.was_challenging?`<p style="font-size:0.82rem;color:#666;margin-top:4px;line-height:1.6;"><span style="color:#555;font-weight:600;">Uitdagend: </span>${escapeHtml(c.was_challenging)}</p>`:''}
-                ${c.focus_next_week?`<p style="font-size:0.82rem;color:#666;margin-top:4px;line-height:1.6;"><span style="color:#555;font-weight:600;">Focus: </span>${escapeHtml(c.focus_next_week)}</p>`:''}
-              </div>
-            </div>`;
-        });
-      } else {
-        html += `<div class="empty-state">Nog geen check-ins ingediend.</div>`;
-      }
-      html += `</div>`;
-
       // ── TAB: REFLECTIES ───────────────────────────────────
-      html += `<div id="klpanel-ref-${uid}" class="hidden">`;
-      if (reflections && reflections.length) {
-        reflections.forEach((r) => {
-          const detId = `kr${uid}${r.id.replace(/[^a-z0-9]/gi,'')}`;
-          html += `
-            <div style="border:1px solid #1A1A1A;border-radius:10px;overflow:hidden;margin-bottom:8px;">
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;" onclick="document.getElementById('${detId}').classList.toggle('hidden')">
-                <span style="flex:1;font-size:0.85rem;color:#CCC;">${escapeHtml(r.tegenstander)}</span>
-                <span style="font-size:0.72rem;color:#555;">${escapeHtml(r.datum)}${r.score?' · '+escapeHtml(r.score):''} ▾</span>
-              </div>
-              <div id="${detId}" class="hidden" style="padding:0 14px 12px;border-top:1px solid #111;">
-                ${r.vraag1?`<p style="font-size:0.82rem;color:#666;margin-top:8px;line-height:1.6;"><span style="color:#555;font-weight:600;">Wat ging goed: </span>${escapeHtml(r.vraag1)}</p>`:''}
-                ${r.vraag2?`<p style="font-size:0.82rem;color:#666;margin-top:5px;line-height:1.6;"><span style="color:#555;font-weight:600;">Verbeteren: </span>${escapeHtml(r.vraag2)}</p>`:''}
-                ${r.vraag3?`<p style="font-size:0.82rem;color:#666;margin-top:5px;line-height:1.6;"><span style="color:#555;font-weight:600;">Aanpak: </span>${escapeHtml(r.vraag3)}</p>`:''}
-              </div>
-            </div>`;
-        });
-      } else {
-        html += `<div class="empty-state">Nog geen wedstrijdreflecties.</div>`;
-      }
-      html += `</div>`;
+      html += `<div id="klpanel-ref-${uid}" class="hidden">${(reflections || []).length
+        ? djEntriesHtml(reflections, i18n.nl, true)
+        : '<div class="empty-state">Nog geen wedstrijdreflecties.</div>'}</div>`;
 
       // ── TAB: BELASTING ────────────────────────────────────
       html += `<div id="klpanel-load-${uid}" class="hidden">`;
@@ -5678,7 +5367,7 @@
     }
 
     function klTab(uid, activeId) {
-      const panels = ['opd','ci','ref','load','sleep','focus','scout','plan'];
+      const panels = ['opd','ref','load','sleep','focus','scout','plan'];
       panels.forEach((p) => {
         const panel = document.getElementById(`klpanel-${p}-${uid}`);
         const tab = document.getElementById(`kltab-${p}`);
@@ -6834,163 +6523,6 @@
       const diff = d.getDate() - day + (day === 0 ? -6 : 1);
       d.setDate(diff);
       return d.toISOString().split('T')[0];
-    }
-
-    ['ciOverall', 'ciMentalTraining', 'ciMentalMatches', 'ciEnergy', 'ciSleep'].forEach((id) => {
-      document.getElementById(id).addEventListener('input', function () {
-        document.getElementById('val' + id.charAt(2).toUpperCase() + id.slice(3)).textContent = this.value;
-      });
-    });
-
-    document.getElementById('ciNoMatches').addEventListener('change', function () {
-      document.getElementById('ciMatchesWrap').style.display = this.checked ? 'none' : '';
-    });
-
-    document.getElementById('checkinForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const T = i18n[lang];
-      const msgEl = document.getElementById('ciMessage');
-      const noMatches = document.getElementById('ciNoMatches').checked;
-
-      const payload = {
-        user_id: currentUser.id,
-        week_start: getWeekStart(),
-        overall_rating:    Number(document.getElementById('ciOverall').value),
-        training_sessions: Number(document.getElementById('ciSessions').value) || 0,
-        mental_training:   Number(document.getElementById('ciMentalTraining').value),
-        mental_matches:    noMatches ? null : Number(document.getElementById('ciMentalMatches').value),
-        energy_level:      Number(document.getElementById('ciEnergy').value),
-        sleep_recovery:    Number(document.getElementById('ciSleep').value),
-        went_well:         document.getElementById('ciWentWell').value.trim() || null,
-        was_challenging:   document.getElementById('ciChallenging').value.trim() || null,
-        focus_next_week:   document.getElementById('ciFocus').value.trim() || null,
-      };
-
-      const { error } = await supabaseClient.from('weekly_checkins').insert(payload);
-      msgEl.classList.remove('hidden', 'success-msg', 'error-msg');
-
-      if (error) {
-        msgEl.classList.add('error-msg');
-        msgEl.textContent = T.ciSaveFailed + error.message;
-        return;
-      }
-
-      msgEl.classList.add('success-msg');
-      msgEl.textContent = T.ciSaveSuccess;
-      document.getElementById('checkinForm').reset();
-      ['ciOverall','ciMentalTraining','ciMentalMatches','ciEnergy','ciSleep'].forEach((id) => {
-        document.getElementById(id).value = 7;
-        document.getElementById('val' + id.charAt(2).toUpperCase() + id.slice(3)).textContent = '7';
-      });
-      document.getElementById('ciMatchesWrap').style.display = '';
-      loadCheckin();
-    });
-
-    async function loadCheckin() {
-      const T = i18n[lang];
-      const weekStart = getWeekStart();
-      const d = new Date(weekStart + 'T00:00:00');
-      const opts = { day: 'numeric', month: 'long', year: 'numeric' };
-      document.getElementById('ciWeekLabel').textContent =
-        T.ciWeekOf + ' ' + d.toLocaleDateString(lang === 'nl' ? 'nl-NL' : 'en-US', opts);
-
-      const { data: existing } = await supabaseClient
-        .from('weekly_checkins')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .eq('week_start', weekStart)
-        .maybeSingle();
-
-      const noticeEl = document.getElementById('ciAlreadyNotice');
-      const submitBtn = document.getElementById('ciSubmitBtn');
-
-      if (existing) {
-        noticeEl.classList.remove('hidden');
-        noticeEl.textContent = T.ciAlreadyDone;
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.4';
-      } else {
-        noticeEl.classList.add('hidden');
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '';
-      }
-
-      const histList = document.getElementById('ciHistoryList');
-      const { data: history } = await supabaseClient
-        .from('weekly_checkins')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('week_start', { ascending: false })
-        .limit(12);
-
-      if (!history || !history.length) {
-        histList.innerHTML = `<div class="empty-state">${T.ciNoHistory}</div>`;
-        return;
-      }
-
-      // Sparkline helper
-      function makeSparkSvg(vals, color) {
-        if (vals.length < 2) return '';
-        const W = 100, H = 34;
-        const step = W / (vals.length - 1);
-        const pts = vals.map((v, i) => `${(i * step).toFixed(1)},${(H - ((v - 1) / 9) * H).toFixed(1)}`).join(' ');
-        const lastX = ((vals.length - 1) * step).toFixed(1);
-        const lastY = (H - ((vals[vals.length - 1] - 1) / 9) * H).toFixed(1);
-        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px;display:block;">
-          <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
-          <circle cx="${lastX}" cy="${lastY}" r="2.5" fill="${color}"/>
-        </svg>`;
-      }
-
-      const sorted = [...history].sort((a,b) => a.week_start.localeCompare(b.week_start));
-      const spOverall  = sorted.map(c => c.overall_rating).filter(v => v != null);
-      const spEnergy   = sorted.map(c => c.energy_level).filter(v => v != null);
-      const spSleep    = sorted.map(c => c.sleep_recovery).filter(v => v != null);
-
-      let sparkHtml = '';
-      if (spOverall.length >= 3) {
-        sparkHtml = `
-          <div class="spark-wrap">
-            <div class="spark-title">${lang === 'en' ? `Trend — last ${spOverall.length} weeks` : `Trend — afgelopen ${spOverall.length} weken`}</div>
-            <div class="spark-row">
-              <span class="spark-label">${T.ciOverall}</span>
-              <div style="flex:1;">${makeSparkSvg(spOverall, '#C8F135')}</div>
-              <span class="spark-val" style="color:#C8F135;">${spOverall[spOverall.length-1]}</span>
-            </div>
-            <div class="spark-row">
-              <span class="spark-label">${T.ciEnergy}</span>
-              <div style="flex:1;">${makeSparkSvg(spEnergy, '#3b82f6')}</div>
-              <span class="spark-val" style="color:#3b82f6;">${spEnergy[spEnergy.length-1]}</span>
-            </div>
-            <div class="spark-row">
-              <span class="spark-label">${T.ciSleep}</span>
-              <div style="flex:1;">${makeSparkSvg(spSleep, '#a855f7')}</div>
-              <span class="spark-val" style="color:#a855f7;">${spSleep[spSleep.length-1]}</span>
-            </div>
-          </div>`;
-      }
-
-      histList.innerHTML = sparkHtml + history.map((c) => {
-        const wd = new Date(c.week_start + 'T00:00:00');
-        const wLabel = T.ciWeekOf + ' ' + wd.toLocaleDateString(lang === 'nl' ? 'nl-NL' : 'en-US', opts);
-        return `
-          <div class="content-item">
-            <div class="content-item-body">
-              <strong>${wLabel}</strong>
-              <div class="rating-grid">
-                ${ratingBadge(T.ciOverall, c.overall_rating)}
-                ${ratingBadge(T.ciMentalTr, c.mental_training)}
-                ${c.mental_matches ? ratingBadge(T.ciMentalM, c.mental_matches) : ''}
-                ${ratingBadge(T.ciEnergy, c.energy_level)}
-                ${ratingBadge(T.ciSleep, c.sleep_recovery)}
-              </div>
-              ${c.training_sessions != null ? `<p class="muted" style="margin-top:10px;font-size:0.85rem;">${c.training_sessions} ${T.ciSessionsShort}</p>` : ''}
-              ${c.went_well ? `<p class="muted" style="margin-top:10px;"><strong style="color:#AAA;">${T.ciWentWellShort}:</strong><br>${escapeHtml(c.went_well)}</p>` : ''}
-              ${c.was_challenging ? `<p class="muted" style="margin-top:6px;"><strong style="color:#AAA;">${T.ciChallengingShort}:</strong><br>${escapeHtml(c.was_challenging)}</p>` : ''}
-              ${c.focus_next_week ? `<p class="muted" style="margin-top:6px;"><strong style="color:#AAA;">${T.ciFocusShort}:</strong><br>${escapeHtml(c.focus_next_week)}</p>` : ''}
-            </div>
-          </div>`;
-      }).join('');
     }
 
     function ratingBadge(label, value) {
