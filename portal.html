@@ -3266,6 +3266,31 @@
       });
       return [...days.entries()];
     }
+    // mail naar Fons bij boeken/annuleren, via hetzelfde Formspree-formulier als de website
+    const AG_NOTIFY_URL = 'https://formspree.io/f/meebonob';
+    function agNotify(kind, s, note) {
+      if (!s) return;
+      const who = currentUser?.user_metadata?.full_name || currentUser?.email || 'Een klant';
+      const when = agWhen(s, true);
+      const booked = kind === 'booked';
+      const data = new FormData();
+      data.append('_subject', `${booked ? 'Nieuw gesprek' : 'Gesprek geannuleerd'}: ${who} – ${when}`);
+      data.append('name', who);
+      if (currentUser?.email) data.append('email', currentUser.email);
+      data.append('bron', 'Portal agenda');
+      data.append('message', [
+        booked ? `${who} heeft een gesprek ingepland.` : `${who} heeft een gesprek geannuleerd. Het moment staat weer vrij.`,
+        '',
+        `Wanneer: ${when} (${s.duration_min} min)`,
+        s.location ? `Locatie: ${s.location}` : null,
+        booked && note ? `Onderwerp: ${note}` : null,
+        '',
+        'Bekijk je agenda: https://vansambeek-performance.nl/portal.html',
+      ].filter((l) => l !== null).join('\n'));
+      // de boeking zelf is al opgeslagen; een mislukte mail mag de klant niet tegenhouden
+      fetch(AG_NOTIFY_URL, { method: 'POST', body: data, headers: { Accept: 'application/json' } }).catch(() => {});
+    }
+
     function agFlashHtml() {
       if (!agFlash) return '';
       const html = `<p class="success-msg" style="margin:0 0 12px;font-size:0.85rem;">${escapeHtml(agFlash)}</p>`;
@@ -3359,7 +3384,8 @@
       const msg = document.getElementById('agMsg');
       btn.disabled = true;
       btn.textContent = i18n[lang].opdrachtSaving;
-      const { error } = await supabaseClient.rpc('book_slot', { p_slot: id, p_note: document.getElementById('agNote').value.trim() });
+      const note = document.getElementById('agNote').value.trim();
+      const { error } = await supabaseClient.rpc('book_slot', { p_slot: id, p_note: note });
       if (error) {
         btn.disabled = false;
         btn.textContent = isNL ? 'Gesprek inplannen' : 'Book session';
@@ -3372,6 +3398,7 @@
         return;
       }
       const s = agSlots.find((x) => x.id === id);
+      agNotify('booked', s, note);
       agFlash = (isNL ? 'Ingepland: ' : 'Booked: ') + (s ? agWhen(s, isNL) : '');
       await loadAgenda();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3383,6 +3410,7 @@
       if (!confirm(isNL ? `Gesprek van ${s ? agWhen(s, true) : ''} annuleren?` : `Cancel the session on ${s ? agWhen(s, false) : ''}?`)) return;
       const { error } = await supabaseClient.rpc('cancel_slot', { p_slot: id });
       if (error) { alert(error.message); return; }
+      agNotify('cancelled', s);
       agFlash = isNL ? 'Je gesprek is geannuleerd.' : 'Your session has been cancelled.';
       loadAgenda();
     }
