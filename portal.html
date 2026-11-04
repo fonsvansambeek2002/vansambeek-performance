@@ -1086,7 +1086,7 @@
     .ag-booked-sub { font-size: 0.78rem; color: #888; margin-top: 3px; overflow-wrap: anywhere; }
     .ag-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid #1A1A1A; }
     .ag-row:nth-child(2) { border-top: none; }
-    .ag-row-time { font-weight: 700; font-size: 0.84rem; color: #DDD; width: 96px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+    .ag-row-time { font-weight: 700; font-size: 0.84rem; color: #DDD; width: 52px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
     .ag-row-status { flex: 1; min-width: 0; font-size: 0.84rem; }
     .ag-free { color: #666; }
     .ag-taken { color: #C8F135; font-weight: 600; }
@@ -3251,11 +3251,10 @@
     let agFlash = '';
 
     function agTime(d) { return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }); }
-    function agEnd(s) { return new Date(new Date(s.start_at).getTime() + s.duration_min * 60000); }
     function agDayLabel(d, isNL) { return d.toLocaleDateString(isNL ? 'nl-NL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' }); }
     function agWhen(s, isNL) {
       const d = new Date(s.start_at);
-      return `${agDayLabel(d, isNL)} · ${agTime(d)}–${agTime(agEnd(s))}`;
+      return `${agDayLabel(d, isNL)} · ${agTime(d)}`;
     }
     function agByDay(slots) {
       const days = new Map();
@@ -3281,7 +3280,7 @@
       data.append('message', [
         booked ? `${who} heeft een gesprek ingepland.` : `${who} heeft een gesprek geannuleerd. Het moment staat weer vrij.`,
         '',
-        `Wanneer: ${when} (${s.duration_min} min)`,
+        `Wanneer: ${when}`,
         s.location ? `Locatie: ${s.location}` : null,
         booked && note ? `Onderwerp: ${note}` : null,
         '',
@@ -3368,7 +3367,7 @@
       document.querySelector(`.ag-time[data-id="${CSS.escape(id)}"]`).classList.add('active');
       box.classList.remove('hidden');
       box.innerHTML = `
-        <div style="font-weight:700;color:#EEE;font-size:0.9rem;">${agTime(new Date(s.start_at))}–${agTime(agEnd(s))} <span style="color:#666;font-weight:400;">· ${s.duration_min} min</span></div>
+        <div style="font-weight:700;color:#EEE;font-size:0.9rem;">${agTime(new Date(s.start_at))}</div>
         ${s.location ? `<div style="font-size:0.8rem;color:#888;margin-top:2px;">${escapeHtml(s.location)}</div>` : ''}
         <div class="field" style="margin:12px 0 10px;">
           <label>${isNL ? 'Waar wil je het over hebben? (optioneel)' : 'What would you like to talk about? (optional)'}</label>
@@ -3438,7 +3437,7 @@
             const past = start < now;
             return `
             <div class="ag-row"${past ? ' style="opacity:.45;"' : ''}>
-              <div class="ag-row-time">${agTime(start)}–${agTime(agEnd(s))}</div>
+              <div class="ag-row-time">${agTime(start)}</div>
               <div class="ag-row-status">
                 ${s.booked_by
                   ? `<span class="ag-taken">${escapeHtml(names[s.booked_by] || (isNL ? 'Klant' : 'Client'))}</span>${s.booking_note ? `<span class="ag-note">${escapeHtml(s.booking_note)}</span>` : ''}`
@@ -3457,7 +3456,7 @@
         ${agFlashHtml()}
         <div class="card" style="margin-bottom:6px;">
           <h3 style="margin:0 0 4px;">${isNL ? 'Beschikbaarheid toevoegen' : 'Add availability'}</h3>
-          <p class="muted" style="font-size:0.82rem;margin:0 0 14px;">${isNL ? 'Het blok wordt opgedeeld in losse momenten die klanten kunnen boeken.' : 'The block is split into separate times clients can book.'}</p>
+          <p class="muted" style="font-size:0.82rem;margin:0 0 14px;">${isNL ? 'Binnen dit blok komen starttijden die klanten kunnen boeken.' : 'This block gets start times clients can book.'}</p>
           <div class="field">
             <label>${isNL ? 'Datum' : 'Date'}</label>
             <input type="date" id="agDate" value="${localDateStr(new Date())}" min="${localDateStr(new Date())}" />
@@ -3466,7 +3465,7 @@
             <div class="field"><label>${isNL ? 'Van' : 'From'}</label><input type="time" id="agFrom" value="09:00" step="900" /></div>
             <div class="field"><label>${isNL ? 'Tot' : 'Until'}</label><input type="time" id="agTo" value="12:00" step="900" /></div>
           </div>
-          <span class="sc-form-label">${isNL ? 'Duur per gesprek' : 'Length per session'}</span>
+          <span class="sc-form-label">${isNL ? 'Starttijden om de' : 'Start times every'}</span>
           <div class="ld-chips" id="agDur" style="margin-bottom:16px;">${durChips}</div>
           <div class="field">
             <label>${isNL ? 'Locatie' : 'Location'}</label>
@@ -3509,7 +3508,7 @@
 
       if (!date || !from || !to) return fail(isNL ? 'Vul een datum en tijden in.' : 'Enter a date and times.');
       const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-      if (toMin(to) - toMin(from) < dur) return fail(isNL ? `Het blok moet minstens ${dur} minuten zijn.` : `The block must be at least ${dur} minutes.`);
+      if (toMin(to) <= toMin(from)) return fail(isNL ? 'De eindtijd moet na de begintijd liggen.' : 'The end time must be after the start time.');
 
       const taken = new Set(agSlots.map((s) => new Date(s.start_at).getTime()));
       const now = Date.now();
@@ -3517,7 +3516,7 @@
       for (let w = 0; w < weeks; w++) {
         const day = new Date(date + 'T00:00:00');
         day.setDate(day.getDate() + w * 7);
-        for (let m = toMin(from); m + dur <= toMin(to); m += dur) {
+        for (let m = toMin(from); m < toMin(to); m += dur) {
           const start = new Date(day);
           start.setHours(Math.floor(m / 60), m % 60, 0, 0);
           if (start.getTime() <= now || taken.has(start.getTime())) continue;
