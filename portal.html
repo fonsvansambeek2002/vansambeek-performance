@@ -1091,6 +1091,7 @@
     .ag-free { color: #666; }
     .ag-taken { color: #C8F135; font-weight: 600; }
     .ag-edit { padding: 4px 0 12px; }
+    .ag-edit input { min-width: 0; width: 100%; box-sizing: border-box; }
     .ag-note { display: block; color: #888; font-size: 0.76rem; margin-top: 2px; overflow-wrap: anywhere; }
 
     /* ── DAGBOEK ── */
@@ -3559,7 +3560,7 @@
       const start = new Date(s.start_at);
       box.classList.remove('hidden');
       box.innerHTML = `
-        <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:10px;">
+        <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px;">
           <div class="field" style="margin-bottom:10px;"><label>${isNL ? 'Datum' : 'Date'}</label><input type="date" id="ageDate" value="${localDateStr(start)}" /></div>
           <div class="field" style="margin-bottom:10px;"><label>${isNL ? 'Starttijd' : 'Start time'}</label><input type="time" id="ageTime" value="${agTime(start)}" step="300" /></div>
         </div>
