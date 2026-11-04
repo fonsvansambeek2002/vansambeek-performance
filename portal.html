@@ -1090,6 +1090,7 @@
     .ag-row-status { flex: 1; min-width: 0; font-size: 0.84rem; }
     .ag-free { color: #666; }
     .ag-taken { color: #C8F135; font-weight: 600; }
+    .ag-edit { padding: 4px 0 12px; }
     .ag-note { display: block; color: #888; font-size: 0.76rem; margin-top: 2px; overflow-wrap: anywhere; }
 
     /* ── DAGBOEK ── */
@@ -3444,10 +3445,10 @@
                   : `<span class="ag-free">${isNL ? 'Vrij' : 'Open'}</span>`}
                 ${s.location ? `<span class="ag-note">${escapeHtml(s.location)}</span>` : ''}
               </div>
-              ${s.booked_by
-                ? (past ? '' : `<button class="btn-ghost-sm" style="font-size:0.72rem;padding:4px 8px;color:#EE6666;" onclick="agAdminCancel('${escapeAttr(s.id)}')">${isNL ? 'Annuleer' : 'Cancel'}</button>`)
-                : `<button class="ld-del" onclick="agDelete('${escapeAttr(s.id)}')" aria-label="${isNL ? 'Verwijderen' : 'Delete'}">×</button>`}
-            </div>`;
+              <button class="btn-ghost-sm" style="font-size:0.72rem;padding:4px 8px;flex-shrink:0;" onclick="agEditSlot('${escapeAttr(s.id)}')">${isNL ? 'Wijzig' : 'Edit'}</button>
+              <button class="ld-del" onclick="agDelete('${escapeAttr(s.id)}')" aria-label="${isNL ? 'Verwijderen' : 'Delete'}">×</button>
+            </div>
+            <div class="ag-edit hidden" id="age-${escapeAttr(s.id)}"></div>`;
           }).join('')}
         </div>`).join('');
 
@@ -3484,7 +3485,8 @@
           <p id="agAddMsg" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>
         </div>
         <div class="ag-section">${isNL ? 'Komende momenten' : 'Upcoming times'}${agSlots.length ? ` <span style="color:#444;font-weight:600;">· ${booked} ${isNL ? 'geboekt' : 'booked'} · ${free} ${isNL ? 'vrij' : 'open'}</span>` : ''}</div>
-        ${daysHtml || `<div class="empty-state">${isNL ? 'Nog geen momenten klaargezet. Voeg hierboven je beschikbaarheid toe.' : 'No times set yet. Add your availability above.'}</div>`}`;
+        ${daysHtml || `<div class="empty-state">${isNL ? 'Nog geen momenten klaargezet. Voeg hierboven je beschikbaarheid toe.' : 'No times set yet. Add your availability above.'}</div>`}
+        ${free ? `<button class="btn-ghost btn-block" style="margin-top:6px;color:#EE6666;" onclick="agClearAllFree()">${isNL ? 'Alle vrije momenten wissen' : 'Clear all open times'} (${free})</button>` : ''}`;
 
       el.querySelectorAll('#agDur .ld-chip').forEach((chip) => chip.addEventListener('click', () => {
         el.querySelectorAll('#agDur .ld-chip').forEach((c) => c.classList.remove('active'));
@@ -3536,8 +3538,81 @@
     }
 
     async function agDelete(id) {
-      const { error } = await supabaseClient.from('coach_slots').delete().eq('id', id).is('booked_by', null);
+      const isNL = lang === 'nl';
+      const s = agSlots.find((x) => x.id === id);
+      if (s && s.booked_by && !confirm(isNL
+        ? `Dit moment (${agWhen(s, true)}) is geboekt. Toch verwijderen? Laat het de klant zelf even weten.`
+        : `This time (${agWhen(s, false)}) is booked. Delete anyway? Let the client know yourself.`)) return;
+      const { error } = await supabaseClient.from('coach_slots').delete().eq('id', id);
       if (error) { alert(error.message); return; }
+      loadAgenda();
+    }
+
+    function agEditSlot(id) {
+      const isNL = lang === 'nl';
+      const s = agSlots.find((x) => x.id === id);
+      const box = document.getElementById('age-' + id);
+      if (!s || !box) return;
+      const wasOpen = !box.classList.contains('hidden');
+      document.querySelectorAll('.ag-edit').forEach((b) => { b.classList.add('hidden'); b.innerHTML = ''; });
+      if (wasOpen) return;
+      const start = new Date(s.start_at);
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:10px;">
+          <div class="field" style="margin-bottom:10px;"><label>${isNL ? 'Datum' : 'Date'}</label><input type="date" id="ageDate" value="${localDateStr(start)}" /></div>
+          <div class="field" style="margin-bottom:10px;"><label>${isNL ? 'Starttijd' : 'Start time'}</label><input type="time" id="ageTime" value="${agTime(start)}" step="300" /></div>
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label>${isNL ? 'Locatie' : 'Location'}</label>
+          <input type="text" id="ageLoc" maxlength="80" value="${escapeAttr(s.location || '')}" />
+        </div>
+        <button class="btn-accent" id="ageSave" onclick="agSaveSlot('${escapeAttr(id)}')">${isNL ? 'Wijziging opslaan' : 'Save change'}</button>
+        ${s.booked_by ? `<button class="btn-ghost btn-block" style="margin-top:8px;color:#EE6666;" onclick="agAdminCancel('${escapeAttr(id)}')">${isNL ? 'Boeking annuleren (moment blijft vrij)' : 'Cancel booking (time stays open)'}</button>` : ''}
+        <p id="ageMsg" class="hidden" style="margin-top:10px;font-size:0.85rem;"></p>`;
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function agSaveSlot(id) {
+      const isNL = lang === 'nl';
+      const s = agSlots.find((x) => x.id === id);
+      const msg = document.getElementById('ageMsg');
+      const date = document.getElementById('ageDate').value;
+      const time = document.getElementById('ageTime').value;
+      const fail = (text) => { msg.className = 'error-msg'; msg.textContent = text; };
+      if (!date || !time) return fail(isNL ? 'Vul een datum en starttijd in.' : 'Enter a date and start time.');
+      const start = new Date(`${date}T${time}:00`);
+      if (agSlots.some((x) => x.id !== id && new Date(x.start_at).getTime() === start.getTime())) {
+        return fail(isNL ? 'Op dit tijdstip staat al een moment.' : 'There is already a time at this moment.');
+      }
+      const moved = start.getTime() !== new Date(s.start_at).getTime();
+      if (moved && s.booked_by && !confirm(isNL
+        ? 'Dit moment is geboekt. De klant ziet de nieuwe tijd in de portal; laat het hem of haar ook even weten.'
+        : 'This time is booked. The client will see the new time in the portal; let them know as well.')) return;
+      const btn = document.getElementById('ageSave');
+      btn.disabled = true;
+      btn.textContent = i18n[lang].opdrachtSaving;
+      const { error } = await supabaseClient.from('coach_slots')
+        .update({ start_at: start.toISOString(), location: document.getElementById('ageLoc').value.trim() || null }).eq('id', id);
+      if (error) {
+        btn.disabled = false;
+        btn.textContent = isNL ? 'Wijziging opslaan' : 'Save change';
+        return fail(i18n[lang].djSaveFailed + error.message);
+      }
+      agFlash = isNL ? 'Moment gewijzigd.' : 'Time updated.';
+      loadAgenda();
+    }
+
+    async function agClearAllFree() {
+      const isNL = lang === 'nl';
+      const now = new Date();
+      const ids = agSlots.filter((s) => !s.booked_by && new Date(s.start_at) > now).map((s) => s.id);
+      if (!ids.length || !confirm(isNL
+        ? `Alle ${ids.length} vrije momenten verwijderen? Geboekte gesprekken blijven staan.`
+        : `Delete all ${ids.length} open times? Booked sessions stay.`)) return;
+      const { error } = await supabaseClient.from('coach_slots').delete().in('id', ids).is('booked_by', null);
+      if (error) { alert(error.message); return; }
+      agFlash = isNL ? 'Vrije momenten gewist.' : 'Open times cleared.';
       loadAgenda();
     }
 
