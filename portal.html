@@ -2169,34 +2169,19 @@
         `<em style="display:block;font-size:1rem;color:#DDD;line-height:1.75;margin-bottom:12px;">"${escapeHtml(q.text)}"</em>` +
         `<span style="color:#C8F135;font-size:0.82rem;font-weight:600;">— ${escapeHtml(q.author)}</span>`;
 
-      const today = new Date().toISOString().split('T')[0];
       const [
         { data: completions },
-        { data: tournaments },
         { data: myPrograms },
         { data: coachNotes },
-        { data: recentLoad },
-        { data: focusOpen },
         { data: agendaSlots },
       ] = await Promise.all([
         supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
-        supabaseClient.from('tournaments').select('name,start_date,end_date').eq('user_id', currentUser.id)
-          .or(`end_date.gte.${today},start_date.gte.${today}`).order('start_date').limit(1),
         supabaseClient.from('client_programs').select('id,start_date,status,total_weeks').eq('user_id', currentUser.id).eq('status','active').order('start_date', { ascending: false }).limit(1),
         supabaseClient.from('coach_notes').select('content,session_date').eq('client_id', currentUser.id).order('session_date', { ascending: false }).limit(1),
-        supabaseClient.from('training_load').select('duration_min,rpe').eq('user_id', currentUser.id).gte('session_date', localDateStr(ldDaysAgo(6))),
-        supabaseClient.from('focus_points').select('category').eq('user_id', currentUser.id),
         supabaseClient.from('coach_slots').select('start_at,duration_min,booked_by').gte('start_at', new Date().toISOString()).order('start_at').limit(300),
       ]);
 
-      const asData = getAssignments();
-      const loadSessions = recentLoad || [];
-      const loadTotal = loadSessions.reduce((a, s) => a + s.duration_min * s.rpe, 0);
-      const focusList = focusOpen || [];
-      const focusCats = fcCategories(!isEN).filter(([k]) => focusList.some((f) => f.category === k)).map(([, label]) => label);
       const doneCount = (completions || []).length;
-      const allDone = doneCount >= asData.length;
-      const nextTournament = (tournaments || [])[0] || null;
       const activeProgram = (myPrograms || [])[0] || null;
       const latestNote = (coachNotes || [])[0] || null;
       const agList = agendaSlots || [];
@@ -2253,7 +2238,6 @@
       } else {
         welcomeCard.classList.add('hidden');
       }
-      const nextA = allDone ? null : asData[doneCount];
 
       const cards = document.getElementById('homeActions');
       cards.innerHTML = `
@@ -2265,7 +2249,7 @@
           <div class="action-card-body">
             <div class="action-card-label">${agNext ? (isEN ? 'Next session' : 'Volgend gesprek') : (isEN ? 'Calendar' : 'Agenda')}</div>
             <div class="action-card-title">${agNext
-              ? agWhen(agNext, !isEN).replace(/^./, (c) => c.toUpperCase())
+              ? `${new Date(agNext.start_at).toLocaleDateString(isEN ? 'en-GB' : 'nl-NL', { weekday: 'short', day: 'numeric', month: 'short' })} · ${agTime(new Date(agNext.start_at))}`.replace(/^./, (c) => c.toUpperCase())
               : (isAdmin ? (isEN ? 'Set your availability' : 'Zet je beschikbaarheid klaar') : (isEN ? 'Book a session' : 'Plan een gesprek'))}</div>
             ${isAdmin
               ? `<div class="action-card-sub">${agBooked.length} ${isEN ? 'booked' : 'geboekt'} · ${agFree} ${isEN ? 'open' : 'vrij'}</div>`
@@ -2273,64 +2257,6 @@
           </div>
           <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
         </div>` : ''}
-        ${!allDone ? `
-        <div class="action-card" onclick="switchScreen('opdrachten')">
-          <div class="action-card-icon" style="background:#1a2e0a;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C8F135" stroke-width="2" width="22" height="22"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          </div>
-          <div class="action-card-body">
-            <div class="action-card-label">${T.homeNextAssignment} ${doneCount + 1}/${asData.length}</div>
-            <div class="action-card-title">${escapeHtml(nextA.title)}</div>
-          </div>
-          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
-        </div>` : `
-        <div class="action-card done">
-          <div class="action-card-icon" style="background:#1a1a1a;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" width="22" height="22"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="action-card-body">
-            <div class="action-card-label">${T.homeNextAssignment}</div>
-            <div class="action-card-title" style="color:#888;">${T.homeAllDone}</div>
-          </div>
-        </div>`}
-
-        <div class="action-card" onclick="switchScreen('belasting')">
-          <div class="action-card-icon" style="background:#2a1a05;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#EEAA33" stroke-width="2" width="22" height="22"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          </div>
-          <div class="action-card-body">
-            <div class="action-card-label">${isEN ? 'Training load · 7 days' : 'Belasting · 7 dagen'}</div>
-            <div class="action-card-title">${loadSessions.length ? ldFmt(loadTotal, !isEN) + ' AU' : (isEN ? 'Log your training' : 'Log je training')}</div>
-            ${loadSessions.length ? `<div class="action-card-sub">${loadSessions.length} ${isEN ? (loadSessions.length === 1 ? 'session' : 'sessions') : (loadSessions.length === 1 ? 'sessie' : 'sessies')}</div>` : ''}
-          </div>
-          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-
-        <div class="action-card" onclick="switchScreen('focus')">
-          <div class="action-card-icon" style="background:#2a0a1e;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>
-          </div>
-          <div class="action-card-body">
-            <div class="action-card-label">Focus</div>
-            <div class="action-card-title">${focusList.length
-              ? `${focusList.length} ${isEN ? (focusList.length === 1 ? 'focus point' : 'focus points') : (focusList.length === 1 ? 'aandachtspunt' : 'aandachtspunten')}`
-              : (isEN ? 'Write down your focus points' : 'Schrijf je aandachtspunten op')}</div>
-            ${focusCats.length ? `<div class="action-card-sub">${focusCats.join(' · ')}</div>` : ''}
-          </div>
-          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-
-        <div class="action-card" onclick="switchScreen('planning')">
-          <div class="action-card-icon" style="background:#1a0a1a;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          </div>
-          <div class="action-card-body">
-            <div class="action-card-label">${T.homeTournamentLabel}</div>
-            <div class="action-card-title">${nextTournament ? escapeHtml(nextTournament.name) : T.homeNoTournament}</div>
-            ${nextTournament ? `<div class="action-card-sub">${formatTournamentDate(nextTournament, lang)}</div>` : ''}
-          </div>
-          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
       `;
     }
 
