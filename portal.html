@@ -1064,6 +1064,9 @@
       color: #fff; font-family: 'Inter', sans-serif; font-size: 16px; padding: 8px 10px;
     }
 
+    /* ── FOLD: form behind a button ── */
+    .fold-btn { margin-bottom: 16px; }
+
     /* ── AGENDA ── */
     .ag-section { font-size: 0.7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #666; margin: 18px 0 10px; }
     .ag-day { background: #111; border: 1px solid #1E1E1E; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
@@ -1405,7 +1408,8 @@
           <button class="sgn-btn" data-screen="scouting">Scouting</button>
           <button class="sgn-btn active" data-screen="video">Video</button>
         </div>
-        <div class="card" style="margin-bottom:20px;">
+        <button class="btn-accent fold-btn" id="vidOpenBtn" onclick="openFold(this, 'vidFormCard')">+ Video insturen</button>
+        <div class="card hidden" id="vidFormCard" style="margin-bottom:20px;">
           <h3 style="margin-bottom:6px;" id="vidFormTitle">Video insturen</h3>
           <p class="muted" style="font-size:0.85rem;margin-bottom:16px;" id="vidFormDesc">Upload een video van je training of wedstrijd direct vanuit je camera. Ik kijk ernaar en geef je persoonlijke feedback.</p>
 
@@ -1940,6 +1944,7 @@
       iosStep3:      ['Tik op <strong style="color:#fff;">"Voeg toe"</strong> — klaar!', 'Tap <strong style="color:#fff;">"Add"</strong> — done!'],
       iosFoot:       ['De app werkt daarna volledig zonder browserbalk, net als een echte app.', 'The app then runs full screen without the browser bar, just like a real app.'],
       planFormTitle: ['Toernooi toevoegen', 'Add tournament'],
+      vidOpenBtn:    ['+ Video insturen', '+ Submit a video'],
     };
 
     function applyStaticText() {
@@ -2348,8 +2353,8 @@
       const container = document.getElementById('dagboekContent');
       const today = localDateStr(new Date());
 
-      container.innerHTML = `
-        <div class="card" style="margin-bottom:20px;">
+      container.innerHTML = foldBtn(lang === 'nl' ? 'Wedstrijd invullen' : 'Reflect on a match', 'djFormCard') + `
+        <div class="card hidden" id="djFormCard" style="margin-bottom:20px;">
           <h3 style="margin:0 0 4px;">${T.djFormTitle}</h3>
           <p class="muted" style="font-size:0.8rem;margin:0 0 14px;">${T.djFormIntro}</p>
 
@@ -2643,8 +2648,8 @@
       const today = localDateStr(new Date());
       let selType = sessions[0]?.session_type || 'tennis';
 
-      container.innerHTML = parts.top + `
-        <div class="card">
+      container.innerHTML = parts.top + foldBtn(isNL ? 'Sessie loggen' : 'Log a session', 'ldFormCard') + `
+        <div class="card hidden" id="ldFormCard" style="margin-bottom:16px;">
           <h3 style="margin:0 0 4px;">${isNL ? 'Sessie loggen' : 'Log a session'}</h3>
           <p class="muted" style="font-size:0.8rem;margin:0 0 14px;">${isNL ? 'Vul dit ±30 minuten na je training in.' : 'Fill this in about 30 minutes after training.'}</p>
 
@@ -3177,6 +3182,16 @@
     let agSlots = [];
     let agCid = 'agendaContent';
     let agFlash = '';
+
+    function foldBtn(label, targetId) {
+      return `<button class="btn-accent fold-btn" onclick="openFold(this, '${targetId}')">+ ${label}</button>`;
+    }
+    function openFold(btn, targetId) {
+      const card = document.getElementById(targetId);
+      btn.classList.add('hidden');
+      card.classList.remove('hidden');
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     function agTime(d) { return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }); }
     function agDayLabel(d, isNL) { return d.toLocaleDateString(isNL ? 'nl-NL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' }); }
@@ -6121,7 +6136,7 @@
                 ${t.location ? `<span class="muted" style="font-size:0.82rem;"> · ${escapeHtml(t.location)}</span>` : ''}
                 <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:7px;">
                   ${t.surface ? `<span class="plan-surface-badge" style="background:${surfColor};">${escapeHtml(surfLabel)}</span>` : ''}
-                  <span class="muted" style="font-size:0.78rem;">${escapeHtml(t.start_date)}${t.end_date ? T.planTo + escapeHtml(t.end_date) : ''}</span>
+                  <span class="muted" style="font-size:0.78rem;">${formatTournamentDate(t, lang)}</span>
                 </div>
                 ${t.notes ? `<p class="muted" style="font-size:0.82rem;margin-top:6px;">${escapeHtml(t.notes)}</p>` : ''}
               </div>
