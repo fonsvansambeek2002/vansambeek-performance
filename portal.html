@@ -1093,6 +1093,7 @@
     .ag-row-status { flex: 1; min-width: 0; font-size: 0.84rem; }
     .ag-free { color: #666; }
     .ag-taken { color: #C8F135; font-weight: 600; }
+    .ag-new { display: inline-block; background: #C8F135; color: #0A0A0A; font-size: 0.6rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 6px; border-radius: 99px; vertical-align: middle; margin-left: 4px; }
     .ag-edit { padding: 4px 0 12px; }
     .ag-edit input { min-width: 0; width: 100%; box-sizing: border-box; }
     .ag-note { display: block; color: #888; font-size: 0.76rem; margin-top: 2px; overflow-wrap: anywhere; }
@@ -2183,7 +2184,7 @@
         supabaseClient.from('assignment_completions').select('assignment_num').eq('user_id', currentUser.id),
         supabaseClient.from('client_programs').select('id,start_date,status,total_weeks').eq('user_id', currentUser.id).eq('status','active').order('start_date', { ascending: false }).limit(1),
         supabaseClient.from('coach_notes').select('content,session_date').eq('client_id', currentUser.id).order('session_date', { ascending: false }).limit(1),
-        supabaseClient.from('coach_slots').select('start_at,duration_min,booked_by').gte('start_at', new Date().toISOString()).order('start_at').limit(300),
+        supabaseClient.from('coach_slots').select('start_at,duration_min,booked_by,booked_at').gte('start_at', new Date().toISOString()).order('start_at').limit(300),
       ]);
 
       const doneCount = (completions || []).length;
@@ -2193,6 +2194,7 @@
       const agBooked = agList.filter((s) => s.booked_by);
       const agNext = isAdmin ? agBooked[0] : agBooked.find((s) => s.booked_by === currentUser.id);
       const agFree = agList.filter((s) => !s.booked_by).length;
+      const agNewCount = isAdmin ? agBooked.filter((s) => s.booked_at && s.booked_at > agSeenAt()).length : 0;
 
       // ── week banner ───────────────────────────────────────
       const bannerEl = document.getElementById('homeWeekBanner');
@@ -2246,7 +2248,6 @@
 
       const cards = document.getElementById('homeActions');
       cards.innerHTML = `
-        ${agNext || agFree || isAdmin ? `
         <div class="action-card" onclick="${isAdmin ? "switchScreen('klanten');switchKlScreen('agenda')" : "switchScreen('agenda')"}">
           <div class="action-card-icon" style="background:#0a1a2a;">
             <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14v3l2 1"/></svg>
@@ -2254,14 +2255,14 @@
           <div class="action-card-body">
             <div class="action-card-label">${agNext ? (isEN ? 'Next session' : 'Volgend gesprek') : (isEN ? 'Calendar' : 'Agenda')}</div>
             <div class="action-card-title">${agNext
-              ? `${new Date(agNext.start_at).toLocaleDateString(isEN ? 'en-GB' : 'nl-NL', { weekday: 'short', day: 'numeric', month: 'short' })} · ${agTime(new Date(agNext.start_at))}`.replace(/^./, (c) => c.toUpperCase())
+              ? `${new Date(agNext.start_at).toLocaleDateString(isEN ? 'en-GB' : 'nl-NL', { timeZone: AG_TZ, weekday: 'short', day: 'numeric', month: 'short' })} · ${agTime(new Date(agNext.start_at))}`.replace(/^./, (c) => c.toUpperCase())
               : (isAdmin ? (isEN ? 'Set your availability' : 'Zet je beschikbaarheid klaar') : (isEN ? 'Book a session' : 'Plan een gesprek'))}</div>
             ${isAdmin
-              ? `<div class="action-card-sub">${agBooked.length} ${isEN ? 'booked' : 'geboekt'} · ${agFree} ${isEN ? 'open' : 'vrij'}</div>`
-              : (!agNext && agFree ? `<div class="action-card-sub">${agFree} ${isEN ? (agFree === 1 ? 'time available' : 'times available') : (agFree === 1 ? 'moment beschikbaar' : 'momenten beschikbaar')}</div>` : '')}
+              ? `<div class="action-card-sub">${agNewCount ? `<span class="ag-new" style="margin:0 6px 0 0;">${agNewCount} ${isEN ? 'new' : 'nieuw'}</span>` : ''}${agBooked.length} ${isEN ? 'booked' : 'geboekt'} · ${agFree} ${isEN ? 'open' : 'vrij'}</div>`
+              : (!agNext ? `<div class="action-card-sub">${agFree ? `${agFree} ${isEN ? (agFree === 1 ? 'time available' : 'times available') : (agFree === 1 ? 'moment beschikbaar' : 'momenten beschikbaar')}` : (isEN ? 'No open times right now' : 'Nu geen vrije momenten')}</div>` : '')}
           </div>
           <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
-        </div>` : ''}
+        </div>
       `;
     }
 
@@ -3193,8 +3194,34 @@
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function agTime(d) { return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }); }
-    function agDayLabel(d, isNL) { return d.toLocaleDateString(isNL ? 'nl-NL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' }); }
+    // alle tijden in de agenda zijn Nederlandse tijd, ook als de klant (of Fons) in het buitenland zit
+    const AG_TZ = 'Europe/Amsterdam';
+    const agPartsFmt = new Intl.DateTimeFormat('en-GB', { timeZone: AG_TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    function agParts(d) {
+      const p = {};
+      agPartsFmt.formatToParts(d).forEach((x) => { if (x.type !== 'literal') p[x.type] = parseInt(x.value, 10); });
+      return p;
+    }
+    // YYYY-MM-DD van de dag in Nederland
+    function agDateKey(d) {
+      const p = agParts(d);
+      return `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`;
+    }
+    // Nederlandse datum + minuten na middernacht → echt tijdstip (houdt rekening met zomer- en wintertijd)
+    function agFromNL(dateStr, minutes) {
+      const [y, mo, da] = dateStr.split('-').map(Number);
+      const wall = Date.UTC(y, mo - 1, da, Math.floor(minutes / 60), minutes % 60);
+      const offset = (t) => { const p = agParts(new Date(t)); return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - t; };
+      let t = wall - offset(wall);
+      t = wall - offset(t);
+      return new Date(t);
+    }
+    function agTime(d) { return d.toLocaleTimeString('nl-NL', { timeZone: AG_TZ, hour: '2-digit', minute: '2-digit' }); }
+    function agDayLabel(d, isNL) { return d.toLocaleDateString(isNL ? 'nl-NL' : 'en-GB', { timeZone: AG_TZ, weekday: 'long', day: 'numeric', month: 'long' }); }
+    function agTzNote(isNL) { return isNL ? 'Alle tijden zijn Nederlandse tijd.' : 'All times are Dutch time (Amsterdam).'; }
+    // boekingen die de coach nog niet gezien heeft
+    function agSeenAt() { try { return localStorage.getItem('agSeenAt') || ''; } catch (e) { return ''; } }
+    function agMarkSeen() { try { localStorage.setItem('agSeenAt', new Date().toISOString()); } catch (e) {} }
     function agWhen(s, isNL) {
       const d = new Date(s.start_at);
       return `${agDayLabel(d, isNL)} · ${agTime(d)}`;
@@ -3202,7 +3229,7 @@
     function agByDay(slots) {
       const days = new Map();
       slots.forEach((s) => {
-        const key = localDateStr(new Date(s.start_at));
+        const key = agDateKey(new Date(s.start_at));
         if (!days.has(key)) days.set(key, []);
         days.get(key).push(s);
       });
@@ -3249,8 +3276,7 @@
       el.innerHTML = `<div class="empty-state">${T.loading}</div>`;
 
       // de coach ziet de hele dag van vandaag, klanten alleen wat nog komt
-      const from = new Date();
-      if (isAdmin) from.setHours(0, 0, 0, 0);
+      const from = isAdmin ? agFromNL(agDateKey(new Date()), 0) : new Date();
       const { data, error } = await supabaseClient.from('coach_slots').select('*')
         .gte('start_at', from.toISOString()).order('start_at').limit(500);
       if (error) {
@@ -3291,7 +3317,7 @@
         ${agFlashHtml()}
         <p class="muted" style="font-size:0.85rem;line-height:1.5;margin:0 0 14px;">${isNL
           ? 'Plan hier zelf een gesprek met Fons. Kies een moment dat jou uitkomt; tot het gesprek begint kun je het nog annuleren.'
-          : 'Book a session with Fons here. Pick a time that suits you; you can cancel until the session starts.'}</p>
+          : 'Book a session with Fons here. Pick a time that suits you; you can cancel until the session starts.'} ${agTzNote(isNL)}</p>
         ${mine.length ? `<div class="ag-section">${isNL ? 'Jouw gesprekken' : 'Your sessions'}</div>${mineHtml}` : ''}
         <div class="ag-section">${isNL ? 'Beschikbare momenten' : 'Available times'}</div>
         ${daysHtml || `<div class="empty-state">${isNL ? 'Er zijn op dit moment geen vrije momenten. Kijk later nog eens.' : 'There are no open times right now. Check back later.'}</div>`}`;
@@ -3301,7 +3327,7 @@
       const isNL = lang === 'nl';
       const s = agSlots.find((x) => x.id === id);
       if (!s) return;
-      const key = localDateStr(new Date(s.start_at));
+      const key = agDateKey(new Date(s.start_at));
       const box = document.getElementById('agc-' + key);
       const wasOpen = document.querySelector(`.ag-time[data-id="${CSS.escape(id)}"]`).classList.contains('active');
       document.querySelectorAll('.ag-time').forEach((b) => b.classList.remove('active'));
@@ -3368,6 +3394,19 @@
       const booked = agSlots.filter((s) => s.booked_by).length;
       const free = agSlots.length - booked;
       const now = new Date();
+      const seenAt = agSeenAt();
+      const isNew = (s) => s.booked_by && s.booked_at && s.booked_at > seenAt;
+      const bookedList = agSlots.filter((s) => s.booked_by && new Date(s.start_at) >= now);
+      const newCount = bookedList.filter(isNew).length;
+      const bookedHtml = bookedList.map((s) => `
+        <div class="ag-booked">
+          <div style="flex:1;min-width:0;">
+            <div class="ag-booked-when">${escapeHtml(names[s.booked_by] || (isNL ? 'Klant' : 'Client'))}${isNew(s) ? ` <span class="ag-new">${isNL ? 'Nieuw' : 'New'}</span>` : ''}</div>
+            <div class="ag-booked-sub">${agWhen(s, isNL)}${s.location ? ' · ' + escapeHtml(s.location) : ''}</div>
+            ${s.booking_note ? `<div class="ag-booked-sub">${escapeHtml(s.booking_note)}</div>` : ''}
+          </div>
+        </div>`).join('');
+      agMarkSeen();
 
       const daysHtml = agByDay(agSlots).map(([key, slots]) => `
         <div class="ag-day">
@@ -3378,12 +3417,13 @@
           ${slots.map((s) => {
             const start = new Date(s.start_at);
             const past = start < now;
+            const fresh = isNew(s);
             return `
             <div class="ag-row"${past ? ' style="opacity:.45;"' : ''}>
               <div class="ag-row-time">${agTime(start)}</div>
               <div class="ag-row-status">
                 ${s.booked_by
-                  ? `<span class="ag-taken">${escapeHtml(names[s.booked_by] || (isNL ? 'Klant' : 'Client'))}</span>${s.booking_note ? `<span class="ag-note">${escapeHtml(s.booking_note)}</span>` : ''}`
+                  ? `<span class="ag-taken">${escapeHtml(names[s.booked_by] || (isNL ? 'Klant' : 'Client'))}${fresh ? ` <span class="ag-new">${isNL ? 'Nieuw' : 'New'}</span>` : ''}</span>${s.booking_note ? `<span class="ag-note">${escapeHtml(s.booking_note)}</span>` : ''}`
                   : `<span class="ag-free">${isNL ? 'Vrij' : 'Open'}</span>`}
                 ${s.location ? `<span class="ag-note">${escapeHtml(s.location)}</span>` : ''}
               </div>
@@ -3397,12 +3437,14 @@
       const durChips = [30, 45, 60, 90].map((m) => `<button type="button" class="ld-chip${m === 60 ? ' active' : ''}" data-val="${m}">${m} min</button>`).join('');
       el.innerHTML = `
         ${agFlashHtml()}
-        <div class="card" style="margin-bottom:6px;">
+        <div class="ag-section" style="margin-top:0;">${isNL ? 'Geboekte gesprekken' : 'Booked sessions'}${newCount ? ` <span class="ag-new">${newCount} ${isNL ? 'nieuw' : 'new'}</span>` : ''}</div>
+        ${bookedHtml || `<div class="empty-state" style="margin-bottom:12px;">${isNL ? 'Nog niemand heeft een moment geboekt.' : 'Nobody has booked a time yet.'}</div>`}
+        <div class="card" style="margin:18px 0 6px;">
           <h3 style="margin:0 0 4px;">${isNL ? 'Beschikbaarheid toevoegen' : 'Add availability'}</h3>
-          <p class="muted" style="font-size:0.82rem;margin:0 0 14px;">${isNL ? 'Binnen dit blok komen starttijden die klanten kunnen boeken.' : 'This block gets start times clients can book.'}</p>
+          <p class="muted" style="font-size:0.82rem;margin:0 0 14px;">${isNL ? 'Binnen dit blok komen starttijden die klanten direct in de app zien en kunnen boeken.' : 'This block gets start times clients see in the app right away and can book.'} ${agTzNote(isNL)}</p>
           <div class="field">
             <label>${isNL ? 'Datum' : 'Date'}</label>
-            <input type="date" id="agDate" value="${localDateStr(new Date())}" min="${localDateStr(new Date())}" />
+            <input type="date" id="agDate" value="${agDateKey(new Date())}" min="${agDateKey(new Date())}" />
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div class="field"><label>${isNL ? 'Van' : 'From'}</label><input type="time" id="agFrom" value="09:00" step="900" /></div>
@@ -3458,11 +3500,10 @@
       const now = Date.now();
       const rows = [];
       for (let w = 0; w < weeks; w++) {
-        const day = new Date(date + 'T00:00:00');
-        day.setDate(day.getDate() + w * 7);
+        const [y, mo, da] = date.split('-').map(Number);
+        const dayStr = new Date(Date.UTC(y, mo - 1, da + w * 7)).toISOString().slice(0, 10);
         for (let m = toMin(from); m < toMin(to); m += dur) {
-          const start = new Date(day);
-          start.setHours(Math.floor(m / 60), m % 60, 0, 0);
+          const start = agFromNL(dayStr, m);
           if (start.getTime() <= now || taken.has(start.getTime())) continue;
           rows.push({ start_at: start.toISOString(), duration_min: dur, location });
         }
@@ -3502,7 +3543,7 @@
       box.classList.remove('hidden');
       box.innerHTML = `
         <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px;">
-          <div class="field" style="margin-bottom:10px;"><label>${isNL ? 'Datum' : 'Date'}</label><input type="date" id="ageDate" value="${localDateStr(start)}" /></div>
+          <div class="field" style="margin-bottom:10px;"><label>${isNL ? 'Datum' : 'Date'}</label><input type="date" id="ageDate" value="${agDateKey(start)}" /></div>
           <div class="field" style="margin-bottom:10px;"><label>${isNL ? 'Starttijd' : 'Start time'}</label><input type="time" id="ageTime" value="${agTime(start)}" step="300" /></div>
         </div>
         <div class="field" style="margin-bottom:10px;">
@@ -3523,7 +3564,8 @@
       const time = document.getElementById('ageTime').value;
       const fail = (text) => { msg.className = 'error-msg'; msg.textContent = text; };
       if (!date || !time) return fail(isNL ? 'Vul een datum en starttijd in.' : 'Enter a date and start time.');
-      const start = new Date(`${date}T${time}:00`);
+      const [hh, mm] = time.split(':').map(Number);
+      const start = agFromNL(date, hh * 60 + mm);
       if (agSlots.some((x) => x.id !== id && new Date(x.start_at).getTime() === start.getTime())) {
         return fail(isNL ? 'Op dit tijdstip staat al een moment.' : 'There is already a time at this moment.');
       }
@@ -3560,7 +3602,7 @@
 
     async function agClearDay(key) {
       const isNL = lang === 'nl';
-      const ids = agSlots.filter((s) => !s.booked_by && localDateStr(new Date(s.start_at)) === key).map((s) => s.id);
+      const ids = agSlots.filter((s) => !s.booked_by && agDateKey(new Date(s.start_at)) === key).map((s) => s.id);
       if (!ids.length || !confirm(isNL ? `${ids.length} vrije momenten op deze dag verwijderen?` : `Delete ${ids.length} open times on this day?`)) return;
       const { error } = await supabaseClient.from('coach_slots').delete().in('id', ids).is('booked_by', null);
       if (error) { alert(error.message); return; }
