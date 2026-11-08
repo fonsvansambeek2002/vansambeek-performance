@@ -3183,6 +3183,7 @@
     let agSlots = [];
     let agCid = 'agendaContent';
     let agFlash = '';
+    let agWarn = '';
 
     function foldBtn(label, targetId) {
       return `<button class="btn-accent fold-btn" onclick="openFold(this, '${targetId}')">+ ${label}</button>`;
@@ -3261,10 +3262,18 @@
     }
 
     function agFlashHtml() {
-      if (!agFlash) return '';
-      const html = `<p class="success-msg" style="margin:0 0 12px;font-size:0.85rem;">${escapeHtml(agFlash)}</p>`;
+      const html = (agWarn ? `<p class="error-msg" style="margin:0 0 12px;font-size:0.85rem;">${escapeHtml(agWarn)}</p>` : '')
+        + (agFlash ? `<p class="success-msg" style="margin:0 0 12px;font-size:0.85rem;">${escapeHtml(agFlash)}</p>` : '');
       agFlash = '';
+      agWarn = '';
       return html;
+    }
+
+    function agFetch() {
+      // de coach ziet de hele dag van vandaag, klanten alleen wat nog komt
+      const from = isAdmin ? agFromNL(agDateKey(new Date()), 0) : new Date();
+      return supabaseClient.from('coach_slots').select('*')
+        .gte('start_at', from.toISOString()).order('start_at').limit(500);
     }
 
     async function loadAgenda(cid = agCid) {
@@ -3275,10 +3284,7 @@
       if (!el) return;
       el.innerHTML = `<div class="empty-state">${T.loading}</div>`;
 
-      // de coach ziet de hele dag van vandaag, klanten alleen wat nog komt
-      const from = isAdmin ? agFromNL(agDateKey(new Date()), 0) : new Date();
-      const { data, error } = await supabaseClient.from('coach_slots').select('*')
-        .gte('start_at', from.toISOString()).order('start_at').limit(500);
+      const { data, error } = await agFetch();
       if (error) {
         el.innerHTML = `<div class="empty-state">${isNL ? 'De agenda kon niet geladen worden: ' : 'Could not load the calendar: '}${escapeHtml(error.message)}</div>`;
         return;
@@ -3287,6 +3293,61 @@
       if (isAdmin) await agRenderAdmin(el, isNL);
       else agRenderPlayer(el, isNL);
     }
+
+    // ── live bijwerken ────────────────────────────────────
+    // zolang de agenda open staat, kijkt hij elke 10 seconden of er iets veranderd is:
+    // een moment dat iemand anders boekt verdwijnt dan vanzelf, en de coach ziet nieuwe boekingen meteen.
+    const AG_POLL_MS = 10000;
+    function agSig(list) { return list.map((s) => [s.id, s.start_at, s.booked_by || '', s.location || ''].join('|')).join(';'); }
+    function agOpenCid() {
+      if (document.getElementById('screen-agenda')?.classList.contains('active')) return 'agendaContent';
+      if (document.getElementById('screen-klanten')?.classList.contains('active')
+        && !document.getElementById('agendaAdminContent').classList.contains('hidden')) return 'agendaAdminContent';
+      return null;
+    }
+    let agRefreshing = false;
+    async function agRefresh() {
+      const cid = agOpenCid();
+      if (!cid || cid !== agCid || document.hidden || !currentUser || agRefreshing) return;
+      // niet storen terwijl er net opgeslagen wordt of de coach een moment aan het wijzigen is
+      if (document.querySelector('#agBookBtn:disabled, #agAddBtn:disabled, .ag-edit:not(.hidden)')) return;
+      agRefreshing = true;
+      try {
+        const { data, error } = await agFetch();
+        if (error || agOpenCid() !== cid) return;
+        const fresh = data || [];
+        if (agSig(fresh) === agSig(agSlots)) return;
+        const isNL = lang === 'nl';
+        const el = document.getElementById(cid);
+        const scroll = window.scrollY;
+        if (isAdmin) {
+          const before = new Set(agSlots.filter((s) => s.booked_by).map((s) => s.id));
+          const added = fresh.filter((s) => s.booked_by && !before.has(s.id)).length;
+          if (added) agFlash = isNL ? (added === 1 ? 'Er is net een gesprek geboekt.' : `Er zijn net ${added} gesprekken geboekt.`) : (added === 1 ? 'A session was just booked.' : `${added} sessions were just booked.`);
+          // wat de coach al in het formulier had ingevuld blijft staan
+          const keep = {};
+          ['agDate', 'agFrom', 'agTo', 'agLoc', 'agRepeat'].forEach((id) => { const f = document.getElementById(id); if (f) keep[id] = f.value; });
+          const dur = document.querySelector('#agDur .ld-chip.active')?.dataset.val;
+          agSlots = fresh;
+          await agRenderAdmin(el, isNL);
+          Object.entries(keep).forEach(([id, v]) => { const f = document.getElementById(id); if (f) f.value = v; });
+          if (dur) document.querySelectorAll('#agDur .ld-chip').forEach((c) => c.classList.toggle('active', c.dataset.val === dur));
+        } else {
+          const picked = document.querySelector('.ag-time.active')?.dataset.id;
+          const note = document.getElementById('agNote')?.value || '';
+          const stillFree = picked && fresh.some((s) => s.id === picked && !s.booked_by);
+          if (picked && !stillFree) agWarn = isNL ? 'Het moment dat je had gekozen is net door iemand anders geboekt. Kies een ander moment.' : 'The time you picked was just booked by someone else. Please pick another one.';
+          agSlots = fresh;
+          agRenderPlayer(el, isNL);
+          if (stillFree) { agPick(picked); document.getElementById('agNote').value = note; }
+        }
+        window.scrollTo(0, scroll);
+      } finally {
+        agRefreshing = false;
+      }
+    }
+    setInterval(agRefresh, AG_POLL_MS);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) agRefresh(); });
 
     // ── klant: boeken ─────────────────────────────────────
     function agRenderPlayer(el, isNL) {
