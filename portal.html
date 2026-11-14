@@ -63,9 +63,9 @@
     .card {
       background: #1A1A1A;
       border: 1px solid #2A2A2A;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
     }
 
     .card h3 {
@@ -151,7 +151,6 @@
       background: #000;
     }
 
-    .bottom-nav:has(#navKlantenBtn:not(.hidden)) .nav-btn { font-size: 9.5px; }
     .nav-btn span { white-space: nowrap; }
     .bottom-nav {
       background: #0A0A0A;
@@ -386,14 +385,51 @@
     }
     /* secondary sub-nav */
     .sgn-bar {
-      display: flex; gap: 6px; padding: 0 0 14px;
+      display: flex; gap: 6px; margin: 0 -18px 14px; padding: 0 18px;
+      overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
     }
+    .sgn-bar::-webkit-scrollbar { display: none; }
     .sgn-btn {
-      flex: 1; background: #1a1a1a; border: none; border-radius: 8px;
-      color: #888; font-family: 'Inter', sans-serif; font-size: 13px;
-      font-weight: 600; padding: 9px 6px; cursor: pointer; transition: all .15s;
+      flex: 1 0 auto; background: #141414; border: 1px solid #1f1f1f; border-radius: 999px;
+      color: #888; font-family: 'Inter', sans-serif; font-size: 13px; white-space: nowrap;
+      font-weight: 600; padding: 7px 14px; cursor: pointer; transition: all .15s;
     }
-    .sgn-btn.active { background: #C8F135; color: #0A0A0A; }
+    .sgn-btn.active { background: #C8F135; border-color: #C8F135; color: #0A0A0A; }
+
+    /* compact home */
+    #screen-home .greeting { font-size: 1.6rem; margin: 0; line-height: 1.1; }
+    #screen-home .subgreeting { font-size: 0.85rem; margin: 2px 0 16px; }
+    .home-strip { display: flex; gap: 10px; margin-bottom: 10px; }
+    .home-tile {
+      flex: 1; min-width: 0; background: #141414; border: 1px solid #1f1f1f;
+      border-radius: 14px; padding: 12px 14px;
+    }
+    .home-tile-link { cursor: pointer; }
+    .home-tile-link:active { transform: scale(.98); }
+    .home-tile-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #555; margin-bottom: 4px; }
+    .home-tile-value { font-size: 1.15rem; font-weight: 700; color: #f0f0f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .home-tile-value span { color: #444; font-weight: 400; }
+    .home-tile-small { font-size: 0.95rem; padding-top: 2px; }
+    .home-tile-sub { font-size: 12px; color: #666; margin-top: 3px; }
+    .home-tile-bar { height: 4px; background: #222; border-radius: 99px; overflow: hidden; margin-top: 8px; }
+    .home-tile-bar div { height: 100%; background: #C8F135; border-radius: 99px; }
+    .home-note {
+      background: #141414; border: 1px solid #1f1f1f; border-left: 3px solid #C8F135;
+      border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer;
+    }
+    .home-note p {
+      margin: 0; font-size: 0.85rem; color: #ccc; line-height: 1.55;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .home-note.open p { display: block; }
+    .home-quote { margin-top: 18px; padding: 0 2px; font-size: 0.82rem; color: #777; line-height: 1.6; }
+    .home-quote-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #444; margin-bottom: 4px; }
+    .home-quote em { color: #aaa; }
+    .home-quote-author { color: #C8F135; font-weight: 600; white-space: nowrap; }
+
+    /* planning toolbar */
+    .plan-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
+    .plan-list-title { margin: 0 0 10px; font-family: 'Bebas Neue', cursive; letter-spacing: .05em; color: #888; font-weight: 400; font-size: 1.05rem; }
 
     /* welcome card */
     .welcome-card {
@@ -1240,72 +1276,51 @@
 
     <main class="app-main">
       <section class="screen active" id="screen-home">
-        <div style="display:flex;align-items:center;gap:12px;padding:4px 0 14px;">
-          <img src="assets/logo.png" alt="VSP" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;" />
-          <div style="flex:1;min-width:0;">
-            <p class="greeting" id="homeGreeting" style="margin:0;font-size:1.05rem;"></p>
-            <p class="subgreeting" id="subgreeting" style="margin:0;font-size:0.78rem;"></p>
-          </div>
-        </div>
-
-        <div id="homeWeekBanner" class="hidden"></div>
-        <div id="homeCoachNote" class="hidden"></div>
+        <p class="greeting" id="homeGreeting"></p>
+        <p class="subgreeting" id="subgreeting"></p>
 
         <div id="welcomeCard" class="welcome-card hidden">
           <h3 id="welcomeTitle">Welkom bij je coaching portal</h3>
           <p id="welcomeBody">Hier vind je alles voor je mentale ontwikkeling als sporter. Begin met je eerste opdracht en bekijk de content in de bibliotheek.</p>
           <button class="btn-accent" onclick="switchScreen('opdrachten')" id="welcomeBtn">Start met opdracht 1 →</button>
         </div>
-        <div class="action-cards" id="homeActions"></div>
 
-        <div class="card" id="tipCard">
-          <h3 id="tipTitle">Tip van de dag</h3>
-          <p class="muted" id="tipBody">Tip laden…</p>
+        <div class="home-strip" id="homeStrip"></div>
+        <div id="homeCoachNote" class="hidden"></div>
+
+        <div class="home-quote" id="tipCard">
+          <span class="home-quote-label" id="tipTitle">Tip van de dag</span>
+          <div id="tipBody">Tip laden…</div>
         </div>
       </section>
 
       <section class="screen" id="screen-library">
-        <div class="sgn-bar">
-          <button class="sgn-btn active" data-screen="library">Off Court</button>
-          <button class="sgn-btn" data-screen="media">Luisteren & Kijken</button>
-        </div>
-        <div class="tabs" id="categoryTabs">
-          <button class="tab active" data-category="ademhaling">Ademhaling & Mindfulness</button>
-          <button class="tab" data-category="voeding">Voeding</button>
-          <button class="tab" data-category="fysiek">Fysiek</button>
-        </div>
+        <div class="sgn-bar" data-group="offcourt"></div>
         <div id="libraryList"></div>
       </section>
 
       <section class="screen" id="screen-media">
-        <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="library">Off Court</button>
-          <button class="sgn-btn active" data-screen="media">Luisteren & Kijken</button>
-        </div>
+        <div class="sgn-bar" data-group="offcourt"></div>
         <div id="mediaContent"></div>
       </section>
 
       <section class="screen" id="screen-wedstrijden">
-        <div class="sgn-bar" id="sgn-reflectie">
-          <button class="sgn-btn active" data-screen="wedstrijden" id="sgnDagboek">Wedstrijd</button>
-          <button class="sgn-btn" data-screen="slaap">Slaap</button>
-        </div>
+        <div class="sgn-bar" data-group="logboek"></div>
         <div id="dagboekContent"></div>
       </section>
 
       <section class="screen" id="screen-belasting">
+        <div class="sgn-bar" data-group="logboek"></div>
         <div id="belastingContent"></div>
       </section>
 
       <section class="screen" id="screen-slaap">
-        <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="wedstrijden">Wedstrijd</button>
-          <button class="sgn-btn active" data-screen="slaap">Slaap</button>
-        </div>
+        <div class="sgn-bar" data-group="logboek"></div>
         <div id="slaapContent"></div>
       </section>
 
       <section class="screen" id="screen-opdrachten">
+        <div class="sgn-bar" data-group="offcourt"></div>
         <div id="opdrachtContent"></div>
       </section>
 
@@ -1321,26 +1336,26 @@
       </section>
 
       <section class="screen" id="screen-agenda">
+        <div class="sgn-bar" data-group="traject"></div>
         <div id="agendaContent"></div>
       </section>
 
       <section class="screen" id="screen-planning">
-        <div class="sgn-bar">
-          <button class="sgn-btn active" data-screen="planning">Planning</button>
-          <button class="sgn-btn" data-screen="focus">Focus</button>
-          <button class="sgn-btn" data-screen="scouting">Scouting</button>
-          <button class="sgn-btn" data-screen="video">Video</button>
-        </div>
-        <div class="plan-year-nav">
-          <button class="icon-btn" id="planPrevYear" style="font-size:1.4rem;padding:4px 10px;">‹</button>
-          <span class="plan-year-label" id="planYearLabel">2026</span>
-          <button class="icon-btn" id="planNextYear" style="font-size:1.4rem;padding:4px 10px;">›</button>
+        <div class="sgn-bar" data-group="traject"></div>
+        <div class="plan-toolbar">
+          <button class="btn-ghost-sm" id="planViewBtn">Kalender</button>
           <button class="btn-ghost-sm" id="planAddBtn">+ Toernooi</button>
         </div>
 
-        <div class="plan-month-tabs" id="planMonthTabs"></div>
-
-        <div class="plan-cal" id="planCal"></div>
+        <div id="planCalWrap" class="hidden">
+          <div class="plan-year-nav">
+            <button class="icon-btn" id="planPrevYear" style="font-size:1.4rem;padding:4px 10px;">‹</button>
+            <span class="plan-year-label" id="planYearLabel">2026</span>
+            <button class="icon-btn" id="planNextYear" style="font-size:1.4rem;padding:4px 10px;">›</button>
+          </div>
+          <div class="plan-month-tabs" id="planMonthTabs"></div>
+          <div class="plan-cal" id="planCal"></div>
+        </div>
 
         <div id="planList"></div>
 
@@ -1383,32 +1398,17 @@
       </section>
 
       <section class="screen" id="screen-scouting">
-        <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="planning">Planning</button>
-          <button class="sgn-btn" data-screen="focus">Focus</button>
-          <button class="sgn-btn active" data-screen="scouting">Scouting</button>
-          <button class="sgn-btn" data-screen="video">Video</button>
-        </div>
+        <div class="sgn-bar" data-group="traject"></div>
         <div id="scoutingContent"></div>
       </section>
 
       <section class="screen" id="screen-focus">
-        <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="planning">Planning</button>
-          <button class="sgn-btn active" data-screen="focus">Focus</button>
-          <button class="sgn-btn" data-screen="scouting">Scouting</button>
-          <button class="sgn-btn" data-screen="video">Video</button>
-        </div>
+        <div class="sgn-bar" data-group="traject"></div>
         <div id="focusContent"></div>
       </section>
 
       <section class="screen" id="screen-video">
-        <div class="sgn-bar">
-          <button class="sgn-btn" data-screen="planning">Planning</button>
-          <button class="sgn-btn" data-screen="focus">Focus</button>
-          <button class="sgn-btn" data-screen="scouting">Scouting</button>
-          <button class="sgn-btn active" data-screen="video">Video</button>
-        </div>
+        <div class="sgn-bar" data-group="traject"></div>
         <button class="btn-accent fold-btn" id="vidOpenBtn" onclick="openFold(this, 'vidFormCard')">+ Video insturen</button>
         <div class="card hidden" id="vidFormCard" style="margin-bottom:20px;">
           <h3 style="margin-bottom:6px;" id="vidFormTitle">Video insturen</h3>
@@ -1461,13 +1461,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
         <span id="navHome">Home</span>
       </button>
-      <button class="nav-btn" data-screen="belasting">
+      <button class="nav-btn" data-screen="belasting" data-navgroup="logboek">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        <span id="navBelasting">Belasting</span>
-      </button>
-      <button class="nav-btn" data-screen="wedstrijden" data-navgroup="reflectie">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-        <span id="navReflectie">Reflectie</span>
+        <span id="navLogboek">Logboek</span>
       </button>
       <button class="nav-btn" data-screen="planning" data-navgroup="traject">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
@@ -1477,11 +1473,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M18 4v16"/></svg>
         <span id="navContent">Off Court</span>
       </button>
-      <button class="nav-btn" data-screen="opdrachten">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        <span id="navOpdrachten">Opdrachten</span>
-      </button>
-      <button class="nav-btn hidden" id="navKlantenBtn" data-screen="klanten">
+      <button class="nav-btn hidden" id="navKlantenBtn" data-screen="klanten" data-navgroup="klanten">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
         <span id="navKlanten">Klanten</span>
       </button>
@@ -1493,7 +1485,11 @@
   <script>
     const i18n = {
       nl: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Luisteren & Kijken', wedstrijden: 'Reflectie', checkin: 'Check-in', belasting: 'Belasting', slaap: 'Slaap', highlights: 'Reflectie', planning: 'Traject', video: 'Traject', agenda: 'Agenda', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Opdrachten', klanten: 'Klanten' },
+        screenTitles: { home: 'Home', library: 'Off Court', media: 'Off Court', wedstrijden: 'Logboek', checkin: 'Logboek', belasting: 'Logboek', slaap: 'Logboek', highlights: 'Logboek', planning: 'Traject', video: 'Traject', agenda: 'Traject', scouting: 'Traject', focus: 'Traject', opdrachten: 'Off Court', klanten: 'Klanten' },
+        navLogboek: 'Logboek',
+        sub: { belasting: 'Belasting', wedstrijden: 'Wedstrijd', slaap: 'Slaap', planning: 'Planning', focus: 'Focus', scouting: 'Scouting', video: 'Video', agenda: 'Agenda', ademhaling: 'Ademhaling', voeding: 'Voeding', fysiek: 'Fysiek', media: 'Luisteren', opdrachten: 'Opdrachten' },
+        planCalendarBtn: 'Kalender', planListBtn: 'Lijst', planUpcoming: 'Komende toernooien', planNoUpcoming: 'Nog geen toernooien gepland.',
+        homeProgram: 'Programma', homeNextSession: 'Volgend gesprek', homeBook: 'Plan een gesprek', homeAgenda: 'Agenda',
         navReflectie: 'Reflectie',
         navTraject: 'Traject',
         sgnWedstrijden: 'Wedstrijd',
@@ -1675,7 +1671,11 @@
         djMatchLabel: 'Wedstrijd',
       },
       en: {
-        screenTitles: { home: 'Home', library: 'Off Court Training', media: 'Listen & Watch', wedstrijden: 'Reflect', checkin: 'Check-in', belasting: 'Training load', slaap: 'Sleep', highlights: 'Reflect', planning: 'Journey', video: 'Journey', agenda: 'Calendar', scouting: 'Scouting', focus: 'Focus', opdrachten: 'Assignments', klanten: 'Clients' },
+        screenTitles: { home: 'Home', library: 'Off Court', media: 'Off Court', wedstrijden: 'Log', checkin: 'Log', belasting: 'Log', slaap: 'Log', highlights: 'Log', planning: 'Journey', video: 'Journey', agenda: 'Journey', scouting: 'Journey', focus: 'Journey', opdrachten: 'Off Court', klanten: 'Clients' },
+        navLogboek: 'Log',
+        sub: { belasting: 'Load', wedstrijden: 'Match', slaap: 'Sleep', planning: 'Planning', focus: 'Focus', scouting: 'Scouting', video: 'Video', agenda: 'Calendar', ademhaling: 'Breathing', voeding: 'Nutrition', fysiek: 'Physical', media: 'Listen', opdrachten: 'Assignments' },
+        planCalendarBtn: 'Calendar', planListBtn: 'List', planUpcoming: 'Upcoming tournaments', planNoUpcoming: 'No tournaments planned yet.',
+        homeProgram: 'Program', homeNextSession: 'Next session', homeBook: 'Book a session', homeAgenda: 'Calendar',
         navReflectie: 'Reflect',
         navTraject: 'Journey',
         sgnWedstrijden: 'Match',
@@ -1876,27 +1876,18 @@
       document.getElementById('subgreeting').textContent = T.subgreeting;
       document.getElementById('tipTitle').textContent = T.tipTitle;
 
-      document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
-        tab.textContent = T.tabs[tab.dataset.category];
-      });
-
-      const navKeys = { home: 'navHome', belasting: 'navBelasting', library: 'navContent', opdrachten: 'navOpdrachten', wedstrijden: 'navReflectie', planning: 'navTraject', klanten: 'navKlanten' };
+      const navKeys = { home: 'navHome', logboek: 'navLogboek', offcourt: 'navContent', traject: 'navTraject', klanten: 'navKlanten' };
       document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
-        const key = navKeys[btn.dataset.screen];
+        const key = navKeys[btn.dataset.navgroup];
         if (key) btn.querySelector('span').textContent = T[key];
       });
-      const sgnKeys = { wedstrijden: 'sgnWedstrijden', checkin: 'sgnCheckin', library: 'sgnLibrary', media: 'sgnMedia', slaap: 'sgnSlaap', highlights: 'sgnHighlights', planning: 'sgnPlanning', video: 'sgnVideo' };
-      document.querySelectorAll('.sgn-btn').forEach((btn) => {
-        const key = sgnKeys[btn.dataset.screen];
-        if (key) btn.textContent = T[key];
-      });
+      renderSubnavs();
       document.getElementById('vidHistoryTitle').textContent = T.vidHistoryTitle;
 
       applyStaticText();
       if (currentUser) loadHome();
       if (libraryLoaded) {
-        const activeCategory = document.querySelector('#categoryTabs .tab.active').dataset.category;
-        loadLibrary(activeCategory);
+        loadLibrary(libraryCategory);
       }
       if (document.getElementById('screen-wedstrijden').classList.contains('active')) {
         loadJournal();
@@ -1969,20 +1960,68 @@
       location.href = 'login.html';
     });
 
+    // ── sub-navigation: one row of tabs per bottom-nav group ──
+    const SUBNAV = {
+      logboek:  [{ s: 'belasting' }, { s: 'wedstrijden' }, { s: 'slaap' }],
+      traject:  [{ s: 'planning' }, { s: 'focus' }, { s: 'scouting' }, { s: 'video' }, { s: 'agenda' }],
+      offcourt: [{ s: 'library', cat: 'ademhaling' }, { s: 'library', cat: 'voeding' }, { s: 'library', cat: 'fysiek' }, { s: 'media' }, { s: 'opdrachten' }],
+    };
+    let libraryCategory = 'ademhaling';
+    const lastSub = {};
+
+    function subKey(e) { return e.cat || e.s; }
+    function currentSubKey() {
+      const cur = document.querySelector('.screen.active')?.id.replace('screen-', '');
+      return cur === 'library' ? libraryCategory : cur;
+    }
+
+    function renderSubnavs() {
+      const T = i18n[lang];
+      document.querySelectorAll('.sgn-bar[data-group]').forEach((bar) => {
+        const screen = bar.closest('.screen').id.replace('screen-', '');
+        bar.innerHTML = SUBNAV[bar.dataset.group].map((e) => {
+          const on = e.cat ? (screen === 'library' && e.cat === libraryCategory) : e.s === screen;
+          return `<button class="sgn-btn${on ? ' active' : ''}" data-sub="${subKey(e)}">${T.sub[subKey(e)]}</button>`;
+        }).join('');
+      });
+      // keep the active tab in view when the row scrolls
+      const act = document.querySelector('.screen.active .sgn-bar .sgn-btn.active');
+      if (act) act.parentElement.scrollLeft = act.offsetLeft - act.parentElement.clientWidth / 2 + act.clientWidth / 2;
+    }
+
+    function goSub(group, key) {
+      const e = SUBNAV[group].find((x) => subKey(x) === key);
+      if (!e) return;
+      if (e.cat) {
+        const onLibrary = document.getElementById('screen-library').classList.contains('active');
+        libraryCategory = e.cat;
+        if (onLibrary) {
+          lastSub.offcourt = e.cat;
+          renderSubnavs();
+          loadLibrary(e.cat);
+          return;
+        }
+        libraryLoaded = false;
+      }
+      switchScreen(e.s);
+    }
+
+    document.querySelectorAll('.sgn-bar[data-group]').forEach((bar) => {
+      bar.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('.sgn-btn');
+        if (btn) goSub(bar.dataset.group, btn.dataset.sub);
+      });
+    });
+
     document.querySelectorAll('.bottom-nav .nav-btn').forEach((btn) => {
-      btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
+      btn.addEventListener('click', () => {
+        const g = btn.dataset.navgroup;
+        if (SUBNAV[g] && lastSub[g]) goSub(g, lastSub[g]);
+        else switchScreen(btn.dataset.screen);
+      });
     });
 
-    document.querySelectorAll('.sgn-btn').forEach((btn) => {
-      btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
-    });
-
-    // swipe left/right between sgn-bar sub-screens
-    const sgnGroups = [
-      ['wedstrijden', 'slaap'],
-      ['library', 'media'],
-      ['planning', 'focus', 'scouting', 'video'],
-    ];
+    // swipe left/right between sub-screens of the same group
     (function initSwipe() {
       let tx = 0, ty = 0, ignore = false;
       const appMain = document.querySelector('.app-main');
@@ -2006,34 +2045,30 @@
         if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
         const active = document.querySelector('.screen.active');
         if (!active) return;
-        const current = active.id.replace('screen-', '');
-        const group = sgnGroups.find((g) => g.includes(current));
-        if (!group) return;
-        const idx = group.indexOf(current);
-        const target = dx < 0 ? group[idx + 1] : group[idx - 1];
-        if (target) switchScreen(target);
+        const g = screenNavGroup[active.id.replace('screen-', '')];
+        if (!SUBNAV[g]) return;
+        const keys = SUBNAV[g].map(subKey);
+        const idx = keys.indexOf(currentSubKey());
+        const target = dx < 0 ? keys[idx + 1] : keys[idx - 1];
+        if (target) goSub(g, target);
       }, { passive: true });
     })();
 
-    document.querySelectorAll('#categoryTabs .tab').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('#categoryTabs .tab').forEach((el) => el.classList.remove('active'));
-        tab.classList.add('active');
-        loadLibrary(tab.dataset.category);
-      });
-    });
 
     // journal submit wired up inside loadJournal()
 
     const screenNavGroup = {
-      home: 'home', agenda: 'home',
-      wedstrijden: 'reflectie', slaap: 'reflectie',
-      library: 'offcourt', media: 'offcourt',
-      planning: 'traject', video: 'traject', scouting: 'traject', focus: 'traject',
+      home: 'home',
+      belasting: 'logboek', wedstrijden: 'logboek', slaap: 'logboek',
+      library: 'offcourt', media: 'offcourt', opdrachten: 'offcourt',
+      planning: 'traject', video: 'traject', scouting: 'traject', focus: 'traject', agenda: 'traject',
+      klanten: 'klanten',
     };
 
     function switchScreen(name) {
       const T = i18n[lang];
+      // the coach manages the agenda from Klanten
+      if (name === 'agenda' && isAdmin) { switchScreen('klanten'); switchKlScreen('agenda'); return; }
       document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
       document.getElementById('screen-' + name).classList.add('active');
 
@@ -2047,14 +2082,12 @@
 
       document.getElementById('topbarTitle').textContent = T.screenTitles[name] || name;
 
-      // sync sgn-btn active states within the new screen
-      document.querySelectorAll('#screen-' + name + ' .sgn-btn').forEach((b) => {
-        b.classList.toggle('active', b.dataset.screen === name);
-      });
+      if (group) lastSub[group] = name === 'library' ? libraryCategory : name;
+      renderSubnavs();
+      document.querySelector('.app-main').scrollTop = 0;
 
       if (name === 'library' && !libraryLoaded) {
-        const activeCategory = document.querySelector('#categoryTabs .tab.active').dataset.category;
-        loadLibrary(activeCategory);
+        loadLibrary(libraryCategory);
       }
       if (name === 'wedstrijden') {
         loadJournal();
@@ -2172,8 +2205,7 @@
       const dayOfYear = Math.floor((Date.now() - start) / 86400000);
       const q = quotes[dayOfYear % quotes.length];
       document.getElementById('tipBody').innerHTML =
-        `<em style="display:block;font-size:1rem;color:#DDD;line-height:1.75;margin-bottom:12px;">"${escapeHtml(q.text)}"</em>` +
-        `<span style="color:#C8F135;font-size:0.82rem;font-weight:600;">— ${escapeHtml(q.author)}</span>`;
+        `<em>"${escapeHtml(q.text)}"</em> <span class="home-quote-author">— ${escapeHtml(q.author)}</span>`;
 
       const [
         { data: completions },
@@ -2196,46 +2228,47 @@
       const agFree = agList.filter((s) => !s.booked_by).length;
       const agNewCount = isAdmin ? agBooked.filter((s) => s.booked_at && s.booked_at > agSeenAt()).length : 0;
 
-      // ── week banner ───────────────────────────────────────
-      const bannerEl = document.getElementById('homeWeekBanner');
+      // ── strip: program week + next session ────────────────
+      const dateOpts = { timeZone: AG_TZ, weekday: 'short', day: 'numeric', month: 'short' };
+      const agTarget = isAdmin ? "switchScreen('klanten');switchKlScreen('agenda')" : "switchScreen('agenda')";
+      let tiles = '';
       if (activeProgram) {
         const weekNum = Math.min(Math.max(Math.floor((new Date() - new Date(activeProgram.start_date)) / (7 * 864e5)) + 1, 1), activeProgram.total_weeks);
         const pct = Math.round((weekNum / activeProgram.total_weeks) * 100);
-        bannerEl.classList.remove('hidden');
-        bannerEl.innerHTML = `
-          <div style="background:#111;border:1px solid #1A1A1A;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-size:0.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#444;">${isEN ? 'Your program' : 'Jouw programma'}</span>
-              <span style="font-size:0.78rem;font-weight:700;color:#C8F135;">${isEN ? 'Week' : 'Week'} ${weekNum}<span style="color:#333;font-weight:400;">/${activeProgram.total_weeks}</span></span>
-            </div>
-            <div style="height:6px;background:#1A1A1A;border-radius:99px;overflow:hidden;">
-              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#C8F135,#a3c910);border-radius:99px;transition:width .4s;"></div>
-            </div>
-            <div style="font-size:0.65rem;color:#333;margin-top:5px;">${pct}% ${isEN ? 'completed' : 'voltooid'}</div>
+        tiles += `
+          <div class="home-tile">
+            <div class="home-tile-label">${T.homeProgram}</div>
+            <div class="home-tile-value">Week ${weekNum}<span>/${activeProgram.total_weeks}</span></div>
+            <div class="home-tile-bar"><div style="width:${pct}%;"></div></div>
           </div>`;
       }
+      const agTitle = agNext
+        ? `${new Date(agNext.start_at).toLocaleDateString(isEN ? 'en-GB' : 'nl-NL', dateOpts)} · ${agTime(new Date(agNext.start_at))}`.replace(/^./, (c) => c.toUpperCase())
+        : (isAdmin ? (isEN ? 'Set availability' : 'Beschikbaarheid') : T.homeBook);
+      const agSub = isAdmin
+        ? `${agNewCount ? `<span class="ag-new" style="margin:0 6px 0 0;">${agNewCount} ${isEN ? 'new' : 'nieuw'}</span>` : ''}${agBooked.length} ${isEN ? 'booked' : 'geboekt'} · ${agFree} ${isEN ? 'open' : 'vrij'}`
+        : (agNext ? '' : (agFree ? `${agFree} ${isEN ? 'open' : 'vrij'}` : (isEN ? 'No open times' : 'Geen vrije tijden')));
+      tiles += `
+        <div class="home-tile home-tile-link" onclick="${agTarget}">
+          <div class="home-tile-label">${agNext ? T.homeNextSession : T.homeAgenda}</div>
+          <div class="home-tile-value home-tile-small">${agTitle}</div>
+          ${agSub ? `<div class="home-tile-sub">${agSub}</div>` : ''}
+        </div>`;
+      document.getElementById('homeStrip').innerHTML = tiles;
 
-      // ── coach note ────────────────────────────────────────
+      // ── coach note (tap to expand) ────────────────────────
       const noteEl = document.getElementById('homeCoachNote');
+      noteEl.classList.toggle('hidden', !latestNote);
       if (latestNote) {
-        noteEl.classList.remove('hidden');
         const noteDate = new Date(latestNote.session_date).toLocaleDateString(isEN ? 'en-GB' : 'nl-NL', { day: 'numeric', month: 'short' });
         noteEl.innerHTML = `
-          <div style="background:#C8F13508;border:1px solid #C8F13525;border-radius:12px;padding:14px;margin-bottom:12px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-              <div style="width:28px;height:28px;border-radius:50%;background:#C8F135;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="2.5" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              </div>
-              <div>
-                <div style="font-size:0.72rem;font-weight:700;color:#C8F135;">Fons van Sambeek</div>
-                <div style="font-size:0.62rem;color:#444;">${isEN ? 'Coach note' : 'Sessienotitie'} · ${noteDate}</div>
-              </div>
-            </div>
-            <p style="font-size:0.85rem;color:#CCC;line-height:1.65;margin:0;">${escapeHtml(latestNote.content)}</p>
+          <div class="home-note" onclick="this.classList.toggle('open')">
+            <div class="home-tile-label">${isEN ? 'Coach note' : 'Sessienotitie'} · ${noteDate}</div>
+            <p>${escapeHtml(latestNote.content)}</p>
           </div>`;
       }
 
-      // ── welcome / action cards ────────────────────────────
+      // ── welcome card (first visit) ────────────────────────
       const welcomeCard = document.getElementById('welcomeCard');
       if (doneCount === 0 && !isAdmin) {
         document.getElementById('welcomeTitle').textContent = T.welcomeTitle;
@@ -2245,25 +2278,6 @@
       } else {
         welcomeCard.classList.add('hidden');
       }
-
-      const cards = document.getElementById('homeActions');
-      cards.innerHTML = `
-        <div class="action-card" onclick="${isAdmin ? "switchScreen('klanten');switchKlScreen('agenda')" : "switchScreen('agenda')"}">
-          <div class="action-card-icon" style="background:#0a1a2a;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14v3l2 1"/></svg>
-          </div>
-          <div class="action-card-body">
-            <div class="action-card-label">${agNext ? (isEN ? 'Next session' : 'Volgend gesprek') : (isEN ? 'Calendar' : 'Agenda')}</div>
-            <div class="action-card-title">${agNext
-              ? `${new Date(agNext.start_at).toLocaleDateString(isEN ? 'en-GB' : 'nl-NL', { timeZone: AG_TZ, weekday: 'short', day: 'numeric', month: 'short' })} · ${agTime(new Date(agNext.start_at))}`.replace(/^./, (c) => c.toUpperCase())
-              : (isAdmin ? (isEN ? 'Set your availability' : 'Zet je beschikbaarheid klaar') : (isEN ? 'Book a session' : 'Plan een gesprek'))}</div>
-            ${isAdmin
-              ? `<div class="action-card-sub">${agNewCount ? `<span class="ag-new" style="margin:0 6px 0 0;">${agNewCount} ${isEN ? 'new' : 'nieuw'}</span>` : ''}${agBooked.length} ${isEN ? 'booked' : 'geboekt'} · ${agFree} ${isEN ? 'open' : 'vrij'}</div>`
-              : (!agNext ? `<div class="action-card-sub">${agFree ? `${agFree} ${isEN ? (agFree === 1 ? 'time available' : 'times available') : (agFree === 1 ? 'moment beschikbaar' : 'momenten beschikbaar')}` : (isEN ? 'No open times right now' : 'Nu geen vrije momenten')}</div>` : '')}
-          </div>
-          <svg class="action-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-      `;
     }
 
     async function loadLibrary(category) {
@@ -6209,9 +6223,21 @@
       `;
     }
 
+    let planShowCal = false;
+
     function renderPlanList() {
       const T = i18n[lang];
       const list = document.getElementById('planList');
+      document.getElementById('planCalWrap').classList.toggle('hidden', !planShowCal);
+      document.getElementById('planViewBtn').textContent = planShowCal ? T.planListBtn : T.planCalendarBtn;
+      if (!planShowCal) {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const upcoming = planTournaments.filter((t) => (t.end_date || t.start_date) >= todayStr);
+        list.innerHTML = `<h4 class="plan-list-title">${T.planUpcoming}</h4>` +
+          (upcoming.length ? upcoming.map((t) => planCardHtml(t)).join('') : `<div class="empty-state">${T.planNoUpcoming}</div>`);
+        bindPlanDelete(list, T);
+        return;
+      }
       const year = planYear;
       const month = planMonth;
       const monthStart = new Date(year, month, 1);
@@ -6228,26 +6254,31 @@
         return;
       }
 
-      list.innerHTML = `<h4 style="margin:0 0 10px;font-family:'Bebas Neue',cursive;letter-spacing:.05em;color:#888;">${T.planThisMonth}</h4>` +
-        filtered.map((t) => {
-          const surfColor = SURFACE_COLORS[t.surface] || '#333';
-          const surfLabel = SURFACE_LABELS[t.surface] || t.surface;
-          return `
-            <div class="plan-tournament-card">
-              <div style="flex:1;min-width:0;">
-                <strong style="font-size:0.97rem;">${escapeHtml(t.name)}</strong>
-                ${t.location ? `<span class="muted" style="font-size:0.82rem;"> · ${escapeHtml(t.location)}</span>` : ''}
-                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:7px;">
-                  ${t.surface ? `<span class="plan-surface-badge" style="background:${surfColor};">${escapeHtml(surfLabel)}</span>` : ''}
-                  <span class="muted" style="font-size:0.78rem;">${formatTournamentDate(t, lang)}</span>
-                </div>
-                ${t.notes ? `<p class="muted" style="font-size:0.82rem;margin-top:6px;">${escapeHtml(t.notes)}</p>` : ''}
-              </div>
-              <button class="icon-btn plan-del-btn" data-id="${escapeAttr(t.id)}" style="color:#555;font-size:1rem;flex-shrink:0;">✕</button>
-            </div>
-          `;
-        }).join('');
+      list.innerHTML = `<h4 class="plan-list-title">${T.planThisMonth}</h4>` +
+        filtered.map((t) => planCardHtml(t)).join('');
+      bindPlanDelete(list, T);
+    }
 
+    function planCardHtml(t) {
+      const surfColor = SURFACE_COLORS[t.surface] || '#333';
+      const surfLabel = SURFACE_LABELS[t.surface] || t.surface;
+      return `
+        <div class="plan-tournament-card">
+          <div style="flex:1;min-width:0;">
+            <strong style="font-size:0.97rem;">${escapeHtml(t.name)}</strong>
+            ${t.location ? `<span class="muted" style="font-size:0.82rem;"> · ${escapeHtml(t.location)}</span>` : ''}
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:7px;">
+              ${t.surface ? `<span class="plan-surface-badge" style="background:${surfColor};">${escapeHtml(surfLabel)}</span>` : ''}
+              <span class="muted" style="font-size:0.78rem;">${formatTournamentDate(t, lang)}</span>
+            </div>
+            ${t.notes ? `<p class="muted" style="font-size:0.82rem;margin-top:6px;">${escapeHtml(t.notes)}</p>` : ''}
+          </div>
+          <button class="icon-btn plan-del-btn" data-id="${escapeAttr(t.id)}" style="color:#555;font-size:1rem;flex-shrink:0;">✕</button>
+        </div>
+      `;
+    }
+
+    function bindPlanDelete(list, T) {
       list.querySelectorAll('.plan-del-btn').forEach((btn) => {
         btn.addEventListener('click', async () => {
           if (!confirm(T.planDeleteConfirm)) return;
@@ -6258,6 +6289,12 @@
         });
       });
     }
+
+    document.getElementById('planViewBtn').addEventListener('click', () => {
+      planShowCal = !planShowCal;
+      renderPlanCalendar();
+      renderPlanList();
+    });
 
     document.getElementById('planAddBtn').addEventListener('click', () => {
       const form = document.getElementById('planFormCard');
